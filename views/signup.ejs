@@ -38,7 +38,7 @@
   </div>
 
   <div class="form-container">
-    <form method="post" action="/send">
+    <form method="post" action="/user/send">
       <p class="signup-text text-center mb-4">Sign up</p>
       <div class="text-center mb-3">
         <div class="social-buttons">
@@ -49,7 +49,7 @@
       <p class="or-text text-center mb-3">OR</p>
       <div class="form-group">
         <label for="inputEmail4">Name</label>
-        <input type="name" class="form-control" name="name" id="name" placeholder="Name">
+        <input type="text" class="form-control" name="name" id="name" placeholder="Name">
         <% if(errors && errors.name) { %>
           <span class="text-danger"><%= errors.name.msg %></span>
         <% } %>  
@@ -63,7 +63,7 @@
       </div>
       <div class="form-group">
         <label for="inputPassword4">Phone Number</label>
-        <input type="phone" class="form-control" name="phone" id="phone" placeholder="Phone">
+        <input type="number" class="form-control" name="phone" id="phone" placeholder="Phone">
         <% if(errors && errors.phone) { %>
           <span class="text-danger"><%= errors.phone.msg %></span>
         <% } %> 
@@ -77,7 +77,7 @@
       </div>
       <div class="form-group">
         <label for="inputPassword4">Confirm Password</label>
-        <input type="confirmpassword" class="form-control" name="confirmpassword" id="confirmpassword" placeholder="ConfirmPassword">
+        <input type="password" class="form-control" name="confirmpassword" id="confirmpassword" placeholder="ConfirmPassword">
         <% if(errors && errors.confirmpassword) { %>
           <span class="text-danger"><%= errors.confirmpassword.msg %></span>
         <% } %> 
