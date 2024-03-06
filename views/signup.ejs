@@ -38,53 +38,65 @@
   </div>
 
   <div class="form-container">
-    <form method="post" action="/user/send">
+    <form method="post" action="/user/signup">
       <p class="signup-text text-center mb-4">Sign up</p>
       <div class="text-center mb-3">
         <div class="social-buttons">
-          <button type="button" class="btn btn-primary btn-block">SignIn with Google</button>
-          <button type="button" class="btn btn-primary btn-block">SignIn with Facebook</button>
+          <a href="/user/auth/google" class="btn btn-primary btn-block">SignIn with Google</a>
+          <a href="/user/auth/facebook" class="btn btn-primary btn-block">SignIn with Facebook</a>
         </div>
       </div>
       <p class="or-text text-center mb-3">OR</p>
       <div class="form-group">
         <label for="inputEmail4">Name</label>
-        <input type="text" class="form-control" name="name" id="name" placeholder="Name">
+        <input type="text" class="form-control" name="name" id="name"
+          value="<%= typeof body !== 'undefined' ? body.name : '' %>" placeholder="Name">
         <% if(errors && errors.name) { %>
-          <span class="text-danger"><%= errors.name.msg %></span>
-        <% } %>  
+          <span class="text-danger">
+            <%= errors.name.msg %>
+          </span>
+          <% } %>
       </div>
       <div class="form-group">
         <label for="inputPassword4">Email</label>
         <input type="email" class="form-control" name="email" id="email" placeholder="Email">
         <% if(errors && errors.email) { %>
-          <span class="text-danger"><%= errors.email.msg %></span>
-        <% } %> 
+          <span class="text-danger">
+            <%= errors.email.msg %>
+          </span>
+          <% } %>
       </div>
       <div class="form-group">
         <label for="inputPassword4">Phone Number</label>
         <input type="number" class="form-control" name="phone" id="phone" placeholder="Phone">
         <% if(errors && errors.phone) { %>
-          <span class="text-danger"><%= errors.phone.msg %></span>
-        <% } %> 
+          <span class="text-danger">
+            <%= errors.phone.msg %>
+          </span>
+          <% } %>
       </div>
       <div class="form-group">
         <label for="inputPassword4">Password</label>
         <input type="password" class="form-control" name="password" id="password" placeholder="Password">
         <% if(errors && errors.password) { %>
-          <span class="text-danger"><%= errors.password.msg %></span>
-        <% } %> 
+          <span class="text-danger">
+            <%= errors.password.msg %>
+          </span>
+          <% } %>
       </div>
       <div class="form-group">
         <label for="inputPassword4">Confirm Password</label>
-        <input type="password" class="form-control" name="confirmpassword" id="confirmpassword" placeholder="ConfirmPassword">
+        <input type="password" class="form-control" name="confirmpassword" id="confirmpassword"
+          placeholder="ConfirmPassword">
         <% if(errors && errors.confirmpassword) { %>
-          <span class="text-danger"><%= errors.confirmpassword.msg %></span>
-        <% } %> 
+          <span class="text-danger">
+            <%= errors.confirmpassword.msg %>
+          </span>
+          <% } %>
       </div>
       <button type="submit" class="btn btn-success btn-block">Sign Up</button>
 
-      <p class="mt-3 text-center">Already have account? <a href="/User/signin.html">SignIn</a></p>
+      <p class="mt-3 text-center">Already have account? <a href="/User/signin">SignIn</a></p>
     </form>
   </div>
 
