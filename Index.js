@@ -10,7 +10,7 @@ const bodyparser = require('body-parser');
 const app = express();
 require('./passportSetup')
 
-app.use(
+app.use(  
   session({
     secret: 'secret',
     resave: false,
