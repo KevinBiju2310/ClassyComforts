@@ -17,6 +17,10 @@ const emailConfig = {
 
 const transporter = nodemailer.createTransport(emailConfig);
 
+exports.homeGet = (req, res) => {
+    res.render('home')
+}
+
 exports.signupGet = (req, res) => {
     res.render('signup', { errors: '' });
 };
@@ -86,7 +90,7 @@ exports.signinPost = [
             if (!passwordMatch) {
                 return res.render('signin', { errors: { password: { msg: 'Invalid password' } } });
             }
-            res.send("signin successfull")
+            res.render("home")
         } catch (error) {
             console.error("Error in signing in" + error)
         }
@@ -156,7 +160,7 @@ exports.forgotPasswordPost = async (req, res) => {
 
 exports.resetPasswordGet = async (req, res) => {
     const { id, token } = req.params;
-    
+
     try {
         const user = await User.findById(id);
 
@@ -166,7 +170,7 @@ exports.resetPasswordGet = async (req, res) => {
 
         const secret = process.env.JWT_SECRET + user.password;
         const payload = jwt.verify(token, secret);
-        return res.render('resetpassword', { id,token,email: user.email });
+        return res.render('resetpassword', { id, token, email: user.email });
     } catch (error) {
         console.error(error.message);
         return res.send(error.message);
