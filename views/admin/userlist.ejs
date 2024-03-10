@@ -1,0 +1,45 @@
+<%- include("../layouts/adminHeader") %>
+
+
+    <div id="content">
+        <h1>User Details</h1>
+        <div class="d-flex justify-content-end align-items-center mt-2">
+            <input type="text" id="searchBar" placeholder="Search..." class="form-control w-auto mr-2">
+            <button class="btn btn-primary mb-3">Search</button>
+        </div>
+
+
+        <!-- User List Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>John Doe</td>
+                    <td>john@example.com</td>
+                    <td>(123) 456-7890</td>
+                    <td>
+                        <button class="btn block-btn">Block</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Jane Doe</td>
+                    <td>jane@example.com</td>
+                    <td>(987) 654-3210</td>
+                    <td>
+                        <button class="btn block-btn">Block</button>
+                    </td>
+                </tr>
+                <!-- Add more rows as needed -->
+            </tbody>
+        </table>
+    </div>
+
+
+    <%- include("../layouts/adminFooter")%>

@@ -17,12 +17,23 @@ const emailConfig = {
 
 const transporter = nodemailer.createTransport(emailConfig);
 
-exports.homeGet = (req, res) => {
-    res.render('home')
+exports.homeGet = async (req, res) => {
+    try {
+        await res.render('home')
+    } catch (error) {
+        console.error("Error rendering home: ", error);
+        res.status(500).send('Internet Server Error')
+    }
+
 }
 
-exports.signupGet = (req, res) => {
-    res.render('signup', { errors: '' });
+exports.signupGet = async (req, res) => {
+    try {
+        await res.render('signup', { errors: '' });
+    } catch (error) {
+        console.error("Error rendering singup: ", error);
+        res.status(500).send('Internet Server Error');
+    }
 };
 
 exports.signupPost = [
@@ -52,11 +63,13 @@ exports.signupPost = [
             const { name, email, phone, password } = req.body;
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
+            const isAdmin = 0;
             const newUser = new User({
                 name,
                 email,
                 phone,
                 password: hashedPassword,
+                isAdmin,
             });
 
             await newUser.save();
@@ -67,8 +80,14 @@ exports.signupPost = [
     },
 ];
 
-exports.signinGet = (req, res) => {
-    res.render('signin', { errors: '' });
+exports.signinGet = async (req, res) => {
+    try {
+        await res.render('signin', { errors: '' });
+    } catch (error) {
+        console.error("Error rendering signin: ", error);
+        res.status(500).send('Internet Server Error');
+    }
+
 };
 
 exports.signinPost = [
@@ -76,7 +95,6 @@ exports.signinPost = [
     check('password').notEmpty().withMessage('Password is required'),
     async (req, res) => {
         const errors = validationResult(req);
-
         if (!errors.isEmpty()) {
             return res.render('signin', { errors: errors.mapped() });
         }
@@ -122,8 +140,13 @@ exports.logout = (req, res) => {
     res.send('See you again!');
 };
 
-exports.forgotPasswordGet = (req, res) => {
-    res.render('forgotpassword', { errors: '' });
+exports.forgotPasswordGet = async (req, res) => {
+
+    try {
+        return res.render('forgotpassword', { errors: '' });
+    } catch (error) {
+        console.error("Error rendering forgotpassword: ", error)
+    }
 };
 
 
@@ -195,7 +218,7 @@ exports.resetPasswordPost = async (req, res) => {
         if (!user) {
             return res.send('Invalid ID');
         }
-
+            
         const secret = process.env.JWT_SECRET + user.password;
         const payload = jwt.verify(token, secret);
         const hashedPassword = await bcrypt.hash(password, 10);
