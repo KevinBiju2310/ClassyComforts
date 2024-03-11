@@ -9,6 +9,7 @@ router.post('/login',adminController.signInPost)
 router.get('/dashboard',adminController.dashboardGet)
 
 router.get('/userlist',adminController.userlistGet)
+router.get('/category',adminController.categoryGet)
 
 
 module.exports = router

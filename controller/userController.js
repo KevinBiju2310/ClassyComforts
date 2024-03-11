@@ -36,49 +36,89 @@ exports.signupGet = async (req, res) => {
     }
 };
 
-exports.signupPost = [
-    check('name').trim().notEmpty().withMessage('Name is Required').custom(value => {
-        const nameRegex = /^[a-zA-Z\s]+$/;
-        if (!nameRegex.test(value)) {
-            throw new Error('Name should contain only letters');
-        }
-        return true;
-    }),
-    check('email').trim().notEmpty().withMessage('Email is Required'),
-    check('phone').trim().notEmpty().withMessage('Phone is Required'),
-    check('password').trim().notEmpty().withMessage('Password is Required').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    check('confirmpassword').trim().notEmpty().withMessage('Confirm Password is Required').custom((val, { req }) => {
-        if (val !== req.body.password) {
-            throw new Error('Passwords do not match')
-        }
-        return true;
-    }),
-    async (req, res) => {
-        const errors = validationResult(req);
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000);
+}
 
-        if (!errors.isEmpty()) {
-            return res.render('signup', { errors: errors.mapped() });
-        }
-        try {
-            const { name, email, phone, password } = req.body;
-            const saltRounds = 10;
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
-            const isAdmin = 0;
-            const newUser = new User({
-                name,
-                email,
-                phone,
-                password: hashedPassword,
-                isAdmin,
-            });
 
-            await newUser.save();
-            res.send('Signup successful!');
-        } catch (error) {
-            console.error("Error saving to database", error);
-        }
-    },
-];
+exports.signupPost = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.render('signup', { errors: errors.mapped() });
+    }
+
+    try {
+        const { name, email, phone, password } = req.body;
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Generate OTP
+        const otp = generateOTP(); // You need to implement generateOTP function
+        console.log(otp)
+        // Send OTP to user's email
+        const mailOptions = {
+            from: process.env.EMAIL_ID,
+            to: email,
+            subject: 'OTP for Signup',
+            text: `Your OTP for signup is: ${otp}`,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        // Save user and OTP to session for verification
+        req.session.newUser = {
+            name,
+            email,
+            phone,
+            password: hashedPassword,
+            otp,
+        };
+        req.session.save()
+        res.redirect('/user/verifyotp'); // Render OTP page
+    } catch (error) {
+        console.error("Error saving to database", error);
+    }
+};
+
+exports.verifyOTPGet = async (req, res) => {
+    try {
+        res.render('otppage')
+    } catch (error) {
+        console.error('Error rendering otppage: ', error)
+    }
+}
+
+
+
+exports.verifyOTP = async (req, res) => {
+    const { otp } = req.body;
+    console.log(otp)
+    const finotp = parseInt(otp)
+    const newUser = req.session.newUser;
+    console.log(newUser)
+    console.log(newUser.otp)
+    if (newUser.otp !== finotp) {
+        return res.render('otppage', { errors: 'Invalid OTP' });
+    } else {
+        // Save user to the database
+        const { name, phone, password, email } = newUser;
+        const isAdmin = 0;
+        console.log(name, phone, password, email)
+        const user = new User({
+            name,
+            email,
+            phone,
+            password,
+            isAdmin,
+        });
+        await user.save();
+        // Clear the session data
+        req.session.newUser = null;
+        res.render('home');
+    }
+};
+
 
 exports.signinGet = async (req, res) => {
     try {
@@ -89,6 +129,7 @@ exports.signinGet = async (req, res) => {
     }
 
 };
+
 
 exports.signinPost = [
     check('email').trim().isEmail().notEmpty().withMessage('Email is Required'),
@@ -139,6 +180,8 @@ exports.logout = (req, res) => {
     req.logout();
     res.send('See you again!');
 };
+
+
 
 exports.forgotPasswordGet = async (req, res) => {
 
@@ -218,7 +261,7 @@ exports.resetPasswordPost = async (req, res) => {
         if (!user) {
             return res.send('Invalid ID');
         }
-            
+
         const secret = process.env.JWT_SECRET + user.password;
         const payload = jwt.verify(token, secret);
         const hashedPassword = await bcrypt.hash(password, 10);

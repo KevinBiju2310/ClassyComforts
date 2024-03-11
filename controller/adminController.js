@@ -60,3 +60,12 @@ exports.userlistGet = async (req, res) => {
         res.status(500).send('Internet Server Error');
     }
 }
+
+exports.categoryGet = async (req,res) =>{
+    try{
+        await res.render('category')
+    } catch(error){
+        console.error("Error rendering Cateory: ",error);
+        res.status(500).send('Internet Server Error');
+    }
+}

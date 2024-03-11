@@ -4,21 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>OTP Verification</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="public/otp.css">
-    <!-- <style>
-        input[type="text"]::-webkit-inner-spin-button,
-        input[type="text"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        input[type="text"] {
-            -moz-appearance: textfield;
-        }
-    </style> -->
+    <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
@@ -49,41 +38,54 @@
     </div>
 
     <div class="form-container">
-        <p class="signup-text text-center mb-3">OTP-Verification</p>
-        <form class="form-row">
-            <!-- Six OTP input fields -->
-            <div class="form-group col-md-2">
-                <input type="number" class="form-control" placeholder="0">
-            </div>
-            <div class="form-group col-md-2">
-                <input type="number" class="form-control" placeholder="0">
-            </div>
-            <div class="form-group col-md-2">
-                <input type="number" class="form-control" placeholder="0">
-            </div>
-            <div class="form-group col-md-2">
-                <input type="number" class="form-control" placeholder="0">
-            </div>
-            <div class="form-group col-md-2">
-                <input type="number" class="form-control" placeholder="0">
-            </div>
-            <div class="form-group col-md-2">
-                <input type="number" class="form-control" placeholder="0">
+        <p class="signup-text text-center mb-3">OTP Verification</p>
+        <form action="/user/verifyotp" method="post">
+            <div class="form-group col-md-12">
+                <input type="text" class="form-control" name="otp" placeholder="Enter OTP">
             </div>
             <!-- Sign In button -->
             <button type="submit" class="btn btn-success btn-block col-md-12 mt-3">Verify OTP</button>
 
             <div class="form-group col-md-6 mt-2">
-                <span id="otpTimer">Time: 60s</span>
+                <span>Time: <span id="otpTimer"></span></span>
             </div>
 
             <div class="form-group col-md-6 text-right">
                 <!-- Resend OTP button -->
-                <button type="button" class="btn btn-link text-success">Resend OTP</button>
+                <button type="button" class="btn btn-link text-success" onclick="resendOTP()">Resend OTP</button>
             </div>
-
         </form>
     </div>
+
+    <script>
+        let otpTimer;
+        let timeLeft = 60; // 5 minutes in seconds
+
+        function startTimer() {
+            otpTimer = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(otpTimer);
+                    alert('OTP expired. Please request a new OTP.');
+                    // You can redirect to the resend route or take any other action here
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('otpTimer').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+
+        // Start the timer when the page loads
+        window.onload = function () {
+            startTimer();
+        };
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"

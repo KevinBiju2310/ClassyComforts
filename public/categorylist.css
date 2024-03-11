@@ -1,0 +1,67 @@
+.edit-btn {
+    background-color: #3498db;
+    /* Blue background color for the Edit button */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.edit-btn:hover {
+    background-color: #2980b9;
+    /* Darker blue on hover */
+}
+
+.delete-btn {
+    background-color: #e74c3c;
+    /* Red background color for the Delete button */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+    /* Darker red on hover */
+}
+
+#addCategoryBtn {
+    background-color: #27ae60;
+    /* Green background color for the Add Category button */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#addCategoryBtn:hover {
+    background-color: #219d54;
+    /* Darker green on hover */
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    #sidebar {
+        left: -250px;
+    }
+
+    #sidebar.active {
+        left: 0;
+    }
+}
+
+/* Center the modal */
+.modal-dialog {
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 1rem);
+}
+
+.modal-content {
+    width: 100%;
+}

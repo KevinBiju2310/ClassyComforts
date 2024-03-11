@@ -15,6 +15,9 @@ router.get('/auth/google/failure', userController.googleSignInFailure);
 router.get('/auth/protected', userController.protectedRoute);
 router.use('/auth/logout', userController.logout);
 
+router.get('/verifyotp', userController.verifyOTPGet)
+router.post('/verifyotp', userController.verifyOTP)
+
 router.get('/forgotpassword', userController.forgotPasswordGet);
 router.post('/forgotpassword', userController.forgotPasswordPost);
 router.get('/resetpassword/:id/:token', userController.resetPasswordGet);
