@@ -54,18 +54,69 @@ exports.dashboardGet = async (req, res) => {
 
 exports.userlistGet = async (req, res) => {
     try {
-        await res.render('userlist');
+        const users = await User.find({isAdmin:{$ne:"1"}})
+        res.render('userlist', { users });
     } catch (error) {
-        console.error("Error rendering userlist: ",error);
+        console.error("Error rendering dashboard: ", error);
         res.status(500).send('Internet Server Error');
     }
 }
 
-exports.categoryGet = async (req,res) =>{
-    try{
+exports.toggleUserBlock = async (req, res) => {
+    const userId = req.params.id;
+    console.log(userId)
+    try {
+        const user = await User.findById(userId);
+        console.log(user)
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+        user.isBlocked = !user.isBlocked;
+        await user.save();
+        res.status(200).json({ status: user.isBlocked ? 'Blocked' : 'Unblocked' });
+    } catch (error) {
+        console.error('Error toggling user block status:', error);
+        res.status(500).send('Internal Server Error');
+    } 
+};
+
+exports.blockUser = async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const updatedUser = await User.findByIdAndUpdate(userId, { isBlocked: true }, { new: true });
+        if (!updatedUser) {
+            return res.status(404).send('User not found');
+        }
+
+        res.redirect('/admin/userlist');
+    } catch (error) {
+        console.error('Error blocking user:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+exports.unblockUser = async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        const updatedUser = await User.findByIdAndUpdate(userId, { isBlocked: false }, { new: true });
+
+        if (!updatedUser) {
+            return res.status(404).send('User not found');
+        }
+
+        res.redirect('/admin/userlist');
+    } catch (error) {
+        console.error('Error unblocking user:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+exports.categoryGet = async (req, res) => {
+    try {
         await res.render('category')
-    } catch(error){
-        console.error("Error rendering Cateory: ",error);
+    } catch (error) {
+        console.error("Error rendering Cateory: ", error);
         res.status(500).send('Internet Server Error');
     }
 }

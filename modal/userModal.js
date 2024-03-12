@@ -20,10 +20,14 @@ const userSchema = new mongoose.Schema({
     },
     isAdmin: {
         type: String,
-        default:0
+        default: 0
+    },
+    isBlocked: {
+        type: Boolean,
+        default: false
     }
 }
 )
 
-const User = mongoose.model('users',userSchema)
+const User = mongoose.model('users', userSchema)
 module.exports = User

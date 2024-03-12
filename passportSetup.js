@@ -1,6 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 require('dotenv').config();
+const User = require('./modal/userModal')
 
 passport.use(
     new GoogleStrategy(

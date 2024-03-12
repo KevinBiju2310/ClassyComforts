@@ -41,45 +41,68 @@ function generateOTP() {
 }
 
 
-exports.signupPost = async (req, res) => {
-    const errors = validationResult(req);
+exports.signupPost = [
+    check('name')
+        .notEmpty().withMessage('Name is Required')
+        .custom(value => {
+            const nameRegex = /^[a-zA-Z\s]+$/;
+            if (!nameRegex.test(value)) {
+                throw new Error('Name should contain only letters');
+            }
+            return true;
+        }),
+    check('email').notEmpty().withMessage('Email is Required'),
+    check('phone').notEmpty().withMessage('Phone is Required'),
+    check('password')
+        .notEmpty().withMessage('Password is Required')
+        .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    check('confirmpassword')
+        .notEmpty().withMessage('Confirm Password is Required')
+        .custom((value, { req }) => {
+            if (value !== req.body.password) {
+                throw new Error('Passwords do not match');
+            }
+            return true;
+        }),
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.render('signup', { errors: errors.mapped() });
+        }
 
-    if (!errors.isEmpty()) {
-        return res.render('signup', { errors: errors.mapped() });
-    }
+        try {
+            const { name, email, phone, password } = req.body;
+            const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    try {
-        const { name, email, phone, password } = req.body;
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+            // Generate OTP
+            const otp = generateOTP(); // You need to implement generateOTP function
+            console.log(otp)
+            // Send OTP to user's email
+            const mailOptions = {
+                from: process.env.EMAIL_ID,
+                to: email,
+                subject: 'OTP for Signup',
+                text: `Your OTP for signup is: ${otp}`,
+            };
 
-        // Generate OTP
-        const otp = generateOTP(); // You need to implement generateOTP function
-        console.log(otp)
-        // Send OTP to user's email
-        const mailOptions = {
-            from: process.env.EMAIL_ID,
-            to: email,
-            subject: 'OTP for Signup',
-            text: `Your OTP for signup is: ${otp}`,
-        };
+            await transporter.sendMail(mailOptions);
 
-        await transporter.sendMail(mailOptions);
-
-        // Save user and OTP to session for verification
-        req.session.newUser = {
-            name,
-            email,
-            phone,
-            password: hashedPassword,
-            otp,
-        };
-        req.session.save()
-        res.redirect('/user/verifyotp'); // Render OTP page
-    } catch (error) {
-        console.error("Error saving to database", error);
-    }
-};
+            // Save user and OTP to session for verification
+            req.session.newUser = {
+                name,
+                email,
+                phone,
+                password: hashedPassword,
+                otp,
+            };
+            req.session.save()
+            res.redirect('/user/verifyotp'); // Render OTP page
+        } catch (error) {
+            console.error("Error saving to database", error);
+        }
+    },
+]
 
 exports.verifyOTPGet = async (req, res) => {
     try {

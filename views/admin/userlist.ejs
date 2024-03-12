@@ -1,15 +1,12 @@
 <%- include("../layouts/adminHeader") %>
 
-
     <div id="content">
         <h1>User Details</h1>
         <div class="d-flex justify-content-end align-items-center mt-2">
             <input type="text" id="searchBar" placeholder="Search..." class="form-control w-auto mr-2">
-            <button class="btn btn-primary mb-3">Search</button>
+            <button class="btn btn-primary mb-3" onclick="searchUsers()">Search</button>
         </div>
 
-
-        <!-- User List Table -->
         <table>
             <thead>
                 <tr>
@@ -20,18 +17,58 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>John Doe</td>
-                    <td>john@example.com</td>
-                    <td>(123) 456-7890</td>
-                    <td>
-                        <button class="btn block-btn">Block</button>
-                    </td>
-                </tr>
-                <!-- Add more rows as needed -->
+                <% users.forEach(user=> { %>
+                    <tr>
+                        <td>
+                            <%= user.name %>
+                        </td>
+                        <td>
+                            <%= user.email %>
+                        </td>
+                        <td>
+                            <%= user.phone %>
+                        </td>
+                        <td>
+                            <button type="submit" class="btn <%= user.isBlocked ? 'btn-success' : 'btn-danger' %>"
+                                onclick="toggleUserBlock('<%= user._id %>')">
+                                <%= user.isBlocked ? 'Unblock' : 'Block' %>
+                            </button>
+                        </td>
+                    </tr>
+                    <% }); %>
             </tbody>
         </table>
     </div>
 
+    <%- include("../layouts/adminFooter") %>
 
-    <%- include("../layouts/adminFooter")%>
+        <script>
+            async function toggleUserBlock(userId) {
+                try {
+                    const response = await fetch(`/admin/toggleUserBlock/${userId}`, {
+                        method: 'POST',
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const button = document.getElementById(`toggleButton-${userId}`);
+
+                        // Update the button status based on the response from the server
+                        button.innerHTML = data.status;
+                        button.classList.remove(data.status === 'Blocked' ? 'btn-danger' : 'btn-success');
+                        button.classList.add(data.status === 'Blocked' ? 'btn-success' : 'btn-danger');
+                    } else {
+                        console.error('Failed to toggle user block status:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error toggling user block status:', error);
+                }  finally{
+                    location.reload()
+                }
+            }
+
+            function searchUsers() {
+                // Add logic for searching users
+                console.log('Searching users...');
+            }
+        </script>
