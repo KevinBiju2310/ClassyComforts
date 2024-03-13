@@ -9,14 +9,15 @@ router.post('/login',adminController.signInPost)
 router.get('/dashboard',adminController.dashboardGet)
 
 router.get('/userlist',adminController.userlistGet)
-
 router.post('/toggleUserBlock/:id', adminController.toggleUserBlock);
 
 // Block and unblock users
 // router.post('/blockUser/:id', adminController.blockUser);
 // router.post('/unblockUser/:id', adminController.unblockUser);
 
-router.get('/category',adminController.categoryGet)
-
+router.get('/category',adminController.categoryGet);
+router.post('/addcategory',adminController.addcategoryPost);
+router.post('/updatecategory/:id',adminController.updatecategoryPost);
+router.post('/deletecategory',adminController.deletecategoryPost)
 
 module.exports = router

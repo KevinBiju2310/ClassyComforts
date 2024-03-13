@@ -18,34 +18,30 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Electronics</td>
-                    <td>Active</td>
-                    <td>
-                        <button class="btn edit-btn" data-toggle="modal" data-target="#editCategoryModal">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn delete-btn" data-toggle="modal" data-target="#deleteCategoryModal">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Clothing</td>
-                    <td>Active</td>
-                    <td>
-                        <button class="btn edit-btn" data-toggle="modal" data-target="#editCategoryModal">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn delete-btn" data-toggle="modal" data-target="#deleteCategoryModal">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-                <!-- Add more rows as needed -->
+                <% category.forEach(category=> { %>
+                    <tr>
+                        <td>
+                            <%= category.name %>
+                        </td>
+                        <td>
+                            <%= category.status %>
+                        </td>
+                        <td>
+                            <button class="btn edit-btn" data-toggle="modal" data-target="#editCategoryModal"
+                                onclick="populateEditModal('<%= category.id %>', '<%= category.name %>', '<%= category.status %>')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn delete-btn" data-toggle="modal" data-target="#deleteCategoryModal">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <% }) %>
+                        <!-- Add more rows as needed -->
             </tbody>
         </table>
     </div>
+
     <!-- Add Category Modal -->
     <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryModalLabel"
         aria-hidden="true">
@@ -59,26 +55,26 @@
                 </div>
                 <div class="modal-body">
                     <!-- Add Category Form -->
-                    <form>
+                    <form method="post" action="/admin/addcategory">
                         <div class="form-group">
                             <label for="addCategoryName">Category Name</label>
                             <input type="text" class="form-control" id="addCategoryName"
-                                placeholder="Enter category name" required>
+                                placeholder="Enter category name" name="name" required>
                         </div>
                         <div class="form-group">
                             <label>Status</label><br>
                             <div class="custom-control custom-radio custom-control-inline">
-                                <input type="radio" id="addStatusActive" name="addStatus" class="custom-control-input"
-                                    value="active" checked>
+                                <input type="radio" id="addStatusActive" name="status" class="custom-control-input"
+                                    value="Active" checked>
                                 <label class="custom-control-label" for="addStatusActive">Active</label>
                             </div>
                             <div class="custom-control custom-radio custom-control-inline">
-                                <input type="radio" id="addStatusInactive" name="addStatus" class="custom-control-input"
-                                    value="inactive">
+                                <input type="radio" id="addStatusInactive" name="status" class="custom-control-input"
+                                    value="Inactive">
                                 <label class="custom-control-label" for="addStatusInactive">Inactive</label>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-primary" onclick="addCategory()">Add Category</button>
+                        <button type="submit" class="btn btn-primary" onclick="addCategory()">Add Category</button>
                     </form>
                 </div>
             </div>
@@ -98,22 +94,22 @@
                 </div>
                 <div class="modal-body">
                     <!-- Edit Category Form -->
-                    <form>
+                    <form id="editCategoryForm" method="post">
                         <div class="form-group">
                             <label for="editCategoryName">Category Name</label>
                             <input type="text" class="form-control" id="editCategoryName"
-                                placeholder="Enter category name" required>
+                                placeholder="Enter category name" name="name" required>
                         </div>
                         <div class="form-group">
                             <label>Status</label><br>
                             <div class="custom-control custom-radio custom-control-inline">
-                                <input type="radio" id="editStatusActive" name="editStatus" class="custom-control-input"
-                                    value="active" checked>
+                                <input type="radio" id="editStatusActive" name="status" class="custom-control-input"
+                                    value="Active">
                                 <label class="custom-control-label" for="editStatusActive">Active</label>
                             </div>
                             <div class="custom-control custom-radio custom-control-inline">
-                                <input type="radio" id="editStatusInactive" name="editStatus"
-                                    class="custom-control-input" value="inactive">
+                                <input type="radio" id="editStatusInactive" name="status" class="custom-control-input"
+                                    value="Inactive">
                                 <label class="custom-control-label" for="editStatusInactive">Inactive</label>
                             </div>
                         </div>
@@ -125,7 +121,7 @@
     </div>
 
     <!-- Delete Category Modal -->
-    <div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog"
+    <!-- <div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog"
         aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -137,27 +133,51 @@
                 </div>
                 <div class="modal-body">
                     <p>Are you sure you want to delete this category?</p>
-                    <button type="button" class="btn btn-danger" onclick="deleteCategory()">Delete</button>
+                    <button type="submit" class="btn btn-danger" onclick="deleteCategory()">Delete</button>
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <script>
+        function populateEditModal(id, name, status) {
+            $('#editCategoryForm').attr('action', `/admin/updatecategory/${id}`);
+            $('#editCategoryName').val(name);
+            if (status === 'Active') {
+                $('#editStatusActive').prop('checked', true);
+            } else {
+                $('#editStatusInactive').prop('checked', true);
+            }
+        }
+
         function addCategory() {
-            // Implement your add category logic here
             $('#addCategoryModal').modal('hide');
         }
 
         function editCategory() {
-            // Implement your edit category logic here
+            const form = $('#editCategoryForm');
+            const actionUrl = form.attr('action');
+            const formData = form.serialize();
+
+            fetch(actionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/admin/category';
+                    } else {
+                        throw new Error('Failed to update category');
+                    }
+                })
+                .catch(error => console.error('Error updating category:', error));
+
             $('#editCategoryModal').modal('hide');
         }
 
-        function deleteCategory() {
-            // Implement your delete category logic here
-            $('#deleteCategoryModal').modal('hide');
-        }
     </script>
 
     <%- include("../layouts/adminFooter") %>

@@ -1,6 +1,7 @@
 const { check, validationResult } = require('express-validator')
 const User = require('../modal/userModal')
 const bcrypt = require('bcrypt')
+const Category = require('../modal/categoryModel')
 
 
 exports.signInGet = async (req, res) => {
@@ -54,7 +55,7 @@ exports.dashboardGet = async (req, res) => {
 
 exports.userlistGet = async (req, res) => {
     try {
-        const users = await User.find({isAdmin:{$ne:"1"}})
+        const users = await User.find({ isAdmin: { $ne: "1" } })
         res.render('userlist', { users });
     } catch (error) {
         console.error("Error rendering dashboard: ", error);
@@ -77,46 +78,97 @@ exports.toggleUserBlock = async (req, res) => {
     } catch (error) {
         console.error('Error toggling user block status:', error);
         res.status(500).send('Internal Server Error');
-    } 
-};
-
-exports.blockUser = async (req, res) => {
-    const userId = req.params.id;
-    try {
-        const updatedUser = await User.findByIdAndUpdate(userId, { isBlocked: true }, { new: true });
-        if (!updatedUser) {
-            return res.status(404).send('User not found');
-        }
-
-        res.redirect('/admin/userlist');
-    } catch (error) {
-        console.error('Error blocking user:', error);
-        res.status(500).send('Internal Server Error');
     }
 };
 
-exports.unblockUser = async (req, res) => {
-    const userId = req.params.id;
+// exports.blockUser = async (req, res) => {
+//     const userId = req.params.id;
+//     try {
+//         const updatedUser = await User.findByIdAndUpdate(userId, { isBlocked: true }, { new: true });
+//         if (!updatedUser) {
+//             return res.status(404).send('User not found');
+//         }
 
-    try {
-        const updatedUser = await User.findByIdAndUpdate(userId, { isBlocked: false }, { new: true });
+//         res.redirect('/admin/userlist');
+//     } catch (error) {
+//         console.error('Error blocking user:', error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// };
 
-        if (!updatedUser) {
-            return res.status(404).send('User not found');
-        }
+// exports.unblockUser = async (req, res) => {
+//     const userId = req.params.id;
 
-        res.redirect('/admin/userlist');
-    } catch (error) {
-        console.error('Error unblocking user:', error);
-        res.status(500).send('Internal Server Error');
-    }
-};
+//     try {
+//         const updatedUser = await User.findByIdAndUpdate(userId, { isBlocked: false }, { new: true });
+
+//         if (!updatedUser) {
+//             return res.status(404).send('User not found');
+//         }
+
+//         res.redirect('/admin/userlist');
+//     } catch (error) {
+//         console.error('Error unblocking user:', error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// };
 
 exports.categoryGet = async (req, res) => {
     try {
-        await res.render('category')
+        const category = await Category.find()
+        res.render('category', { category })
     } catch (error) {
         console.error("Error rendering Cateory: ", error);
         res.status(500).send('Internet Server Error');
     }
+}
+
+exports.addcategoryPost = async (req, res) => {
+    try {
+        const { name, status } = req.body;
+        const newCategory = new Category({
+            name,
+            status
+        });
+        await newCategory.save();
+        res.redirect('/admin/category')
+    } catch (error) {
+        console.log("Error occured: ", error);
+    }
+}
+
+exports.updatecategoryPost = async (req, res) => {
+    try {
+        const categoryId = req.params.id;
+        const { name, status } = req.body;
+
+        const updateCategory = await Category.findByIdAndUpdate(categoryId, { name, status }, { new: true });
+
+        if (!updateCategory) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+        console.log("start")
+        res.status(200).json({ success: true });
+        console.log("finish")
+    } catch (error) {
+        console.log('Error Occurred: ', error);
+        res.status(500).send('Internal Server Error'); // Send appropriate error response
+    }
+};
+
+exports.deletecategoryPost = async (req, res) => {
+    const categoryId = req.body.categoryId;
+
+    try {
+        const category = await Category.findByIdAndUpdate(categoryId, { deleted: true }, { new: true });
+
+        if (!category) {
+            return res.status(404).json({ success: false, message: `Category with ID ${categoryId} not found!` });
+        }
+        res.json({ success: true, message: `Category with ID ${categoryId} soft deleted successfully!` });
+    } catch (error) {
+        console.log("Error occured: ", error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+
 }
