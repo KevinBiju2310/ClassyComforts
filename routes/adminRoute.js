@@ -18,6 +18,6 @@ router.post('/toggleUserBlock/:id', adminController.toggleUserBlock);
 router.get('/category',adminController.categoryGet);
 router.post('/addcategory',adminController.addcategoryPost);
 router.post('/updatecategory/:id',adminController.updatecategoryPost);
-router.post('/deletecategory',adminController.deletecategoryPost)
+router.post('/deletecategory/:id',adminController.deletecategoryPost);
 
 module.exports = router

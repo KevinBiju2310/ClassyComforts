@@ -115,7 +115,7 @@ exports.toggleUserBlock = async (req, res) => {
 
 exports.categoryGet = async (req, res) => {
     try {
-        const category = await Category.find()
+        const category = await Category.find({deleted: false})
         res.render('category', { category })
     } catch (error) {
         console.error("Error rendering Cateory: ", error);
@@ -157,18 +157,17 @@ exports.updatecategoryPost = async (req, res) => {
 };
 
 exports.deletecategoryPost = async (req, res) => {
-    const categoryId = req.body.categoryId;
-
     try {
-        const category = await Category.findByIdAndUpdate(categoryId, { deleted: true }, { new: true });
-
+        const categoryId = req.params.id;
+        const category = await Category.findById(categoryId);
         if (!category) {
-            return res.status(404).json({ success: false, message: `Category with ID ${categoryId} not found!` });
+            return res.status(404).json({ message: "Category not found" });
         }
-        res.json({ success: true, message: `Category with ID ${categoryId} soft deleted successfully!` });
+        category.deleted = true;
+        await category.save();
+        res.redirect('/admin/category');
     } catch (error) {
-        console.log("Error occured: ", error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+        console.error(err);
+        res.status(500).json({ message: "Internal server error" });
     }
-
 }
