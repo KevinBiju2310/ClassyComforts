@@ -1,39 +1,36 @@
 <%- include("../layouts/adminHeader") %>
 
 <div id="content">
-    <form action="/admin/updateproduct/<%= product._id %>" method="post">
+    <form action="/admin/updateproduct/<%= productId %>" method="post">
     <div class="container py-3">
         <h1 class="h3">Update Product</h1>
         <hr>
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label for="productName" class="form-label">Product Name</label>
-                <input type="text" class="form-control" id="productName" placeholder="Enter product name here">
+                <input type="text" class="form-control" id="productName" value="<%= product.productname %>" placeholder="Enter product name here">
             </div>
             <div class="col-md-6 mb-3">
                 <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" rows="3" placeholder="Type description here"></textarea>
+                <textarea class="form-control" name="description" id="description" rows="3" placeholder="Type description here"><%= product.description %></textarea>
             </div>
         </div>
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label for="category" class="form-label">Category</label>
-                <select class="form-select" id="category">
-                    <option value="">Select Category</option>
-                    <option value="electronics">Electronics</option>
-                    <option value="clothing">Clothing</option>
-                    <option value="home">Home</option>
+                <select class="form-select" id="category" name="category">
+                    <% category.forEach(category => { %>
+                        <option value="<%= category.name %>" <%= product.category === category.name ? 'selected' : '' %>>
+                            <%= category.name %>
+                        </option>
+                    <% }) %>
                 </select>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label for="brandName" class="form-label">Brand Name</label>
-                <input type="text" class="form-control" id="brandName" placeholder="Type brand name here">
             </div>
             <div class="col-md-4 mb-3">
                 <label for="regularPrice" class="form-label">Regular Price</label>
                 <div class="input-group">
                     <span class="input-group-text">₹</span>
-                    <input type="number" class="form-control" id="regularPrice" aria-label="Regular price">
+                    <input type="number" class="form-control" value="<%= product.price %>" name="price" id="regularPrice" aria-label="Regular price">
                 </div>
             </div>
         </div>
@@ -41,23 +38,53 @@
             <div class="col-md-12">
                 <label for="productGallery" class="form-label">Product Gallery (multiple images can be uploaded)</label>
                 <input type="file" class="form-control" id="productGallery" multiple>
+                <div class="row">
+                    <% product.productImage.forEach(image => { %>
+                        <div class="col-md-3 mb-3">
+                            <img src="<%= image %>" class="img-fluid" alt="Product Image">
+                        </div>
+                    <% }) %>
+                </div>
             </div>
         </div>
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="remainingProducts" class="form-label">Remaining Products</label>
-                <input type="number" class="form-control" id="remainingProducts" placeholder="Enter number of remaining products">
+                <input type="number" class="form-control" value="<%= product.quantity %>" name="quantity" id="remainingProducts" placeholder="Enter number of remaining products">
             </div>
         </div>
+        <input type="hidden" id="productId" value="<%= productId %>">
         <div class="row">
             <div class="col-md-12 d-flex justify-content-end">
-                <button type="button" class="btn btn-primary me-md-2 mb-2 mb-md-0" id="updateProduct">Update Product</button>
+                <button type="submit" class="btn btn-primary me-md-2 mb-2 mb-md-0" id="updateProduct">Update Product</button>
                 <button type="button" class="btn btn-danger me-md-2 mb-2 mb-md-0" id="deleteProduct">Delete Product</button>
-                <button type="button" class="btn btn-outline-secondary">Cancel</button>
+                <button type="submit" class="btn btn-outline-secondary">Cancel</button>
             </div>
         </div>
     </div>
     </form>
 </div>
+
+<script>
+    document.getElementById('deleteProduct').addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete this product?')) {
+            const productId = document.getElementById('productId').value;
+            fetch('/admin/deleteproduct' + productId, {
+                method: 'post'
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/admin/products';
+                } else {
+                    console.log("Error Occurred:", response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    });
+</script>
+
 
 <%- include("../layouts/adminFooter") %>

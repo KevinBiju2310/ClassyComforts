@@ -1,5 +1,6 @@
 const { check, validationResult } = require('express-validator');
 const User = require('../modal/userModal')
+const Product = require('../modal/productModel')
 const bcrypt = require('bcrypt')
 const passport = require('passport')
 const nodemailer = require('nodemailer')
@@ -168,6 +169,11 @@ exports.signinPost = [
             if (!user) {
                 return res.render('signin', { errors: { email: { msg: 'Invalid email' } } });
             }
+
+            if (user.isBlocked) {
+                return res.render('signin', { errors: { email: { msg: 'This email address is blocked.' } } });
+            }
+
             const passwordMatch = await bcrypt.compare(password, user.password);
             if (!passwordMatch) {
                 return res.render('signin', { errors: { password: { msg: 'Invalid password' } } });
@@ -196,7 +202,7 @@ exports.googleSignInFailure = (req, res) => {
 };
 
 exports.protectedRoute = (req, res) => {
-    res.send(`Hello ${req.user.displayName}`);
+    res.redirect('/user/home');
 };
 
 exports.logout = (req, res) => {
@@ -297,3 +303,13 @@ exports.resetPasswordPost = async (req, res) => {
     }
 };
 
+
+
+exports.shoppageGet = async (req, res) => {
+    try {
+        const products = await Product.find();
+        res.render('shop',{ products })
+    } catch (error) {
+        console.log("Error Occured");
+    }
+}

@@ -182,22 +182,19 @@
         }
 
         function softDeleteCategory(categoryId) {
-            // Set up the modal for deletion
+
             $('#deleteCategoryModal').modal('show');
 
-            // Set up event listener for delete confirmation
             $('#confirmDeleteBtn').on('click', function () {
-                // Make a fetch request to delete the category
                 fetch(`/admin/deletecategory/${categoryId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ deleted: true }) // Set deleted field to true
+                    body: JSON.stringify({ deleted: true })
                 })
                     .then(response => {
                         if (response.ok) {
-                            // Remove the row from the table
                             $('#categoryRow' + categoryId).remove();
                         } else {
                             throw new Error('Failed to delete category');
@@ -205,7 +202,6 @@
                     })
                     .catch(error => console.error('Error deleting category:', error))
                     .finally(() => {
-                        // Hide the modal after deletion
                         $('#deleteCategoryModal').modal('hide');
                     });
             });

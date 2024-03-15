@@ -51,7 +51,7 @@
             <button class="btn nl-button-1" type="button" aria-label="navbar light button">
                 Home
             </button>
-            <button class="btn nl-button-1" type="button" aria-label="navbar light button">
+            <button id="shopButton" class="btn nl-button-1" type="button" aria-label="navbar light button">
                 Shop
             </button>
             <button class="btn nl-button-1" type="button" aria-label="navbar light button">
@@ -68,7 +68,8 @@
             </button>
         </div>
         <div class="nav-link-2">
-            <a href="/user/signup" class="btn nl-button-2" aria-label="navbar light button" style="text-decoration: none;">
+            <a href="/user/signup" class="btn nl-button-2" aria-label="navbar light button"
+                style="text-decoration: none;">
                 <img src="/imgs/Vector (7).png" alt="person" class="nl-img">
                 Login / Register
             </a>
@@ -743,5 +744,12 @@
         </div>
     </div>
 </body>
+
+<script>
+    const shopButton = document.getElementById('shopButton');
+    shopButton.addEventListener('click', function () {
+        window.location.href = '/user/shop';
+    });
+</script>
 
 </html>
