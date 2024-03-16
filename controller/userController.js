@@ -236,8 +236,8 @@ exports.forgotPasswordPost = async (req, res) => {
         const payload = { email: user.email, id: user.id };
         const token = jwt.sign(payload, secret, { expiresIn: '15m' });
         const link = `http://localhost:5000/user/resetpassword/${user.id}/${token}`;
-
-        const mailOptions = {
+        console.log(link)
+        const mailOptions = {   
             from: process.env.EMAIL_ID,
             to: user.email,
             subject: 'Password Reset Link',
