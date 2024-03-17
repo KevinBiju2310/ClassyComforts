@@ -26,39 +26,48 @@ exports.productsGet = async (req, res) => {
 
 exports.addproductGet = async (req, res) => {
     try {
-        const category = await Category.find({ deleted: false })
+        const category = await Category.find({deleted: false})
         res.render('addproduct', { category })
     } catch (error) {
         console.log("Error Occurred: ", error)
     }
 }
 
-exports.addproductPost = async (req, res, next) => {
+
+exports.addproductPost = async (req, res) => {
     try {
-        upload(req, res, async function (err) {
-            if (err) {
-                console.error(err);
-                return res.status(400).send('File upload error')
-            }
-            const productImage = req.files.map(file => file.filename);
-            const { productname, description, price, category, quantity } = req.body;
 
-            const newProduct = new Product({
-                productname: productname,
-                description: description,
-                price: price,
-                category: category,
-                quantity: quantity,
-                productImage: productImage,
-            });
-
-            await newProduct.save();
-            res.redirect('/admin/products')
-        })
     } catch (error) {
-        console.log("Error Occurred: ", error);
+
     }
 }
+
+// exports.addproductPost = async (req, res, next) => {
+//     try {
+//         upload(req, res, async function (err) {
+//             if (err) {
+//                 console.error(err);
+//                 return res.status(400).send('File upload error')
+//             }
+//             const productImage = req.files.map(file => file.filename);
+//             const { productname, description, price, category, quantity } = req.body;
+
+//             const newProduct = new Product({
+//                 productname: productname,
+//                 description: description,
+//                 price: price,
+//                 category: category,
+//                 quantity: quantity,
+//                 productImage: productImage,
+//             });
+
+//             await newProduct.save();
+//             res.redirect('/admin/products')
+//         })
+//     } catch (error) {
+//         console.log("Error Occurred: ", error);
+//     }
+// }
 
 exports.updateproductGet = async (req, res) => {
     try {
@@ -106,5 +115,14 @@ exports.deleteproductPost = async (req, res) => {
     } catch (error) {
         console.error('Error soft deleting product:', error);
         res.status(500).send('Internal Server Error');
+    }
+}
+
+
+exports.singleproductGet = async (req, res) => {
+    try {
+        res.render('singleproduct');
+    } catch (error) {
+
     }
 }

@@ -24,9 +24,10 @@ router.post('/deletecategory/:id',adminController.deletecategoryPost);
 router.get('/products',productController.productsGet);
 router.get('/addproduct',productController.addproductGet)
 router.post('/addproduct',productController.addproductPost)
-router.get('/updateproduct/:productId',productController.updateproductGet)
-router.post('/updateproduct/:productId',productController.updateproductPost)
-router.post('/admin/deleteproduct/:productId', productController.deleteproductPost);
+
+// router.get('/updateproduct/:productId',productController.updateproductGet)
+// router.post('/updateproduct/:productId',productController.updateproductPost)
+// router.post('/admin/deleteproduct/:productId', productController.deleteproductPost);
 
 
 module.exports = router

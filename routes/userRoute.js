@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controller/userController');
+const productController = require('../controller/productController')
 
 router.get('/home', userController.homeGet)
 
@@ -25,5 +26,6 @@ router.post('/resetpassword/:id/:token', userController.resetPasswordPost);
 
 
 router.get('/shop',userController.shoppageGet)
+router.get('/singleproduct',productController.singleproductGet)
 
 module.exports = router;
