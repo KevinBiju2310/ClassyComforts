@@ -1,51 +1,48 @@
 <%- include("../layouts/adminHeader") %>
 
-    <div id="content">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-6">
-                    <h3 style="margin-bottom: 20px;">Products</h3>
-                </div>
-                <div class="col-md-6">
-                    <form action="/admin/addproduct" method="">
-                        <button class="add-product-btn float-right" type="submit">Add Product</button>
-                    </form>
-                </div>
-
+<div id="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <h3 style="margin-bottom: 20px;">Products</h3>
             </div>
-            <div class="row">
-                <!-- Product Card 1 -->
-                <% product.forEach(product=>{ %>
-                    <div class="col-lg-4 col-md-6">
-                        <div class="product-card">
-                            <div class="product-img">
-                                <% if (product.productImage.length> 0) { %>
-                                    <img src="/uploads/<%= product.productImage[0] %>" alt="Product Image">
-                                    <% } else { %>
-                                        <img src="https://via.placeholder.com/300" alt="Product Image">
-                                        <% } %>
-                                        <a href="/admin/updateproduct/<%= product._id %>">
-                                            <div class="edit-container bg-light">
-                                                <span class="edit-icon"><i class="fas fa-edit text-black"></i></span>
-                                            </div>
-                                        </a>
-                                            <!-- Edit icon -->
-                            </div>
-                            <div class="product-details">
-                                <h5 class="product-name">
-                                    <%= product.productname %>
-                                </h5>
-                                <p class="product-price">$<%= product.price %>
-                                </p>
-                                <p class="product-category">Category: <%= product.category %>
-                                </p>
-                                <p class="product-category">Stock: <%= product.quantity %>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <% }) %>
+            <div class="col-md-6">
+                <form action="/admin/addproduct" method="">
+                    <button class="add-product-btn float-right" type="submit">Add Product</button>
+                </form>
             </div>
         </div>
+        <div class="row">
+            <!-- Product Cards -->
+            <% products.forEach(product => { %>
+            <div class="col-lg-4 col-md-6">
+                <div class="product-card">
+                    <div class="product-img">
+                        <% if (product.productImages.length > 0) { %>
+                        <!-- Use the first product image for display -->
+                        <img src="./public/uploads/<%= product.productImages[0] %>" alt="Product Image">
+                        <% } else { %>
+                        <img src="https://via.placeholder.com/300" alt="Product Image">
+                        <% } %>
+                        <a href="/admin/updateproduct/<%= product._id %>">
+                            <div class="edit-container bg-light">
+                                <span class="edit-icon"><i class="fas fa-edit text-black"></i></span>
+                            </div>
+                        </a>
+                        <!-- Edit icon -->
+                    </div>
+                    <div class="product-details">
+                        <h5 class="product-name">
+                            <%= product.productname %>
+                        </h5>
+                        <p class="product-price">$<%= product.price %></p>
+                        <p class="product-category">Category: <%= product.category %></p>
+                        <p class="product-quantity">Quantity: <%= product.quantity %></p>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+        </div>
     </div>
-    <%- include("../layouts/adminFooter") %>
+</div>
+<%- include("../layouts/adminFooter") %>

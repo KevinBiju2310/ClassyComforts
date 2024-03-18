@@ -23,11 +23,10 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    productImage: {
+    productImages: {
         type: Array,
         required: true
     },
-    deleted: { type: Boolean, default: false }
 });
 
 const Product = mongoose.model('Product', productSchema);
