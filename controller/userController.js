@@ -20,7 +20,8 @@ const transporter = nodemailer.createTransport(emailConfig);
 
 exports.homeGet = async (req, res) => {
     try {
-        await res.render('home')
+        const products = await Product.find();
+        res.render('home', { products })
     } catch (error) {
         console.error("Error rendering home: ", error);
         res.status(500).send('Internet Server Error')
@@ -237,7 +238,7 @@ exports.forgotPasswordPost = async (req, res) => {
         const token = jwt.sign(payload, secret, { expiresIn: '15m' });
         const link = `http://localhost:5000/user/resetpassword/${user.id}/${token}`;
         console.log(link)
-        const mailOptions = {   
+        const mailOptions = {
             from: process.env.EMAIL_ID,
             to: user.email,
             subject: 'Password Reset Link',
@@ -308,7 +309,7 @@ exports.resetPasswordPost = async (req, res) => {
 exports.shoppageGet = async (req, res) => {
     try {
         const products = await Product.find();
-        res.render('shop',{ products })
+        res.render('shop', { products })
     } catch (error) {
         console.log("Error Occured");
     }

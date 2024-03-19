@@ -1,59 +1,46 @@
+const path = require('path');
 const Product = require("../modal/productModel");
 const Category = require("../modal/categoryModel");
 const multer = require('multer');
-const path = require('path'); // Don't forget to require path module
 const sharp = require('sharp');
+const fs = require('fs').promises;
 
 
 const storage = multer.diskStorage({
-    destination: './public/uploads/', // Destination directory for uploaded files
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads');
+    },
     filename: function (req, file, cb) {
-        // Generate unique filename for uploaded file
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        cb(null, Date.now() + '-' + file.originalname);
     }
 });
 
-// Initialize upload middleware
 const upload = multer({
-    storage: storage, // Specify the storage configuration
-    limits: { fileSize: 1000000 }, // Limit file size to 1MB
+    storage: storage,
+    limits: { fileSize: 1000000 },
     fileFilter: function (req, file, cb) {
-        // Check file type using custom function checkFileType
         checkFileType(file, cb);
     }
-}).array('productImages', 10); // Allow uploading up to 10 images with the field name 'images'
+}).array('productImages', 10);
 
-// Middleware function to check file type
+
 function checkFileType(file, cb) {
-    // Allowed file extensions
-    const filetypes = /jpeg|jpg|png/;
-    // Check file extension
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    // Check MIME type
+    const filetypes = /jpeg|jpg|png|webp/;
     const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
 
     if (mimetype && extname) {
         return cb(null, true);
     } else {
-        cb('Error: Images only! (JPEG, JPG, PNG)');
-    }
-}
-
-function checkFileType(file, cb) {
-    const filetypes = /jpeg|jpg|png|gif|webp/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb('Error: Images only!');
+        cb(new Error('Please upload only JPEG, JPG, or PNG images.'));
     }
 }
 
 exports.productsGet = async (req, res) => {
     try {
-        const products = await Product.find(); // Fetch products from database
-        res.render('products', { products: products }); // Pass products to the template
+        const products = await Product.find();
+        const category = await Category.find({ deleted: false })
+        res.render('products', { products: products, category });
     } catch (error) {
         console.log("Error Occurred: ", error);
         res.status(500).send("Internal Server Error");
@@ -72,86 +59,62 @@ exports.addproductGet = async (req, res) => {
 
 exports.addproductPost = async (req, res) => {
     try {
-        // Call the upload middleware to handle file uploads
         upload(req, res, async function (err) {
             if (err) {
-                // If upload encountered an error, return an error response
-                console.log("Upload Error: ", err);
-                return res.status(400).send("Upload Error: " + err);
+                if (err instanceof multer.MulterError) {
+                    return res.status(400).send("Error uploading files.");
+                } else {
+                    return res.status(400).send(err.message);
+                }
             }
 
-            // Extracting data from the request body
             const { productname, description, category, price, quantity } = req.body;
-            const productImages = req.files; // Files are available in req.files due to Multer
+            const productImages = req.files.map(file => file.path);
 
-            // Cropping and processing each image
-            const processedImages = [];
-            for (let image of productImages) {
-                const croppedImageBuffer = await sharp(image.buffer) // Assuming image.buffer contains image data
-                    .resize({ width: 300, height: 300 }) // Resize the image
-                    .toBuffer(); // Convert the image to a buffer
-                processedImages.push(croppedImageBuffer);
-            }
+            const resizedImages = await Promise.all(
+                productImages.map(async filePath => {
+                    const resizedImageBuffer = await sharp(filePath)
+                        .resize(700, 700)
+                        .toBuffer();
+                    const { filename, destinationPath } = await saveResizedImage(resizedImageBuffer, path.basename(filePath));
+                    return filename;
+                })
+            );
 
-            // Creating a new product document
-            const newProduct = new Product({
+            const product = new Product({
                 productname,
                 description,
                 category,
                 price,
                 quantity,
-                productImages: processedImages // Assigning the processed images to productImages field
+                productImages: resizedImages
             });
+            await product.save();
 
-            // Saving the new product to the database
-            await newProduct.save();
-
-            // Sending success response
-            res.status(201).send("Product added successfully");
+            res.redirect('/admin/products');
         });
     } catch (error) {
-        // Handling errors
         console.log("Error Occurred: ", error);
         res.status(500).send("Internal Server Error");
     }
 };
 
-// exports.addproductPost = async (req, res, next) => {
-//     try {
-//         upload(req, res, async function (err) {
-//             if (err) {
-//                 console.error(err);
-//                 return res.status(400).send('File upload error');
-//             }
-//             const productImages = req.files.map(file => {
-//                 const croppedFileName = 'cropped-' + file.filename;
-//                 const croppedFilePath = `/uploads/${croppedFileName}`;
-//                 cropAndSaveImage(file.path, croppedFileName);
-//                 return {cropped: croppedFilePath };
-//             });
-//             const { productname, description, price, category, quantity } = req.body;
-
-//             const newProduct = new Product({
-//                 productname: productname,
-//                 description: description,
-//                 price: price,
-//                 category: category,
-//                 quantity: quantity,
-//                 productImages: productImages,
-//             });
-
-//             await newProduct.save();
-//             res.redirect('/admin/products');
-//         })
-//     } catch (error) {
-//         console.log("Error Occurred: ", error);
-//         res.status(500).send("Internal Server Error");
-//     }
-// }
+async function saveResizedImage(buffer, originalFilename) {
+    const ext = path.extname(originalFilename);
+    const filename = `cropped_${Date.now()}${ext}`;
+    const destinationPath = path.join('public', 'uploads', filename);
+    try {
+        await fs.writeFile(destinationPath, buffer);
+        return { filename, destinationPath };
+    } catch (error) {
+        console.error('Error saving resized image:', error);
+        throw error;
+    }
+}
 
 exports.updateproductGet = async (req, res) => {
     try {
-        const productId = req.params.productId;
+        const productId = req.params.id;
         const category = await Category.find({ deleted: false });
         const product = await Product.findById(productId);
         if (!product) {
@@ -166,16 +129,33 @@ exports.updateproductGet = async (req, res) => {
 
 exports.updateproductPost = async (req, res) => {
     try {
-        const productId = req.params.productId;
-        const updatedProduct = {
-            productname: req.body.productname,
-            description: req.body.description,
-            category: req.body.category,
-            price: req.body.price,
-            quantity: req.body.quantity,
-            productImage: req.body.productImage
-        };
-        const product = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
+        const productId = req.params.id;
+        const { productname, description, category, price, quantity } = req.body;
+        let productImages = [];
+
+        if (req.files && req.files.length > 0) {
+            productImages = req.files.map(file => file.path);
+        }
+
+        if (req.body.deletedImages && req.body.deletedImages.length > 0) {
+            await Promise.all(req.body.deletedImages.map(async imagePath => {
+                await fs.unlink(imagePath);
+            }));
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(productId, {
+            productname, // Ensure productname is included in the update object
+            description,
+            category,
+            price,
+            quantity,
+            $addToSet: { productImages: { $each: productImages } }
+        }, { new: true });
+
+        if (!updatedProduct) {
+            return res.status(404).send("Product not found");
+        }
+
         res.redirect('/admin/products');
     } catch (error) {
         console.log("Error Occurred: ", error);

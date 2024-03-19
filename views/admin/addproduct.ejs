@@ -1,84 +1,84 @@
 <%- include("../layouts/adminHeader") %>
-    <div id="content">
-        <div class="container py-3">
-            <form action="/admin/addproduct" method="post" enctype="multipart/form-data">
-                <h1 class="h3">Product Creation</h1>
-                <hr>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="productName" class="form-label">Product Name</label>
-                        <input type="text" class="form-control" id="productName" name="productname"
-                            placeholder="Enter product name here">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" rows="3" name="description"
-                            placeholder="Type description here"></textarea>
+
+<div id="content">
+    <div class="container py-3">
+        <form action="/admin/addproduct" method="post" enctype="multipart/form-data">
+            <h1 class="h3">Product Creation</h1>
+            <hr>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="productName" class="form-label">Product Name</label>
+                    <input type="text" class="form-control" id="productName" name="productname" placeholder="Enter product name here">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" rows="3" name="description" placeholder="Type description here"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category">
+                        <% category.forEach(category=> { %>
+                        <option value="<%= category.name %>"><%= category.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="regularPrice" class="form-label">Regular Price</label>
+                    <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="regularPrice" name="price" aria-label="Regular price">
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <select class="form-select" id="category" name="category">
-                            <% category.forEach(category=> { %>
-                                <option value="<%= category.name %>">
-                                    <%= category.name %>
-                                </option>
-                                <% }) %>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="regularPrice" class="form-label">Regular Price</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₹</span>
-                            <input type="number" class="form-control" id="regularPrice" name="price"
-                                aria-label="Regular price">
-                        </div>
-                    </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label for="productGallery" class="form-label">Product Gallery (multiple images can be uploaded)</label>
+                    <input type="file" class="form-control" id="productGallery" name="productImages" multiple>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label for="productGallery" class="form-label">Product Gallery (multiple images can be
-                            uploaded)</label>
-                        <input type="file" class="form-control" id="productGallery" name="productImages" multiple>
-                    </div>
+            </div>
+            <div class="row mb-3" id="imagePreviewsContainer">
+                <!-- Image previews will be appended here -->
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="remainingProducts" class="form-label">Remaining Products</label>
+                    <input type="number" class="form-control" id="remainingProducts" name="quantity" placeholder="Enter number of remaining products">
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label>Preview Image:</label>
-                        <img id="previewImage" src="#" alt="Preview Image" style="max-width: 200px; max-height: 200px;">
-                    </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary ms-auto" id="createProduct">Create Product</button>
+                    <button type="reset" class="btn btn-outline-secondary ms-2">Reset</button>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="remainingProducts" class="form-label">Remaining Products</label>
-                        <input type="number" class="form-control" id="remainingProducts" name="quantity"
-                            placeholder="Enter number of remaining products">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary ms-auto" id="createProduct">Create Product</button>
-                        <button type="submit" class="btn btn-outline-secondary ms-2">Cancel</button>
-                    </div>
-                </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
+</div>
 
+<script>
+    document.getElementById('productGallery').addEventListener('change', function (event) {
+        const imagePreviewsContainer = document.getElementById('imagePreviewsContainer');
+        imagePreviewsContainer.innerHTML = ''; // Clear existing previews
 
-    <script>
-        // document.getElementById('productGallery').addEventListener('change', function (event) {
-        //     const previewImage = document.getElementById('previewImage');
-        //     if (event.target.files && event.target.files[0]) {
-        //         const reader = new FileReader();
-        //         reader.onload = function (e) {
-        //             previewImage.src = e.target.result;
-        //         }
-        //         reader.readAsDataURL(event.target.files[0]);
-        //     } else {
-        //         previewImage.src = '#';
-        //     }
-        // });
-    </script>
-    <%- include("../layouts/adminFooter") %>
+        const files = event.target.files;
+        if (files) {
+            for (let i = 0; i < files.length; i++) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = 'Product Image';
+                    img.style.maxWidth = '200px';
+                    img.style.maxHeight = '200px';
+                    imagePreviewsContainer.appendChild(img);
+                }
+                reader.readAsDataURL(files[i]);
+            }
+        }
+    });
+</script>
+
+<%- include("../layouts/adminFooter") %>
+ 
