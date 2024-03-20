@@ -20,13 +20,12 @@ const transporter = nodemailer.createTransport(emailConfig);
 
 exports.homeGet = async (req, res) => {
     try {
-        const products = await Product.find();
-        res.render('home', { products })
+        const products = await Product.find({ deleted: false });
+        res.render('home', { products });
     } catch (error) {
         console.error("Error rendering home: ", error);
         res.status(500).send('Internet Server Error')
     }
-
 }
 
 exports.signupGet = async (req, res) => {
@@ -179,7 +178,7 @@ exports.signinPost = [
             if (!passwordMatch) {
                 return res.render('signin', { errors: { password: { msg: 'Invalid password' } } });
             }
-            res.render("home")
+            res.redirect('/user/home')
         } catch (error) {
             console.error("Error in signing in" + error)
         }
@@ -308,7 +307,7 @@ exports.resetPasswordPost = async (req, res) => {
 
 exports.shoppageGet = async (req, res) => {
     try {
-        const products = await Product.find();
+        const products = await Product.find({ deleted: false });
         res.render('shop', { products })
     } catch (error) {
         console.log("Error Occured");

@@ -200,8 +200,10 @@
                                     <ul class="language-dropdown">
                                         <li><a href="#"><img src="/assets/imgs/theme/flag-fr.png" alt="">Français</a>
                                         </li>
-                                        <li><a href="#"><img src="/assets/imgs/theme/flag-dt.png" alt="">Deutsch</a></li>
-                                        <li><a href="#"><img src="/assets/imgs/theme/flag-ru.png" alt="">Pусский</a></li>
+                                        <li><a href="#"><img src="/assets/imgs/theme/flag-dt.png" alt="">Deutsch</a>
+                                        </li>
+                                        <li><a href="#"><img src="/assets/imgs/theme/flag-ru.png" alt="">Pусский</a>
+                                        </li>
                                     </ul>
                                 </li>
                                 <li><i class="fi-rs-user"></i><a href="page-login-register.html">Log In / Sign Up</a>
@@ -241,7 +243,8 @@
                             <div class="header-action-2">
                                 <div class="header-action-icon-2">
                                     <a href="shop-wishlist.html">
-                                        <img class="svgInject" alt="Evara" src="/assets/imgs/theme/icons/icon-heart.svg">
+                                        <img class="svgInject" alt="Evara"
+                                            src="/assets/imgs/theme/icons/icon-heart.svg">
                                         <span class="pro-count blue">4</span>
                                     </a>
                                 </div>
@@ -951,46 +954,33 @@
                                         <!-- MAIN SLIDES -->
                                         <div class="product-image-slider">
                                             <figure class="border-radius-10">
-                                                <img src="/assets/imgs/shop/product-16-2.jpg" alt="product image">
-                                            </figure>
-                                            <figure class="border-radius-10">
-                                                <img src="/assets/imgs/shop/product-16-1.jpg" alt="product image">
-                                            </figure>
-                                            <figure class="border-radius-10">
-                                                <img src="/assets/imgs/shop/product-16-3.jpg" alt="product image">
-                                            </figure>
-                                            <figure class="border-radius-10">
-                                                <img src="/assets/imgs/shop/product-16-4.jpg" alt="product image">
-                                            </figure>
-                                            <figure class="border-radius-10">
-                                                <img src="/assets/imgs/shop/product-16-5.jpg" alt="product image">
-                                            </figure>
-                                            <figure class="border-radius-10">
-                                                <img src="/assets/imgs/shop/product-16-6.jpg" alt="product image">
-                                            </figure>
-                                            <figure class="border-radius-10">
-                                                <img src="/assets/imgs/shop/product-16-7.jpg" alt="product image">
+                                                <img id="mainImage" src="/uploads/<%= product.productImages[index] %>"
+                                                    alt="<%= product.productname %>">
                                             </figure>
                                         </div>
                                         <!-- THUMBNAILS -->
                                         <div class="slider-nav-thumbnails pl-15 pr-15">
-                                            <div><img src="/assets/imgs/shop/thumbnail-3.jpg" alt="product image"></div>
-                                            <div><img src="/assets/imgs/shop/thumbnail-4.jpg" alt="product image"></div>
-                                            <div><img src="/assets/imgs/shop/thumbnail-5.jpg" alt="product image"></div>
-                                            <div><img src="/assets/imgs/shop/thumbnail-6.jpg" alt="product image"></div>
-                                            <div><img src="/assets/imgs/shop/thumbnail-7.jpg" alt="product image"></div>
-                                            <div><img src="/assets/imgs/shop/thumbnail-8.jpg" alt="product image"></div>
-                                            <div><img src="/assets/imgs/shop/thumbnail-9.jpg" alt="product image"></div>
+                                            <% product.productImages.forEach((image, index)=> { %>
+                                                <div>
+                                                    <img src="/uploads/<%= image %>" alt="product image" onclick=changeMainImage(<%= index %>)>
+
+                                                </div>
+                                                <% }) %>
                                         </div>
                                     </div>
                                     <!-- End Gallery -->
                                 </div>
+
                                 <div class="col-md-6 col-sm-12 col-xs-12">
                                     <div class="detail-info">
-                                        <h2 class="title-detail">Colorful Pattern Shirts HD450</h2>
+                                        <h2 class="title-detail">
+                                            <%= product.productname %>
+                                        </h2>
                                         <div class="product-detail-rating">
                                             <div class="pro-details-brand">
-                                                <span> Brands: <a href="shop-grid-right.html">Bootstrap</a></span>
+                                                <span> Category: <a href="shop-grid-right.html">
+                                                        <%= product.category %>
+                                                    </a></span>
                                             </div>
                                             <div class="product-rate-cover text-end">
                                                 <div class="product-rate d-inline-block">
@@ -1002,17 +992,16 @@
                                         </div>
                                         <div class="clearfix product-price-cover">
                                             <div class="product-price primary-color float-left">
-                                                <ins><span class="text-brand">$120.00</span></ins>
+                                                <ins><span class="text-brand">$<%= product.price %></span></ins>
                                                 <ins><span class="old-price font-md ml-15">$200.00</span></ins>
                                                 <span class="save-price  font-md color3 ml-15">25% Off</span>
                                             </div>
                                         </div>
                                         <div class="bt-1 border-color-1 mt-15 mb-15"></div>
                                         <div class="short-desc mb-30">
-                                            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam rem
-                                                officia, corrupti reiciendis minima nisi modi, quasi, odio minus dolore
-                                                impedit fuga eum eligendi? Officia doloremque facere quia. Voluptatum,
-                                                accusantium!</p>
+                                            <p>
+                                                <%= product.description %>
+                                            </p>
                                         </div>
                                         <div class="product_sort_info font-xs mb-30">
                                             <ul>
@@ -1062,8 +1051,10 @@
                                             <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
                                             <li class="mb-5">Tags: <a href="#" rel="tag">Cloth</a>, <a href="#"
                                                     rel="tag">Women</a>, <a href="#" rel="tag">Dress</a> </li>
-                                            <li>Availability:<span class="in-stock text-success ml-5">8 Items In
-                                                    Stock</span></li>
+                                            <li>Availability:<span class="in-stock text-success ml-5">
+                                                    <%= product.quantity %> Items In
+                                                        Stock
+                                                </span></li>
                                         </ul>
                                     </div>
                                     <!-- Detail Info -->
@@ -1544,6 +1535,17 @@
             </div>
         </div>
     </div>
+
+
+    <script>
+        function changeMainImage(index) {
+            const mainImage = document.getElementById('mainImage');
+            mainImage.src = '/uploads/<%= product.productImages[index] %>';
+        }
+    </script>
+
+
+
     <!-- Vendor JS-->
     <script src="/assets/js/vendor/modernizr-3.6.0.min.js"></script>
     <script src="/assets/js/vendor/jquery-3.6.0.min.js"></script>

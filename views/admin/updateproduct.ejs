@@ -1,15 +1,15 @@
 <%- include("../layouts/adminHeader") %>
 
     <div id="content">
-        <form action="/admin/updateproduct/<%= product._id %>" method="post">
+        <form action="/admin/updateproduct/<%= product._id %>" method="post" enctype="multipart/form-data">
             <div class="container py-3">
                 <h1 class="h3">Update Product</h1>
                 <hr>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="productName" class="form-label">Product Name</label>
-                        <input type="text" class="form-control" id="productName" name="productname" value="<%= product.productname %>"
-                            name="productname" placeholder="Enter product name here">
+                        <input type="text" class="form-control" id="productName" name="productname"
+                            value="<%= product.productname %>" name="productname" placeholder="Enter product name here">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="description" class="form-label">Description</label>
@@ -62,6 +62,8 @@
                 </div>
                 <input type="hidden" id="productId" value="<%= product._id %>">
                 <div class="row">
+                    <input type="hidden" id="productId" value="<%= product._id %>">
+                    <input type="hidden" id="deletedImages" name="deletedImages" value="">
                     <div class="col-md-12 d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary me-md-2 mb-2 mb-md-0" id="updateProduct">Update
                             Product</button>
@@ -77,6 +79,7 @@
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const deleteButtons = document.querySelectorAll(".btn-delete");
+                const form = document.querySelector('form');
 
                 deleteButtons.forEach(button => {
                     button.addEventListener("click", function (event) {
@@ -89,8 +92,20 @@
                         if (confirmation) {
                             // Remove the image container from the DOM
                             imageContainer.remove();
+                            // Update deleted images input value
+                            const deletedImagesInput = document.getElementById('deletedImages');
+                            const deletedImages = deletedImagesInput.value.split(',');
+                            deletedImages.push(this.dataset.image);
+                            deletedImagesInput.value = deletedImages.join(',');
                         }
                     });
                 });
+
+                // Submit form when adding or deleting images
+                document.getElementById('updateProduct').addEventListener('click', function (event) {
+                    event.preventDefault();
+                    form.submit();
+                });
             });
+
         </script>

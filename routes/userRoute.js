@@ -26,6 +26,6 @@ router.post('/resetpassword/:id/:token', userController.resetPasswordPost);
 
 
 router.get('/shop',userController.shoppageGet)
-router.get('/singleproduct',productController.singleproductGet)
+router.get('/singleproduct/:id',productController.singleproductGet)
 
 module.exports = router;

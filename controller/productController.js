@@ -4,6 +4,7 @@ const Category = require("../modal/categoryModel");
 const multer = require('multer');
 const sharp = require('sharp');
 const fs = require('fs').promises;
+const fsmod = require('fs')
 
 
 const storage = multer.diskStorage({
@@ -38,7 +39,7 @@ function checkFileType(file, cb) {
 
 exports.productsGet = async (req, res) => {
     try {
-        const products = await Product.find();
+        const products = await Product.find({ deleted: false });
         const category = await Category.find({ deleted: false })
         res.render('products', { products: products, category });
     } catch (error) {
@@ -133,18 +134,32 @@ exports.updateproductPost = async (req, res) => {
         const { productname, description, category, price, quantity } = req.body;
         let productImages = [];
 
+        // Handle uploaded images
         if (req.files && req.files.length > 0) {
-            productImages = req.files.map(file => file.path);
-        }
-
-        if (req.body.deletedImages && req.body.deletedImages.length > 0) {
-            await Promise.all(req.body.deletedImages.map(async imagePath => {
-                await fs.unlink(imagePath);
+            await Promise.all(req.files.map(async file => {
+                const filename = file.path.split('/').pop();
+                const outputPath = `public/uploads/${filename}`;
+                await sharp(file.path)
+                    .resize(700, 700) // Crop and resize
+                    .toFile(outputPath); // Save cropped image
+                productImages.push(outputPath); // Push path to array
             }));
         }
 
+        // Handle deleted images
+        if (req.body.deletedImages && req.body.deletedImages.length > 0) {
+            await Promise.all(req.body.deletedImages.map(async imagePath => {
+                // Remove image from filesystem
+                await fsmod.unlink(imagePath);
+                // Remove image path from database
+                await Product.findByIdAndUpdate(productId, {
+                    $pull: { productImages: imagePath }
+                });
+            }));
+        }
+        // Update product in database
         const updatedProduct = await Product.findByIdAndUpdate(productId, {
-            productname, // Ensure productname is included in the update object
+            productname,
             description,
             category,
             price,
@@ -165,12 +180,12 @@ exports.updateproductPost = async (req, res) => {
 
 exports.deleteproductPost = async (req, res) => {
     try {
-        const productId = req.params.productId;
+        const productId = req.params.id;
         const updatedProduct = await Product.findByIdAndUpdate(productId, { deleted: true }, { new: true });
         if (!updatedProduct) {
             return res.status(404).send('Product not found');
         }
-        res.status(200).send('Product soft deleted successfully');
+        res.redirect('/admin/products')
     } catch (error) {
         console.error('Error soft deleting product:', error);
         res.status(500).send('Internal Server Error');
@@ -179,7 +194,9 @@ exports.deleteproductPost = async (req, res) => {
 
 exports.singleproductGet = async (req, res) => {
     try {
-        res.render('singleproduct');
+        const productId = req.params.id;
+        const product = await Product.findById(productId)
+        res.render('singleproduct', { product });
     } catch (error) {
         console.log("Error Occurred: ", error);
         res.status(500).send("Internal Server Error");
