@@ -1,6 +1,7 @@
 const { check, validationResult } = require('express-validator');
 const User = require('../modal/userModal')
 const Product = require('../modal/productModel')
+const Category = require('../modal/categoryModel')
 const bcrypt = require('bcrypt')
 const passport = require('passport')
 const nodemailer = require('nodemailer')
@@ -307,8 +308,13 @@ exports.resetPasswordPost = async (req, res) => {
 
 exports.shoppageGet = async (req, res) => {
     try {
-        const products = await Product.find({ deleted: false });
-        res.render('shop', { products })
+        let query = {deleted: false}
+        if(req.query.category){
+            query.category = req.query.category;
+        }
+        const products = await Product.find(query);
+        const category = await Category.find({ deleted: false });
+        res.render('shop', { products, category })
     } catch (error) {
         console.log("Error Occured");
     }

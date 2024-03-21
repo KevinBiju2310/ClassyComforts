@@ -1,86 +1,91 @@
 <%- include("../layouts/adminHeader") %>
-<link href="/admin/assets/css/main.css" rel="stylesheet" type="text/css" />
-<div id="content">
-    <div class="container-fluid">
-        <div class="col-md-12 mt-3">
-            <div class="text-end">
-                <a href="/admin/addproduct" class="btn btn-primary">Add Product</a>
+    <link href="/admin/assets/css/main.css" rel="stylesheet" type="text/css" />
+    <div id="content">
+        <div class="container-fluid">
+            <div class="col-md-12 mt-3">
+                <div class="text-end">
+                    <a href="/admin/addproduct" class="btn btn-primary">Add Product</a>
+                </div>
+            </div>
+            <div class="card mb-4 mt-3">
+                <header class="card-header">
+                    <div class="row gx-3">
+                        <div class="col-lg-4 col-md-6 me-auto">
+                            <input type="text" placeholder="Search..." class="form-control">
+                        </div>
+                        <div class="col-lg-2 col-6 col-md-3">
+                            <form id="filterForm" method="get" action="/admin/products">
+                                <select id="categorySelect" class="form-select" name="category"
+                                    onchange="this.form.submit()">
+                                    <option value="All">All</option>
+                                    <% category.forEach(category=> { %>
+                                        <option value="<%= category.name %>">
+                                            <%= category.name %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                </header> <!-- card-header end// -->
+                <div class="card-body">
+                    <div class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5">
+                        <% products.forEach(product=> { %>
+                            <div class="col" data-product-id="<%= product._id %>">
+                                <div class="card card-product-grid">
+                                    <a href="#" class="img-wrap">
+                                        <img src="/uploads/<%= product.productImages[0] %>" alt="Product Image">
+                                    </a>
+                                    <div class="info-wrap">
+                                        <a href="#" class="title text-truncate">
+                                            <%= product.productname %>
+                                        </a>
+                                        <div class="price mb-2">$<%= product.price %>
+                                        </div> <!-- price.// -->
+                                        <a href="/admin/updateproduct/<%= product._id %>"
+                                            class="btn btn-sm font-sm rounded btn-brand">
+                                            <i class="material-icons md-edit"></i> Edit
+                                        </a>
+                                        <form id="deleteForm_<%= product._id %>"
+                                            action="/admin/deleteproduct/<%= product._id %>" method="post"
+                                            style="display: inline;">
+                                            <button type="button"
+                                                class="btn btn-sm font-sm btn-light rounded delete-btn"
+                                                data-product-id="<%= product._id %>">
+                                                <i class="material-icons md-delete_forever"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div> <!-- card-product  end// -->
+                            </div> <!-- col.// -->
+                            <% }) %>
+                    </div> <!-- row.// -->
+                </div> <!-- card-body end// -->
             </div>
         </div>
-        <div class="card mb-4 mt-3">
-            <header class="card-header">
-                <div class="row gx-3">
-                    <div class="col-lg-4 col-md-6 me-auto">
-                        <input type="text" placeholder="Search..." class="form-control">
-                    </div>
-                    <div class="col-lg-2 col-6 col-md-3">
-                        <select class="form-select">
-                            <% category.forEach(category=> { %>
-                            <option value="<%= category.name %>">
-                                <%= category.name %>
-                            </option>
-                            <% }) %>
-                        </select>
-                    </div>
-                </div>
-            </header> <!-- card-header end// -->
-            <div class="card-body">
-                <div class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5">
-                    <% products.forEach(product=> { %>
-                    <div class="col" data-product-id="<%= product._id %>">
-                        <div class="card card-product-grid">
-                            <a href="#" class="img-wrap">
-                                <img src="/uploads/<%= product.productImages[0] %>" alt="Product Image">
-                            </a>
-                            <div class="info-wrap">
-                                <a href="#" class="title text-truncate">
-                                    <%= product.productname %>
-                                </a>
-                                <div class="price mb-2">$<%= product.price %>
-                                </div> <!-- price.// -->
-                                <a href="/admin/updateproduct/<%= product._id %>"
-                                    class="btn btn-sm font-sm rounded btn-brand">
-                                    <i class="material-icons md-edit"></i> Edit
-                                </a>
-                                <form id="deleteForm_<%= product._id %>"
-                                    action="/admin/deleteproduct/<%= product._id %>" method="post"
-                                    style="display: inline;">
-                                    <button type="button"
-                                        class="btn btn-sm font-sm btn-light rounded delete-btn"
-                                        data-product-id="<%= product._id %>">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </button>
-                                </form>
-                            </div>
-                        </div> <!-- card-product  end// -->
-                    </div> <!-- col.// -->
-                    <% }) %>
-                </div> <!-- row.// -->
-            </div> <!-- card-body end// -->
-        </div>
     </div>
-</div>
-<%- include("../layouts/adminFooter") %>
+    <%- include("../layouts/adminFooter") %>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const deleteButtons = document.querySelectorAll('.delete-btn');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function (event) {
-                const productId = event.currentTarget.getAttribute('data-product-id');
-                const confirmation = confirm('Are you sure you want to delete this product?');
-                if (confirmation) {
-                    const form = document.getElementById(`deleteForm_${productId}`);
-                    if (form) {
-                        form.submit();
-                        // Remove the card from DOM
-                        const card = document.querySelector(`.col[data-product-id="${productId}"]`);
-                        if (card && card.parentElement) {
-                            card.parentElement.removeChild(card);
+        <script>
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const deleteButtons = document.querySelectorAll('.delete-btn');
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function (event) {
+                        const productId = event.currentTarget.getAttribute('data-product-id');
+                        const confirmation = confirm('Are you sure you want to delete this product?');
+                        if (confirmation) {
+                            const form = document.getElementById(`deleteForm_${productId}`);
+                            if (form) {
+                                form.submit();
+                                // Remove the card from DOM
+                                const card = document.querySelector(`.col[data-product-id="${productId}"]`);
+                                if (card && card.parentElement) {
+                                    card.parentElement.removeChild(card);
+                                }
+                            }
                         }
-                    }
-                }
+                    });
+                });
             });
-        });
-    });
-</script>
+        </script>

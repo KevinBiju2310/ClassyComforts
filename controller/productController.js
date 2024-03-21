@@ -39,7 +39,11 @@ function checkFileType(file, cb) {
 
 exports.productsGet = async (req, res) => {
     try {
-        const products = await Product.find({ deleted: false });
+        let query = { deleted: false };
+        if (req.query.category && req.query.category !== "All") {
+            query.category = req.query.category;
+        }
+        const products = await Product.find(query);
         const category = await Category.find({ deleted: false })
         res.render('products', { products: products, category });
     } catch (error) {
@@ -69,7 +73,7 @@ exports.addproductPost = async (req, res) => {
                 }
             }
 
-            const { productname, description, category, price, quantity } = req.body;
+            const { productname, description, category, price, quantity, length, width, height, material, shape, weight } = req.body;
             const productImages = req.files.map(file => file.path);
 
             const resizedImages = await Promise.all(
@@ -88,6 +92,12 @@ exports.addproductPost = async (req, res) => {
                 category,
                 price,
                 quantity,
+                length,
+                width,
+                height,
+                shape,
+                weight,
+                material,
                 productImages: resizedImages
             });
             await product.save();
@@ -131,7 +141,7 @@ exports.updateproductGet = async (req, res) => {
 exports.updateproductPost = async (req, res) => {
     try {
         const productId = req.params.id;
-        const { productname, description, category, price, quantity } = req.body;
+        const { productname, description, category, price, quantity, length, width, height, material, shape, weight } = req.body;
         let productImages = [];
 
         // Handle uploaded images
@@ -164,6 +174,12 @@ exports.updateproductPost = async (req, res) => {
             category,
             price,
             quantity,
+            length,
+            width,
+            height,
+            shape,
+            weight,
+            material,
             $addToSet: { productImages: { $each: productImages } }
         }, { new: true });
 
@@ -196,7 +212,8 @@ exports.singleproductGet = async (req, res) => {
     try {
         const productId = req.params.id;
         const product = await Product.findById(productId)
-        res.render('singleproduct', { product });
+        const relatedProducts = await Product.find({ category: product.category, _id: { $ne: productId } }).limit(4);
+        res.render('singleproduct', { product, relatedProducts });
     } catch (error) {
         console.log("Error Occurred: ", error);
         res.status(500).send("Internal Server Error");

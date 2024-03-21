@@ -23,11 +23,35 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    length: {
+        type: Number,
+        required: true,
+    },
+    width: {
+        type: Number,
+        required: true,
+    },
+    height: {
+        type: Number,
+        required: true
+    },
+    weight: {
+        type: Number,
+        required: true,
+    },
+    shape: {
+        type: String,
+        required: true,
+    },
+    material: {
+        type: String,
+        required: true,
+    },
     productImages: {
         type: Array,
         required: true
     },
-    deleted:{
+    deleted: {
         type: Boolean,
         default: false
     }

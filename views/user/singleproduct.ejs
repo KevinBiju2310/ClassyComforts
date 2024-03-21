@@ -954,22 +954,30 @@
                                         <!-- MAIN SLIDES -->
                                         <div class="product-image-slider">
                                             <figure class="border-radius-10">
-                                                <img id="mainImage" src="/uploads/<%= product.productImages[index] %>"
+                                                <img id="mainImage" src="/uploads/<%= product.productImages[0] %>"
                                                     alt="<%= product.productname %>">
                                             </figure>
                                         </div>
                                         <!-- THUMBNAILS -->
-                                        <div class="slider-nav-thumbnails pl-15 pr-15">
-                                            <% product.productImages.forEach((image, index)=> { %>
+                                        <div class="slider-nav-thumbnails pl-15 pr-15" id="thumbnailContainer">
+                                            <% product.productImages.forEach(image=> { %>
                                                 <div>
-                                                    <img src="/uploads/<%= image %>" alt="product image" onclick=changeMainImage(<%= index %>)>
-
+                                                    <img src="/uploads/<%= image %>" alt="product image"
+                                                        onclick="changeMainImage('<%= image %>')">
                                                 </div>
                                                 <% }) %>
                                         </div>
                                     </div>
                                     <!-- End Gallery -->
                                 </div>
+
+                                <script>
+                                    function changeMainImage(imageUrl) {
+                                        const mainImage = document.getElementById('thumbnailContainer');
+                                        mainImage.src = imageUrl;
+                                    }
+
+                                </script>
 
                                 <div class="col-md-6 col-sm-12 col-xs-12">
                                     <div class="detail-info">
@@ -1085,36 +1093,30 @@
                                     <table class="font-md mb-30">
                                         <tbody>
                                             <tr class="stand-up">
-                                                <th>Stand Up</th>
+                                                <th>Product Dimension</th>
                                                 <td>
-                                                    <p>35″L x 24″W x 37-45″H(front to back wheel)</p>
+                                                    <p><%= product.length %>″L x <%= product.width %>″W x <%= product.height %>″H</p>
                                                 </td>
                                             </tr>
                                             <tr class="folded-wo-wheels">
-                                                <th>Folded (w/o wheels)</th>
+                                                <th>Material</th>
                                                 <td>
-                                                    <p>32.5″L x 18.5″W x 16.5″H</p>
-                                                </td>
-                                            </tr>
-                                            <tr class="folded-w-wheels">
-                                                <th>Folded (w/ wheels)</th>
-                                                <td>
-                                                    <p>32.5″L x 24″W x 18.5″H</p>
+                                                    <p><%= product.material %></p>
                                                 </td>
                                             </tr>
                                             <tr class="door-pass-through">
-                                                <th>Door Pass Through</th>
+                                                <th>Shape</th>
                                                 <td>
-                                                    <p>24</p>
+                                                    <p><%= product.shape %></p>
                                                 </td>
                                             </tr>
                                             <tr class="frame">
-                                                <th>Frame</th>
+                                                <th>Weight</th>
                                                 <td>
-                                                    <p>Aluminum</p>
+                                                    <p><%= product.weight %></p>
                                                 </td>
                                             </tr>
-                                            <tr class="weight-wo-wheels">
+                                            <!-- <tr class="weight-wo-wheels">
                                                 <th>Weight (w/o wheels)</th>
                                                 <td>
                                                     <p>20 LBS</p>
@@ -1167,24 +1169,10 @@
                                                 <td>
                                                     <p>M, S</p>
                                                 </td>
-                                            </tr>
+                                            </tr> -->
                                         </tbody>
                                     </table>
-                                    <div class="social-icons single-share">
-                                        <ul class="text-grey-5 d-inline-block">
-                                            <li><strong class="mr-10">Share this:</strong></li>
-                                            <li class="social-facebook"><a href="#"><img
-                                                        src="assets/imgs/theme/icons/icon-facebook.svg" alt=""></a></li>
-                                            <li class="social-twitter"> <a href="#"><img
-                                                        src="assets/imgs/theme/icons/icon-twitter.svg" alt=""></a></li>
-                                            <li class="social-instagram"><a href="#"><img
-                                                        src="assets/imgs/theme/icons/icon-instagram.svg" alt=""></a>
-                                            </li>
-                                            <li class="social-linkedin"><a href="#"><img
-                                                        src="assets/imgs/theme/icons/icon-pinterest.svg" alt=""></a>
-                                            </li>
-                                        </ul>
-                                    </div>
+
                                     <h3 class="section-title style-1 mb-30 mt-30">Reviews (3)</h3>
                                     <!--Comments-->
                                     <div class="comments-area style-2">
@@ -1347,47 +1335,56 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="row related-products">
-                                        <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                                            <div class="product-cart-wrap small hover-up">
-                                                <div class="product-img-action-wrap">
-                                                    <div class="product-img product-img-zoom">
-                                                        <a href="shop-product-right.html" tabindex="0">
-                                                            <img class="default-img"
-                                                                src="/assets/imgs/shop/product-2-1.jpg" alt="">
-                                                            <img class="hover-img"
-                                                                src="/assets/imgs/shop/product-2-2.jpg" alt="">
-                                                        </a>
-                                                    </div>
-                                                    <div class="product-action-1">
-                                                        <a aria-label="Quick view" class="action-btn small hover-up"
-                                                            data-bs-toggle="modal" data-bs-target="#quickViewModal
-"><i class="fi-rs-search"></i></a>
-                                                        <a aria-label="Add To Wishlist"
-                                                            class="action-btn small hover-up" href="shop-wishlist.html"
-                                                            tabindex="0"><i class="fi-rs-heart"></i></a>
-                                                        <a aria-label="Compare" class="action-btn small hover-up"
-                                                            href="shop-compare.html" tabindex="0"><i
-                                                                class="fi-rs-shuffle"></i></a>
-                                                    </div>
-                                                    <div
-                                                        class="product-badges product-badges-position product-badges-mrg">
-                                                        <span class="hot">Hot</span>
+                                        <% if(relatedProducts && relatedProducts.length>0) { %>
+                                            <% relatedProducts.forEach(relatedProduct=> { %>
+                                                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                                    <div class="product-cart-wrap small hover-up">
+                                                        <div class="product-img-action-wrap">
+                                                            <div class="product-img product-img-zoom">
+                                                                <a href="/user/singleproduct/<%= relatedProduct.id %>" tabindex="0">
+                                                                    <img class="default-img"
+                                                                        src="/uploads/<%= relatedProduct.productImages[0] %>" alt="">
+                                                                    <img class="hover-img"
+                                                                        src="/uploads/<%= relatedProduct.productImages[0] %>" alt="">
+                                                                </a>
+                                                            </div>
+                                                            <div class="product-action-1">
+                                                                <a aria-label="Quick view"
+                                                                    class="action-btn small hover-up"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#quickViewModal"><i
+                                                                        class="fi-rs-search"></i></a>
+                                                                <a aria-label="Add To Wishlist"
+                                                                    class="action-btn small hover-up"
+                                                                    href="shop-wishlist.html" tabindex="0"><i
+                                                                        class="fi-rs-heart"></i></a>
+                                                                <a aria-label="Compare"
+                                                                    class="action-btn small hover-up"
+                                                                    href="shop-compare.html" tabindex="0"><i
+                                                                        class="fi-rs-shuffle"></i></a>
+                                                            </div>
+                                                            <div
+                                                                class="product-badges product-badges-position product-badges-mrg">
+                                                                <span class="hot">Hot</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="product-content-wrap">
+                                                            <h2><a href="shop-product-right.html" tabindex="0"><%= relatedProduct.productname %></a></h2>
+                                                            <div class="rating-result" title="90%">
+                                                                <span>
+                                                                </span>
+                                                            </div>
+                                                            <div class="product-price">
+                                                                <span>$<%= relatedProduct.price %> </span>
+                                                                <span class="old-price">$245.8</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="product-content-wrap">
-                                                    <h2><a href="shop-product-right.html" tabindex="0">Ulstra Bass
-                                                            Headphone</a></h2>
-                                                    <div class="rating-result" title="90%">
-                                                        <span>
-                                                        </span>
-                                                    </div>
-                                                    <div class="product-price">
-                                                        <span>$238.85 </span>
-                                                        <span class="old-price">$245.8</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                <% }); %>
+                                                    <% } else { %>
+                                                        <p>No related products found.</p>
+                                                        <% } %>
                                     </div>
                                 </div>
                             </div>
@@ -1535,16 +1532,6 @@
             </div>
         </div>
     </div>
-
-
-    <script>
-        function changeMainImage(index) {
-            const mainImage = document.getElementById('mainImage');
-            mainImage.src = '/uploads/<%= product.productImages[index] %>';
-        }
-    </script>
-
-
 
     <!-- Vendor JS-->
     <script src="/assets/js/vendor/modernizr-3.6.0.min.js"></script>
