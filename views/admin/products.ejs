@@ -17,7 +17,7 @@
                             <form id="filterForm" method="get" action="/admin/products">
                                 <select id="categorySelect" class="form-select" name="category"
                                     onchange="this.form.submit()">
-                                    <option value="All">All</option>
+                                    <option><a href="/admin/products">All</a></option>
                                     <% category.forEach(category=> { %>
                                         <option value="<%= category.name %>">
                                             <%= category.name %>

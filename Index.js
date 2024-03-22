@@ -6,7 +6,7 @@ const ejs = require('ejs');
 const session = require('express-session')
 const passport = require('passport')
 const userRoute = require('./routes/userRoute');
-const adminRoute = require('./routes/adminRoute')
+const adminRoute = require('./routes/adminRoute');
 const bodyparser = require('body-parser');
 const app = express();
 require('./passportSetup')
@@ -21,9 +21,8 @@ app.use(
 );
 
 
-
 app.use((req, res, next) => {
-  res.locals.user = req.user;
+  res.locals.user = req.session.user;
   next();
 });
 

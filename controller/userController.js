@@ -138,9 +138,8 @@ exports.verifyOTP = async (req, res) => {
             isAdmin,
         });
         await user.save();
-        // Clear the session data
         req.session.newUser = null;
-        res.render('home');
+        res.redirect('/user/home');
     }
 };
 
@@ -158,7 +157,7 @@ exports.signinGet = async (req, res) => {
 
 exports.signinPost = [
     check('email').trim().isEmail().notEmpty().withMessage('Email is Required'),
-    check('password').notEmpty().withMessage('Password is required'),
+    check('password').trim().notEmpty().withMessage('Password is required'),
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -179,6 +178,7 @@ exports.signinPost = [
             if (!passwordMatch) {
                 return res.render('signin', { errors: { password: { msg: 'Invalid password' } } });
             }
+            req.session.user = user;
             res.redirect('/user/home')
         } catch (error) {
             console.error("Error in signing in" + error)
@@ -187,6 +187,16 @@ exports.signinPost = [
     },
 ];
 
+exports.logoutuser = (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error destroying session:', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.redirect('/user/home'); 
+        }
+    });
+};
 
 
 exports.googleSignIn = passport.authenticate('google', {
@@ -308,8 +318,8 @@ exports.resetPasswordPost = async (req, res) => {
 
 exports.shoppageGet = async (req, res) => {
     try {
-        let query = {deleted: false}
-        if(req.query.category){
+        let query = { deleted: false }
+        if (req.query.category) {
             query.category = req.query.category;
         }
         const products = await Product.find(query);
