@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controller/userController');
 const productController = require('../controller/productController');
 const cartController = require('../controller/cartController');
+const { isLoggedIn } = require('../middleware/auth');
 
 router.get('/home', userController.homeGet)
 
@@ -27,8 +28,8 @@ router.post('/resetpassword/:id/:token', userController.resetPasswordPost);
 
 router.get('/shop', userController.shoppageGet)
 router.get('/singleproduct/:id', productController.singleproductGet)
-router.get('/cart', cartController.cartGet)
-
+router.get('/cart', isLoggedIn, cartController.cartGet)
+router.post('/cart', isLoggedIn, cartController.cartPost)
 
 router.get('/logout', userController.logoutuser);
 

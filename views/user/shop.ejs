@@ -101,10 +101,13 @@
                                                 <span>$<%= product.price %></span>
                                                 <span class="old-price">$245.8</span>
                                             </div>
-                                            <div class="product-action-1 show">
-                                                <a aria-label="Add To Cart" class="action-btn hover-up"
-                                                    href="shop-cart.html"><i class="fi-rs-shopping-bag-add"></i></a>
-                                            </div>
+                                            <form action="">
+                                                <div class="product-action-1 show">
+                                                    <a aria-label="Add To Cart" class="action-btn hover-up"
+                                                        onclick="addToCart('<%= product.id %>', 1)"><i
+                                                            class="fi-rs-shopping-bag-add"></i></a>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -228,4 +231,24 @@
             </div>
         </section>
     </main>
-   <%- include("../layouts/userFooter") %>
+
+    <script>
+        const addToCart = async (itemId, quantity) => {
+            console.log(itemId)
+            try {
+                const response = await fetch('/user/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ itemId, quantity }),
+                });
+                const data = await response.json();
+                console.log(data);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+    </script>
+
+    <%- include("../layouts/userFooter") %>
