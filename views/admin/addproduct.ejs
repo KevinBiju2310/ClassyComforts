@@ -1,20 +1,30 @@
 <%- include("../layouts/adminHeader") %>
 
+    <style>
+        .invalid-feedback {
+            color: red;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+    </style>
+
     <div id="content">
         <div class="container py-3">
-            <form action="/admin/addproduct" method="post" enctype="multipart/form-data">
+            <form id="productForm" action="/admin/addproduct" method="post" enctype="multipart/form-data">
                 <h1 class="h3">Product Creation</h1>
                 <hr>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="productName" class="form-label">Product Name</label>
-                        <input type="text" class="form-control" id="productName" name="productname"
+                        <input type="text" class="form-control" id="productname" name="productname"
                             placeholder="Enter product name here">
+                        <div id="productNameError" class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea class="form-control" id="description" rows="3" name="description"
                             placeholder="Type description here"></textarea>
+                        <div id="descriptionError" class="invalid-feedback"></div>
                     </div>
                 </div>
                 <div class="row">
@@ -27,6 +37,7 @@
                                 </option>
                                 <% }) %>
                         </select>
+                        <div id="categoryError" class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="regularPrice" class="form-label">Regular Price</label>
@@ -34,6 +45,7 @@
                             <span class="input-group-text">₹</span>
                             <input type="number" class="form-control" id="regularPrice" name="price"
                                 aria-label="Regular price">
+                            <div id="priceError" class="invalid-feedback"></div>
                         </div>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -41,6 +53,7 @@
                         <div class="input-group">
                             <input type="number" class="form-control" id="remainingProducts" name="quantity"
                                 placeholder="Enter number of remaining products">
+                            <div id="quantityError" class="invalid-feedback"></div>
                         </div>
                     </div>
                 </div>
@@ -50,6 +63,7 @@
                             uploaded)</label>
                         <input type="file" class="form-control" id="productGallery" name="productImages" multiple>
                     </div>
+                    <div id="imageError" class="invalid-feedback"></div>
                 </div>
                 <div class="row mb-3" id="imagePreviewsContainer">
                     <!-- Image previews will be appended here -->
@@ -59,16 +73,18 @@
                         <label for="length" class="form-label">Length</label>
                         <input type="number" class="form-control" id="length" name="length"
                             placeholder="Enter the Length">
+                        <div id="lengthError" class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="width" class="form-label">Width</label>
-                        <input type="number" class="form-control" id="width" name="width"
-                            placeholder="Enter the Width">
+                        <input type="number" class="form-control" id="width" name="width" placeholder="Enter the Width">
+                        <div id="widthError" class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="height" class="form-label">Height</label>
                         <input type="number" class="form-control" id="height" name="height"
                             placeholder="Enter the Height">
+                        <div id="heightError" class="invalid-feedback"></div>
                     </div>
                 </div>
                 <div class="row">
@@ -76,16 +92,18 @@
                         <label for="material" class="form-label">Material</label>
                         <input type="text" class="form-control" id="material" name="material"
                             placeholder="Enter the Material">
+                        <div id="materialError" class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="shape" class="form-label">Shape</label>
-                        <input type="text" class="form-control" id="shape" name="shape"
-                            placeholder="Enter the Shape">
+                        <input type="text" class="form-control" id="shape" name="shape" placeholder="Enter the Shape">
+                        <div id="shapeError" class="invalid-feedback"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="weight" class="form-label">Weight</label>
                         <input type="number" class="form-control" id="weight" name="weight"
                             placeholder="Enter the Weight">
+                        <div id="weightError" class="invalid-feedback"></div>
                     </div>
                 </div>
                 <div class="row">
@@ -119,6 +137,7 @@
                 }
             }
         });
+        
     </script>
 
     <%- include("../layouts/adminFooter") %>

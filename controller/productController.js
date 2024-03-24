@@ -39,13 +39,18 @@ function checkFileType(file, cb) {
 
 exports.productsGet = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 15;
         let query = { deleted: false };
         if (req.query.category && req.query.category !== "All") {
             query.category = req.query.category;
         }
-        const products = await Product.find(query);
-        const category = await Category.find({ deleted: false })
-        res.render('products', { products: products, category });
+        const totalProducts = await Product.countDocuments(query);
+        const totalPages = Math.ceil(totalProducts / perPage);
+        const skip = (page - 1) * perPage;
+        const products = await Product.find(query).skip(skip).limit(perPage);
+        const category = await Category.find({ deleted: false });
+        res.render('products', { products, category, totalPages, currentPage: page });
     } catch (error) {
         console.log("Error Occurred: ", error);
         res.status(500).send("Internal Server Error");
@@ -219,3 +224,4 @@ exports.singleproductGet = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 }
+   

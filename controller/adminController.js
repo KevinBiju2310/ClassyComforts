@@ -55,8 +55,13 @@ exports.dashboardGet = async (req, res) => {
 
 exports.userlistGet = async (req, res) => {
     try {
-        const users = await User.find({ isAdmin: { $ne: "1" } })
-        res.render('userlist', { users });
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 7;
+        const totalUsers = await User.countDocuments({ isAdmin: { $ne: "1" } });
+        const totalPages = Math.ceil(totalUsers / perPage);
+        const skip = (page - 1) * perPage;
+        const users = await User.find({ isAdmin: { $ne: "1" } }).skip(skip).limit(perPage);
+        res.render('userlist', { users, totalPages, currentPage: page });
     } catch (error) {
         console.error("Error rendering dashboard: ", error);
         res.status(500).send('Internet Server Error');
@@ -115,7 +120,7 @@ exports.toggleUserBlock = async (req, res) => {
 
 exports.categoryGet = async (req, res) => {
     try {
-        const category = await Category.find({deleted: false})
+        const category = await Category.find({ deleted: false })
         res.render('category', { category })
     } catch (error) {
         console.error("Error rendering Cateory: ", error);

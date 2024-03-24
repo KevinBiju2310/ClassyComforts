@@ -44,7 +44,7 @@ function generateOTP() {
 
 
 exports.signupPost = [
-    check('name')
+    check('name').trim()
         .notEmpty().withMessage('Name is Required')
         .custom(value => {
             const nameRegex = /^[a-zA-Z\s]+$/;
@@ -53,12 +53,12 @@ exports.signupPost = [
             }
             return true;
         }),
-    check('email').notEmpty().withMessage('Email is Required'),
-    check('phone').notEmpty().withMessage('Phone is Required'),
-    check('password')
+    check('email').trim().notEmpty().withMessage('Email is Required'),
+    check('phone').trim().notEmpty().withMessage('Phone is Required'),
+    check('password').trim()
         .notEmpty().withMessage('Password is Required')
         .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    check('confirmpassword')
+    check('confirmpassword').trim()
         .notEmpty().withMessage('Confirm Password is Required')
         .custom((value, { req }) => {
             if (value !== req.body.password) {
@@ -193,7 +193,7 @@ exports.logoutuser = (req, res) => {
             console.error('Error destroying session:', err);
             res.status(500).send('Internal Server Error');
         } else {
-            res.redirect('/user/home'); 
+            res.redirect('/user/home');
         }
     });
 };
@@ -318,13 +318,22 @@ exports.resetPasswordPost = async (req, res) => {
 
 exports.shoppageGet = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 12;
+
+
         let query = { deleted: false }
         if (req.query.category) {
             query.category = req.query.category;
         }
-        const products = await Product.find(query);
+
+        const totalProducts = await Product.countDocuments(query);
+        const totalPages = Math.ceil(totalProducts / perPage);
+        const skip = (page - 1) * perPage;
+
+        const products = await Product.find(query).skip(skip).limit(perPage);
         const category = await Category.find({ deleted: false });
-        res.render('shop', { products, category })
+        res.render('shop', { products, category, totalPages, currentPage: page });
     } catch (error) {
         console.log("Error Occured");
     }
