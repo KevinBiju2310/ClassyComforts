@@ -37,7 +37,7 @@ const addressSchema = new mongoose.Schema({
     },
     addressType: {
         type: String,
-        enum: ['Home', 'Work'],
+        enum: ['home', 'work'],
         required: true
     }
 

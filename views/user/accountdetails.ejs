@@ -157,16 +157,29 @@
                                                             <div class="card-header">
                                                                 <h5 class="mb-0">Shipping Address</h5>
                                                             </div>
-                                                            <div class="card-body">
+                                                            <div class="card-body" id="card-body">
                                                                 <address>
                                                                     <%= address.address %><br>
                                                                         <%= address.city %>, <%= address.state %>
                                                                                 <%= address.pincode %> <br>
-                                                                                    Phone: <%= address.mobileNumber %>
+                                                                                    Phone: <%= address.phone %>
                                                                 </address>
                                                                 <p>
                                                                     <%= address.district %>
                                                                 </p>
+                                                                <div class="d-flex justify-content">
+                                                                    <button type="button"
+                                                                        class="btn btn-sm btn-primary mr-5"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#editAddressModal">
+                                                                        Edit
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-sm btn-danger"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#deleteConfirmationModal">
+                                                                        Delete
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -401,6 +414,70 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Handle form submission when the modal is shown
+        $('#addAddressModal').on('show.bs.modal', function (event) {
+            // Clear the input fields
+            $('#name').val('');
+            $('#mobileNumber').val('');
+            $('#address').val('');
+            $('#district').val('');
+            $('#state').val('');
+            $('#city').val('');
+            $('#pincode').val('');
+            $('#addressType').val('');
+        });
+
+        // Add an event listener to the address form
+        document.getElementById('addressForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+
+            // Get the values from the form fields
+            const name = document.getElementById('name').value;
+            const mobileNumber = document.getElementById('mobileNumber').value;
+            const address = document.getElementById('address').value;
+            const district = document.getElementById('district').value;
+            const state = document.getElementById('state').value;
+            const city = document.getElementById('city').value;
+            const pincode = document.getElementById('pincode').value;
+            const addressType = document.querySelector('input[name="addressType"]:checked').value;
+
+            // Construct the address object
+            const addressData = {
+                name: name,
+                mobileNumber: mobileNumber,
+                address: address,
+                district: district,
+                state: state,
+                city: city,
+                pincode: pincode,
+                addressType: addressType
+            };
+
+            // Send a POST request to add the address
+            fetch('/user/address', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(addressData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    
+                    console.log('Address added successfully:', data);
+
+                    // Close the modal after saving the address
+                    $('#addAddressModal').modal('hide');
+                })
+                .catch(error => {
+                    console.error('Error adding address:', error);
+                    // Handle error if needed
+                });
+        });
+    </script>
+
 
 
     <%- include("../layouts/userFooter") %>
