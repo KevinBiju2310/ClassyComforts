@@ -1,54 +1,83 @@
-const Cart = require('../modal/cartModel');
-const Product = require('../modal/productModel');
+const User = require("../modal/userModal");
+const Product = require("../modal/productModel");
 
 exports.cartGet = async (req, res) => {
     try {
-        const userId = req.session.user.id;
-        const cart = await Cart.findOne({ user: userId })   
-        if (cart && cart.items.length > 0) {
-            res.render('cart', { cart });
-        } else {
-            res.render('cart', { message: 'No products found' });   
+        // Check if user is authenticated
+        if (!req.session.user) {
+            return res.status(401).json({ error: 'Unauthorized' });
         }
+
+        // Retrieve the user's cart from the database
+        const userId = req.session.user._id;
+        const user = await User.findById(userId).populate('cart.product'); // Populate product details
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Update cart items with product details
+        const updatedCart = user.cart.map(item => ({
+            product: {
+                id: item.product._id,
+                name: item.product.name,
+                price: item.product.price,
+                image: item.product.image
+                // Add more product details as needed
+            },
+            quantity: item.quantity
+        }));
+
+        // Send the updated cart data to the client
+        res.render('cart',{ cart: updatedCart });
     } catch (error) {
-        console.log("Error Occured : ", error);
-    }
-}
-
-exports.cartPost = async (req, res) => {
-    const userId = req.session.user._id;
-    const { productId, quantity } = req.body;
-    try {
-        // Find the user's cart
-        let cart = await Cart.findOne({ user: userId });
-
-        // If cart doesn't exist, create a new one
-        if (!cart) {
-            cart = new Cart({ user: userId, items: [], total: 0 });
-        }
-
-        // Check if the product already exists in the cart
-        const existingItemIndex = cart.items.findIndex(item => item.productId.equals(productId));
-
-        if (existingItemIndex !== -1) {
-            // Update quantity if product already exists
-            cart.items[existingItemIndex].quantity += quantity;
-        } else {
-            // Add new product to the cart
-            cart.items.push({ productId, quantity });
-        }
-
-        // Calculate total
-        cart.total = cart.items.reduce((total, item) => {
-            return total + item.quantity;
-        }, 0);
-
-        // Save the cart
-        await cart.save();
-
-        return res.status(200).json(cart);
-    } catch (error) {
-        console.error("Error occurred:", error);
-        return res.status(500).json({ message: "Something went wrong" });
+        console.error('Error fetching cart:', error);
+        res.status(500).json({ error: 'Failed to fetch cart' });
     }
 };
+
+
+exports.cartPost = async (req, res) => {
+    try {
+        // Check if user is authenticated
+        if (!req.session.user) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        const { productId } = req.body;
+        const userId = req.session.user._id;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        // Check if product is already in the cart, if yes, increment quantity
+        const existingCartItem = user.cart.find(item => item.product.equals(productId));
+        if (existingCartItem) {
+            existingCartItem.quantity++;
+        } else {
+            // Otherwise, add new item to cart with product details
+            user.cart.push({
+                product: productId,
+                quantity: 1,
+                image: product.productImages,
+                name: product.productname,
+                price: product.price,
+                url: `/user/singleproduct/${product.id}`
+            });
+        }
+
+        await user.save();
+        res.redirect('/user/cart');
+    } catch (error) {
+        console.error('Error adding item to cart:', error);
+        res.status(500).json({ error: 'Failed to add item to cart' });
+    }
+};
+

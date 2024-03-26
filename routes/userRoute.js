@@ -31,6 +31,7 @@ router.get('/shop', userController.shoppageGet);
 router.get('/singleproduct/:id', productController.singleproductGet);
 router.get('/accountdetails', isLoggedIn, userProfileController.profileGet);
 router.post('/address', userProfileController.addressPost);
+router.put('/update-address', userProfileController.updateaddressPut);
 
 
 router.get('/cart', isLoggedIn, cartController.cartGet)

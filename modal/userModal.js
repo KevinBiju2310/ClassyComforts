@@ -1,5 +1,4 @@
-const mongoose = require('mongoose')
-
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -25,7 +24,19 @@ const userSchema = new mongoose.Schema({
     isBlocked: {
         type: Boolean,
         default: false
-    }
+    },
+    cart: [{
+        product: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product'
+        },
+        quantity: {
+            type: Number,
+        },
+        totalAmount: {
+            type: Number,
+        }
+    }]
 }
 )
 

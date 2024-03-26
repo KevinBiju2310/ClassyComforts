@@ -1,4 +1,13 @@
 <%- include("../layouts/userHeader") %>
+
+    <style>
+        .icon-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: black;
+        }
+    </style>
     <main class="main">
         <div class="page-header breadcrumb-wrap">
             <div class="container">
@@ -101,13 +110,15 @@
                                                 <span>$<%= product.price %></span>
                                                 <span class="old-price">$245.8</span>
                                             </div>
-                                            <form action="">
-                                                <div class="product-action-1 show">
-                                                    <a aria-label="Add To Cart" class="action-btn hover-up"
-                                                        onclick="addToCart('<%= product.id %>', 1)"><i
-                                                            class="fi-rs-shopping-bag-add"></i></a>
-                                                </div>
-                                            </form>
+                                            <div class="product-action-1 show">
+                                                <form action="/user/cart" method="POST">
+                                                    <input type="hidden" name="productId" value="<%= product.id %>">
+                                                    <button type="submit" aria-label="Add To Cart"
+                                                        class="action-btn hover-up">
+                                                        <i class="fi-rs-shopping-bag-add icon-center pb-10"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -121,19 +132,21 @@
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
-                            
-                            <% for(let i = 1; i <= totalPages; i++) { %>
+
+                            <% for(let i=1; i <=totalPages; i++) { %>
                                 <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                    <a class="page-link" href="?page=<%= i %>">
+                                        <%= i %>
+                                    </a>
                                 </li>
-                            <% } %>
-                            
-                            <!-- Next page button -->
-                            <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                                <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
+                                <% } %>
+
+                                    <!-- Next page button -->
+                                    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                        <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
                         </div>
                     </div>
                     <div class="col-lg-3 primary-sidebar sticky-sidebar">
@@ -239,24 +252,33 @@
             </div>
         </section>
     </main>
-
     <script>
-        const addToCart = async (itemId, quantity) => {
-            console.log(itemId)
-            try {
-                const response = await fetch('/user/cart', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ itemId, quantity }),
+        function addToCart(productId) {
+            fetch('/user/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    productId: productId,
+                    quantity: 1,
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to add product to cart');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Redirect to the cart page after adding the product to the cart
+                    window.location.href = '/user/cart';
+                })
+                .catch(error => {
+                    console.error('Error adding product to cart:', error);
                 });
-                const data = await response.json();
-                console.log(data);
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
+        }
     </script>
+
 
     <%- include("../layouts/userFooter") %>

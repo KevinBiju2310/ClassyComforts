@@ -465,11 +465,12 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    
+
                     console.log('Address added successfully:', data);
 
+                    window.location.hash = '/user/accountdetails/#address'
                     // Close the modal after saving the address
-                    $('#addAddressModal').modal('hide');
+                    // $('#addAddressModal').modal('hide');
                 })
                 .catch(error => {
                     console.error('Error adding address:', error);
@@ -477,6 +478,7 @@
                 });
         });
     </script>
+    
 
 
 

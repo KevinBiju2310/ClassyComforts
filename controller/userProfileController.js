@@ -46,3 +46,13 @@ exports.addressPost = async (req, res) => {
         res.status(501).send('Internet Server Error');
     }
 }
+
+exports.updateaddressPut = async(req,res) => {
+    try{
+        let addresses = [];
+        const formData = req.body;
+        addresses.push(formData)
+    }catch(error){
+        console.log("Error Occured: ",error);
+    }
+}

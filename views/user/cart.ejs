@@ -14,7 +14,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <% if (typeof cart !=='undefined' && cart.items.length> 0) { %>
+                            <% if (cart.length> 0) { %>
                                 <table class="table shopping-summery text-center clean">
                                     <thead>
                                         <tr class="main-heading">
@@ -27,56 +27,38 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <% cart.items.forEach(item=> { %>
+                                        <% cart.forEach(item => { %>
                                             <tr>
-                                                <td class="image product-thumbnail"><img
-                                                        src="<%= item.image %>" alt="#"></td>
-                                                <td class="product-des product-name">
-                                                    <h5 class="product-name"><a href="<%= item.url %>">
-                                                            <%= item.name %>
-                                                        </a></h5>
-                                                    <p class="font-xs"></p>
+                                                <td class="image product-thumbnail">
+                                                    <img src="uploads/<%= item.product.image %>" alt="<%= item.product.name %>">
                                                 </td>
-                                                <td class="price" data-title="Price"><span>$<%=
-                                                            item.price.toFixed(2) %> </span></td>
-                                                <td class="text-center" data-title="Stock">
-                                                    <div class="detail-qty border radius  m-auto">
-                                                        <a href="#" class="qty-down"><i
-                                                                class="fi-rs-angle-small-down"></i></a>
-                                                        <span class="qty-val">
-                                                            <%= item.quantity %>
-                                                        </span>
-                                                        <a href="#" class="qty-up"><i
-                                                                class="fi-rs-angle-small-up"></i></a>
+                                                <td class="product-des product-name">
+                                                    <h5 class="product-name"><%= item.product.name %></h5>
+                                                </td>
+                                                <td class="price" data-title="Price">
+                                                    <span>$<%= item.product.price %></span>
+                                                </td>
+                                                <td class="text-center" data-title="Quantity">
+                                                    <div class="detail-qty border radius m-auto">
+                                                        <span class="qty-val"><%= item.quantity %></span>
                                                     </div>
                                                 </td>
-                                                <td class="text-right" data-title="Cart">
-                                                    <span>$<%= (item.price * item.quantity).toFixed(2) %>
-                                                    </span>
+                                                <td class="text-right" data-title="Subtotal">
+                                                    <span>$<%= item.product.price * item.quantity %></span>
                                                 </td>
-                                                <td class="action" data-title="Remove"><a href="#" class="text-muted"><i
-                                                            class="fi-rs-trash"></i></a></td>
+                                                <td class="action" data-title="Remove">
+                                                    <a href="#" class="text-muted"><i class="fi-rs-trash"></i></a>
+                                                </td>
                                             </tr>
-                                            <% }); %>
-                                                <tr>
-                                                    <td colspan="6" class="text-end">
-                                                        <a href="#" class="text-muted"> <i
-                                                                class="fi-rs-cross-small"></i> Clear Cart</a>
-                                                    </td>
-                                                </tr>
+                                        <% }); %>
                                     </tbody>
                                 </table>
                                 <% } else { %>
                                     <div class="text-center">
-                                        <% if (message) { %>
-                                            <p>
-                                                <%= message %>
-                                            </p>
-                                            <% } %>
+                                        <p>Cart is Empty</p>
                                     </div>
                                     <% } %>
                         </div>
-
                         <div class="cart-action text-end">
                             <a class="btn  mr-10 mb-sm-15"><i class="fi-rs-shuffle mr-10"></i>Update Cart</a>
                             <a class="btn "><i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping</a>
