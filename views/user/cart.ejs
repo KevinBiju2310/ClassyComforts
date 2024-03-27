@@ -1,4 +1,26 @@
 <%- include("../layouts/userHeader") %>
+
+    <style>
+        .detail-qty {
+            display: flex;
+            align-items: center;
+            /* Align items vertically */
+        }
+
+        .minus-btn,
+        .plus-btn {
+            padding: 5px 10px;
+            font-size: 1rem;
+            background-color: #f0f0f0;
+            border: none;
+            cursor: pointer;
+        }
+
+        .qty-val {
+            margin: 0 10px;
+            /* Add some space between buttons and quantity */
+        }
+    </style>
     <main class="main">
         <div class="page-header breadcrumb-wrap">
             <div class="container">
@@ -14,50 +36,73 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <% if (cart.length> 0) { %>
-                                <table class="table shopping-summery text-center clean">
-                                    <thead>
-                                        <tr class="main-heading">
-                                            <th scope="col">Image</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Price</th>
-                                            <th scope="col">Quantity</th>
-                                            <th scope="col">Subtotal</th>
-                                            <th scope="col">Remove</th>
+                            <table class="table shopping-summery text-center clean">
+                                <thead>
+                                    <tr class="main-heading">
+                                        <th scope="col">Image</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Subtotal</th>
+                                        <th scope="col">Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (cart.length===0) { %>
+                                        <!-- If cart is empty, display a message -->
+                                        <tr>
+                                            <td colspan="6">Your cart is empty</td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% cart.forEach(item => { %>
-                                            <tr>
-                                                <td class="image product-thumbnail">
-                                                    <img src="uploads/<%= item.product.image %>" alt="<%= item.product.name %>">
-                                                </td>
-                                                <td class="product-des product-name">
-                                                    <h5 class="product-name"><%= item.product.name %></h5>
-                                                </td>
-                                                <td class="price" data-title="Price">
-                                                    <span>$<%= item.product.price %></span>
-                                                </td>
-                                                <td class="text-center" data-title="Quantity">
-                                                    <div class="detail-qty border radius m-auto">
-                                                        <span class="qty-val"><%= item.quantity %></span>
-                                                    </div>
-                                                </td>
-                                                <td class="text-right" data-title="Subtotal">
-                                                    <span>$<%= item.product.price * item.quantity %></span>
-                                                </td>
-                                                <td class="action" data-title="Remove">
-                                                    <a href="#" class="text-muted"><i class="fi-rs-trash"></i></a>
-                                                </td>
-                                            </tr>
-                                        <% }); %>
-                                    </tbody>
-                                </table>
-                                <% } else { %>
-                                    <div class="text-center">
-                                        <p>Cart is Empty</p>
-                                    </div>
-                                    <% } %>
+                                        <% } else { %>
+                                            <% cart.forEach(item=> { %>
+                                                <tr>
+                                                    <td class="image product-thumbnail">
+                                                        <% if (item.product && item.product.productImages &&
+                                                            item.product.productImages.length> 0) { %>
+                                                            <!-- Display product image if available -->
+                                                            <img src="/uploads/<%= item.product.productImages[0] %>"
+                                                                alt="<%= item.product.productname %>">
+                                                            <% } else { %>
+                                                                <!-- Placeholder image or default image -->
+                                                                <img src="/images/default-product-image.jpg"
+                                                                    alt="Product Image">
+                                                                <% } %>
+                                                    </td>
+                                                    <td class="product-des product-name">
+                                                        <h5 class="product-name">
+                                                            <%= item.product.productname %>
+                                                        </h5>
+                                                    </td>
+                                                    <td class="price" data-title="Price">
+                                                        <!-- Display product price -->
+                                                        <span>$<%= item.product.price %></span>
+                                                    </td>
+                                                    <td class="text-center" data-title="Quantity">
+                                                        <!-- Quantity buttons -->
+                                                        <div class="detail-qty radius m-auto">
+                                                            <button class="minus-btn"
+                                                                data-productid="<%= item.product._id %>">-</button>
+                                                            <span class="qty-val">
+                                                                <%= item.quantity %>
+                                                            </span>
+                                                            <button class="plus-btn"
+                                                                data-productid="<%= item.product._id %>">+</button>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-right subtotal" data-title="Subtotal"
+                                                        data-price="<%= item.product.price %>">
+                                                        <!-- Display subtotal -->
+                                                        <span>$<%= item.subTotal %></span>
+                                                    </td>
+                                                    <td class="action" data-title="Remove">
+                                                        <!-- Remove button -->
+                                                        <a href="#" class="text-muted"><i class="fi-rs-trash"></i></a>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                                    <% } %>
+                                </tbody>
+                            </table>
                         </div>
                         <div class="cart-action text-end">
                             <a class="btn  mr-10 mb-sm-15"><i class="fi-rs-shuffle mr-10"></i>Update Cart</a>
@@ -101,7 +146,8 @@
                                                 <tr>
                                                     <td class="cart_total_label">Cart Subtotal</td>
                                                     <td class="cart_total_amount"><span
-                                                            class="font-lg fw-900 text-brand">$240.00</span></td>
+                                                            class="font-lg fw-900 text-brand">$<span
+                                                                id="cart-subtotal"></span></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="cart_total_label">Shipping</td>
@@ -111,7 +157,8 @@
                                                 <tr>
                                                     <td class="cart_total_label">Total</td>
                                                     <td class="cart_total_amount"><strong><span
-                                                                class="font-xl fw-900 text-brand">$240.00</span></strong>
+                                                                class="font-xl fw-900 text-brand">$<span
+                                                                    id="cart-total"></span></span></strong>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -127,4 +174,75 @@
             </div>
         </section>
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const minusBtns = document.querySelectorAll('.minus-btn');
+            const plusBtns = document.querySelectorAll('.plus-btn');
+            const qtyVals = document.querySelectorAll('.qty-val');
+            const subtotalVals = document.querySelectorAll('.subtotal');
+
+            // Add event listeners to all minus buttons
+            minusBtns.forEach((btn, index) => {
+                btn.addEventListener('click', async function () {
+                    const productId = btn.dataset.productid;
+                    let newQuantity = parseInt(qtyVals[index].textContent) - 1;
+                    if (newQuantity < 1) return; // Quantity can't be less than 1
+                    qtyVals[index].textContent = newQuantity;
+
+                    // Update subtotal for this product
+                    const price = parseFloat(subtotalVals[index].dataset.price); // Get product price
+                    const newSubtotal = price * newQuantity;
+                    subtotalVals[index].textContent = '$' + newSubtotal.toFixed(2);
+
+                    await updateCart(productId, newQuantity);
+                });
+            });
+
+            // Add event listeners to all plus buttons
+            plusBtns.forEach((btn, index) => {
+                btn.addEventListener('click', async function () {
+                    const productId = btn.dataset.productid;
+                    let newQuantity = parseInt(qtyVals[index].textContent) + 1;
+                    if (newQuantity > 10) return; // Limit quantity to 10
+                    qtyVals[index].textContent = newQuantity;
+
+                    // Update subtotal for this product
+                    const price = parseFloat(subtotalVals[index].dataset.price); // Get product price
+                    const newSubtotal = price * newQuantity;
+                    subtotalVals[index].textContent = '$' + newSubtotal.toFixed(2);
+
+                    await updateCart(productId, newQuantity);
+                });
+            });
+
+            async function updateCart(productId, quantity) {
+                try {
+                    const response = await fetch('/user/updatecart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            productId: productId,
+                            quantity: quantity
+                        })
+                    });
+
+                    if (response.ok) {
+                        console.log('Cart updated successfully');
+                        const data = await response.json();
+                        console.log('New subtotal:', data.subtotal);
+                    } else {
+                        console.error('Failed to update cart:', response.statusText);
+                        // Optionally, you can display an error message to the user
+                    }
+                } catch (error) {
+                    console.error('Error updating cart:', error.message);
+                    // Optionally, you can display an error message to the user
+                }
+            }
+
+        });
+    </script>
+
     <%- include("../layouts/userFooter") %>

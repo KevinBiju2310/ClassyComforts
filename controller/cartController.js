@@ -3,81 +3,111 @@ const Product = require("../modal/productModel");
 
 exports.cartGet = async (req, res) => {
     try {
-        // Check if user is authenticated
-        if (!req.session.user) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-
-        // Retrieve the user's cart from the database
         const userId = req.session.user._id;
-        const user = await User.findById(userId).populate('cart.product'); // Populate product details
-
+        const user = await User.findById(userId).populate('cart.product');
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).send('User not found');
         }
 
-        // Update cart items with product details
-        const updatedCart = user.cart.map(item => ({
-            product: {
-                id: item.product._id,
-                name: item.product.name,
-                price: item.product.price,
-                image: item.product.image
-                // Add more product details as needed
-            },
-            quantity: item.quantity
-        }));
+        // Check if the user has any items in the cart
+        if (user.cart.length === 0) {
+            // If cart is empty, render cart.ejs with an empty cart message
+            return res.render('cart', { cart: [], isEmpty: true });
+        }
 
-        // Send the updated cart data to the client
-        res.render('cart',{ cart: updatedCart });
+        // Render cart.ejs with the populated cart items
+        res.render('cart', { cart: user.cart, isEmpty: false });
     } catch (error) {
-        console.error('Error fetching cart:', error);
-        res.status(500).json({ error: 'Failed to fetch cart' });
+        console.error(error);
+        res.status(500).send('Internal Server Error');
     }
 };
 
-
 exports.cartPost = async (req, res) => {
     try {
-        // Check if user is authenticated
-        if (!req.session.user) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-
         const { productId } = req.body;
         const userId = req.session.user._id;
+        const product = await Product.findById(productId);
 
+        if (!product) {
+            return res.status(404).send('Product not found');
+        }
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).send('User not found');
         }
 
-        const product = await Product.findById(productId);
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-        // Check if product is already in the cart, if yes, increment quantity
-        const existingCartItem = user.cart.find(item => item.product.equals(productId));
-        if (existingCartItem) {
-            existingCartItem.quantity++;
+        // Check if the product already exists in the cart
+        const existingCartItemIndex = user.cart.findIndex(item => String(item.product._id) === String(productId));
+        console.log(existingCartItemIndex)
+        if (existingCartItemIndex !== -1) {
+            return res.send('Product already added to cart'); // Send response and exit function
         } else {
-            // Otherwise, add new item to cart with product details
+            // If the product does not exist in the cart, add it with quantity 1
             user.cart.push({
-                product: productId,
+                product: product,
                 quantity: 1,
-                image: product.productImages,
-                name: product.productname,
-                price: product.price,
-                url: `/user/singleproduct/${product.id}`
+                subTotal: product.price
             });
         }
 
         await user.save();
-        res.redirect('/user/cart');
+        res.redirect('/user/cart'); // Redirect to the cart page after adding the item
     } catch (error) {
-        console.error('Error adding item to cart:', error);
-        res.status(500).json({ error: 'Failed to add item to cart' });
+        console.error(error);
+        res.status(500).send('Internal Server Error');
     }
 };
 
+
+
+
+
+
+exports.updateCart = async (req, res) => {
+    try {
+        const { productId, quantity } = req.body;
+        const userId = req.session.user._id;
+
+        console.log("Updating cart for user ID:", userId);
+        console.log("Product ID:", productId);
+        console.log("Quantity:", quantity);
+
+        // Find the user
+        const user = await User.findById(userId);
+        if (!user) {
+            console.error("User not found");
+            return res.status(404).send('User not found');
+        }
+
+        // Find the product
+        const product = await Product.findById(productId);
+        if (!product) {
+            console.error("Product not found");
+            return res.status(404).send('Product not found');
+        }
+
+        // Find the cart item corresponding to the provided productId
+        const cartItem = user.cart.find(item => String(item.product._id) === String(productId));
+
+        if (!cartItem) {
+            console.error("Product not found in cart");
+            return res.status(404).send('Product not found in cart');
+        }
+
+        // Update quantity
+        cartItem.quantity = Math.min(Math.max(parseInt(quantity), 1), 10); // Limit quantity to 1-10
+        cartItem.subTotal = cartItem.quantity * product.price; // Update subtotal
+
+        console.log("Updated cart item:", cartItem);
+
+        // Save the updated user object to the database
+        await user.save();
+
+        // Send the updated cart item as a response
+        res.json({ cartItem });
+    } catch (error) {
+        console.error("Error updating cart:", error);
+        res.status(500).send('Internal Server Error');
+    }
+};

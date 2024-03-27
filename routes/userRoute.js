@@ -36,6 +36,7 @@ router.put('/update-address', userProfileController.updateaddressPut);
 
 router.get('/cart', isLoggedIn, cartController.cartGet)
 router.post('/cart', isLoggedIn, cartController.cartPost)
+router.post('/updatecart',isLoggedIn, cartController.updateCart)
 
 router.get('/logout', userController.logoutuser);
 
