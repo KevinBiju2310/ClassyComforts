@@ -1,284 +1,363 @@
 <%- include("../layouts/userHeader") %>
 
-    <style>
-        .icon-center {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: black;
-        }
-    </style>
-    <main class="main">
-        <div class="page-header breadcrumb-wrap">
-            <div class="container">
-                <div class="breadcrumb">
-                    <a href="index.html" rel="nofollow">Home</a>
-                    <span></span> Shop
+<style>
+    /* Add your CSS styles here */
+    .icon-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: black;
+    }
+
+    .styled-select {
+        appearance: none;
+        -moz-appearance: none;
+        -webkit-appearance: none;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        color: #333;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 16px; /* Adjust font size as needed */
+        width: 100%; /* Make the dropdown full width */
+        max-width: 200px; /* Set maximum width to prevent it from taking too much space */
+    }
+
+    .styled-select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+</style>
+<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html" rel="nofollow">Home</a>
+                <span></span> Shop
+            </div>
+        </div>
+    </div>
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row flex-row-reverse">
+                <div class="col-lg-9">
+                    <div class="shop-product-fillter">
+                        <div class="totall-product">
+                            <p> We found <strong class="text-brand">688</strong> items for you!</p>
+                        </div>
+                        <div class="sort-by-product-area">
+                            <div class="sort-by-cover">
+                                <div class="sort-by-product-wrap">
+                                    <div class="sort-by">
+                                        <span><i class="fi-rs-apps-sort"></i>Sort by:</span>
+                                    </div>
+                                    <div class="sort-by-dropdown-wrap">
+                                        <select id="sortByDropdown" class="styled-select">
+                                            <option value="featured" selected>Featured</option>
+                                            <option value="lowToHigh">Price: Low to High</option>
+                                            <option value="highToLow">Price: High to Low</option>
+                                            <option value="releaseDate">Release Date</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row product-grid-3" id="productGrid">
+                        <% products.forEach(product=>{ %>
+                        <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+                            <div class="product-cart-wrap mb-30">
+                                <div class="product-img-action-wrap">
+                                    <div class="product-img product-img-zoom">
+                                        <a href="/user/singleproduct/<%= product.id %>">
+                                            <img class="default-img"
+                                                src="/uploads/<%= product.productImages[0] %>" alt="">
+                                            <img class="hover-img"
+                                                src="/uploads/<%= product.productImages[0] %>" alt="">
+                                        </a>
+                                    </div>
+                                    <div class="product-action-1">
+                                        <a aria-label="Quick view" class="action-btn hover-up"
+                                            data-bs-toggle="modal" data-bs-target="#quickViewModal">
+                                            <i class="fi-rs-search"></i></a>
+                                        <a aria-label="Add To Wishlist" class="action-btn hover-up"
+                                            href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                        <a aria-label="Compare" class="action-btn hover-up"
+                                            href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
+                                    </div>
+                                    <div class="product-badges product-badges-position product-badges-mrg">
+                                        <span class="hot">Hot</span>
+                                    </div>
+                                </div>
+                                <div class="product-content-wrap">
+                                    <div class="product-category">
+                                        <a href="/user/singleproduct">
+                                            <%= product.category %>
+                                        </a>
+                                    </div>
+                                    <h2><a href="/user/singleproduct">
+                                            <%= product.productname %>
+                                        </a></h2>
+                                    <div class="rating-result" title="90%">
+                                        <span>
+                                            <span>90%</span>
+                                        </span>
+                                    </div>
+                                    <div class="product-price">
+                                        <span>$<%= product.price %></span>
+                                        <span class="old-price">$245.8</span>
+                                    </div>
+                                    <div class="product-action-1 show">
+                                        <form action="/user/cart" method="POST">
+                                            <input type="hidden" name="productId" value="<%= product.id %>">
+                                            <button type="submit" aria-label="Add To Cart"
+                                                class="action-btn hover-up">
+                                                <i class="fi-rs-shopping-bag-add icon-center pb-10"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% }) %>
+                    </div>
+                    <!--pagination-->
+                    <div class="pagination">
+                        <!-- Previous page button -->
+                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+
+                        <% for(let i=1; i <=totalPages; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>">
+                                <%= i %>
+                            </a>
+                        </li>
+                        <% } %>
+
+                        <!-- Next page button -->
+                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </div>
+                </div>
+                <div class="col-lg-3 primary-sidebar sticky-sidebar">
+                    <!--Filter by Category-->
+                    <div class="widget-category mb-30">
+                        <h5 class="section-title style-1 mb-30 wow fadeIn animated">Category</h5>
+                        <ul class="categories">
+                            <li><a href="/user/shop">All products</a></li>
+                            <% category.forEach(category=> { %>
+                            <li><a href="/user/shop?category=<%= category.name %>">
+                                    <%= category.name %>
+                                </a></li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                    <!-- Fillter By Price -->
+                    <div class="sidebar-widget price_range range mb-30">
+                        <div class="widget-header position-relative mb-20 pb-10">
+                            <h5 class="widget-title mb-10">Fill by price</h5>
+                            <div class="bt-1 border-color-1"></div>
+                        </div>
+                        <div class="price-filter">
+                            <div class="price-filter-inner">
+                                <div id="slider-range"></div>
+                                <div class="price_slider_amount">
+                                    <div class="label-input">
+                                        <span>Range:</span><input type="text" id="amount" name="price"
+                                            placeholder="Add Your Price" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group">
+                            <div class="list-group-item mb-10 mt-10">
+                                <label class="fw-900">Color</label>
+                                <div class="custome-checkbox">
+                                    <input class="form-check-input" type="checkbox" name="checkbox"
+                                        id="exampleCheckbox1" value="">
+                                    <label class="form-check-label" for="exampleCheckbox1"><span>Red
+                                            (56)</span></label>
+                                    <br>
+                                    <input class="form-check-input" type="checkbox" name="checkbox"
+                                        id="exampleCheckbox2" value="">
+                                    <label class="form-check-label" for="exampleCheckbox2"><span>Green
+                                            (78)</span></label>
+                                    <br>
+                                    <input class="form-check-input" type="checkbox" name="checkbox"
+                                        id="exampleCheckbox3" value="">
+                                    <label class="form-check-label" for="exampleCheckbox3"><span>Blue
+                                            (54)</span></label>
+                                </div>
+                                <label class="fw-900 mt-15">Item Condition</label>
+                                <div class="custome-checkbox">
+                                    <input class="form-check-input" type="checkbox" name="checkbox"
+                                        id="exampleCheckbox11" value="">
+                                    <label class="form-check-label" for="exampleCheckbox11"><span>New
+                                            (1506)</span></label>
+                                    <br>
+                                    <input class="form-check-input" type="checkbox" name="checkbox"
+                                        id="exampleCheckbox21" value="">
+                                    <label class="form-check-label" for="exampleCheckbox21"><span>Refurbished
+                                            (27)</span></label>
+                                    <br>
+                                    <input class="form-check-input" type="checkbox" name="checkbox"
+                                        id="exampleCheckbox31" value="">
+                                    <label class="form-check-label" for="exampleCheckbox31"><span>Used
+                                            (45)</span></label>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="shop-grid-right.html" class="btn btn-sm btn-default"><i
+                                class="fi-rs-filter mr-5"></i> Filter</a>
+                    </div>
+                    <!-- Product sidebar Widget -->
+                    <div class="sidebar-widget product-sidebar  mb-30 p-30 bg-grey border-radius-10">
+                        <div class="widget-header position-relative mb-20 pb-10">
+                            <h5 class="widget-title mb-10">New products</h5>
+                            <div class="bt-1 border-color-1"></div>
+                        </div>
+                        <div class="single-post clearfix">
+                            <div class="image">
+                                <img src="/assets/imgs/shop/thumbnail-3.jpg" alt="#">
+                            </div>
+                            <div class="content pt-10">
+                                <h5><a href="shop-product-detail.html">Chen Cardigan</a></h5>
+                                <p class="price mb-0 mt-5">$99.50</p>
+                                <div class="product-rate">
+                                    <div class="product-rating" style="width:90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="banner-img wow fadeIn mb-45 animated d-lg-block d-none">
+                        <img src="/assets/imgs/banner/banner-11.jpg" alt="">
+                        <div class="banner-text">
+                            <span>Women Zone</span>
+                            <h4>Save 17% on <br>Office Dress</h4>
+                            <a href="shop-grid-right.html">Shop Now <i class="fi-rs-arrow-right"></i></a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <section class="mt-50 mb-50">
-            <div class="container">
-                <div class="row flex-row-reverse">
-                    <div class="col-lg-9">
-                        <div class="shop-product-fillter">
-                            <div class="totall-product">
-                                <p> We found <strong class="text-brand">688</strong> items for you!</p>
-                            </div>
-                            <div class="sort-by-product-area">
-                                <div class="sort-by-cover mr-10">
-                                    <div class="sort-by-product-wrap">
-                                        <div class="sort-by">
-                                            <span><i class="fi-rs-apps"></i>Show:</span>
-                                        </div>
-                                        <div class="sort-by-dropdown-wrap">
-                                            <span> 50 <i class="fi-rs-angle-small-down"></i></span>
-                                        </div>
-                                    </div>
-                                    <div class="sort-by-dropdown">
-                                        <ul>
-                                            <li><a class="active" href="#">50</a></li>
-                                            <li><a href="#">100</a></li>
-                                            <li><a href="#">150</a></li>
-                                            <li><a href="#">200</a></li>
-                                            <li><a href="#">All</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="sort-by-cover">
-                                    <div class="sort-by-product-wrap">
-                                        <div class="sort-by">
-                                            <span><i class="fi-rs-apps-sort"></i>Sort by:</span>
-                                        </div>
-                                        <div class="sort-by-dropdown-wrap">
-                                            <span> Featured <i class="fi-rs-angle-small-down"></i></span>
-                                        </div>
-                                    </div>
-                                    <div class="sort-by-dropdown">
-                                        <ul>
-                                            <li><a class="active" href="#">Featured</a></li>
-                                            <li><a href="#">Price: Low to High</a></li>
-                                            <li><a href="#">Price: High to Low</a></li>
-                                            <li><a href="#">Release Date</a></li>
-                                            <li><a href="#">Avg. Rating</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row product-grid-3">
-                            <% products.forEach(product=>{ %>
-                                <div class="col-lg-4 col-md-4 col-12 col-sm-6">
-                                    <div class="product-cart-wrap mb-30">
-                                        <div class="product-img-action-wrap">
-                                            <div class="product-img product-img-zoom">
-                                                <a href="/user/singleproduct/<%= product.id %>">
-                                                    <img class="default-img"
-                                                        src="/uploads/<%= product.productImages[0] %>" alt="">
-                                                    <img class="hover-img"
-                                                        src="/uploads/<%= product.productImages[0] %>" alt="">
-                                                </a>
-                                            </div>
-                                            <div class="product-action-1">
-                                                <a aria-label="Quick view" class="action-btn hover-up"
-                                                    data-bs-toggle="modal" data-bs-target="#quickViewModal">
-                                                    <i class="fi-rs-search"></i></a>
-                                                <a aria-label="Add To Wishlist" class="action-btn hover-up"
-                                                    href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
-                                                <a aria-label="Compare" class="action-btn hover-up"
-                                                    href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
-                                            </div>
-                                            <div class="product-badges product-badges-position product-badges-mrg">
-                                                <span class="hot">Hot</span>
-                                            </div>
-                                        </div>
-                                        <div class="product-content-wrap">
-                                            <div class="product-category">
-                                                <a href="/user/singleproduct">
-                                                    <%= product.category %>
-                                                </a>
-                                            </div>
-                                            <h2><a href="/user/singleproduct">
-                                                    <%= product.productname %>
-                                                </a></h2>
-                                            <div class="rating-result" title="90%">
-                                                <span>
-                                                    <span>90%</span>
-                                                </span>
-                                            </div>
-                                            <div class="product-price">
-                                                <span>$<%= product.price %></span>
-                                                <span class="old-price">$245.8</span>
-                                            </div>
-                                            <div class="product-action-1 show">
-                                                <form action="/user/cart" method="POST">
-                                                    <input type="hidden" name="productId" value="<%= product.id %>">
-                                                    <button type="submit" aria-label="Add To Cart"
-                                                        class="action-btn hover-up">
-                                                        <i class="fi-rs-shopping-bag-add icon-center pb-10"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <% }) %>
-                        </div>
-                        <!--pagination-->
-                        <div class="pagination">
-                            <!-- Previous page button -->
-                            <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-                                <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
+    </section>
+</main>
+<script>
+    function addToCart(productId) {
+        fetch('/user/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                productId: productId,
+                quantity: 1,
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to add product to cart');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Redirect to the cart page after adding the product to the cart
+                window.location.href = '/user/cart';
+            })
+            .catch(error => {
+                console.error('Error adding product to cart:', error);
+            });
+    }
 
-                            <% for(let i=1; i <=totalPages; i++) { %>
-                                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                    <a class="page-link" href="?page=<%= i %>">
-                                        <%= i %>
-                                    </a>
-                                </li>
-                                <% } %>
+    document.getElementById('sortByDropdown').addEventListener('change', function () {
+        var selectedOption = this.value;
+        console.log(selectedOption)
+        fetch('/user/sort?sortBy=' + selectedOption)
+            .then(response => response.json())
+            .then(data => {
+                // Update product display section with sorted data
+                renderProducts(data);
+            })
+            .catch(error => console.error('Error:', error));
+    });
 
-                                    <!-- Next page button -->
-                                    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                                        <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
+    const renderProducts = (products) => {
+        const productGrid = document.getElementById('productGrid');
+        // Clear previous products
+        productGrid.innerHTML = '';
+
+        products.forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.classList.add('col-lg-4', 'col-md-4', 'col-12', 'col-sm-6');
+
+            // Assuming product properties such as name, price, and image are accessible from product object
+            productCard.innerHTML = `
+                <div class="product-cart-wrap mb-30">
+                    <div class="product-img-action-wrap">
+                        <div class="product-img product-img-zoom">
+                            <a href="/user/singleproduct/${product.id}">
+                                <img class="default-img" src="/uploads/${product.productImages[0]}" alt="">
+                                <img class="hover-img" src="/uploads/${product.productImages[0]}" alt="">
+                            </a>
+                        </div>
+                        <div class="product-action-1">
+                            <a aria-label="Quick view" class="action-btn hover-up"
+                                data-bs-toggle="modal" data-bs-target="#quickViewModal">
+                                <i class="fi-rs-search"></i></a>
+                            <a aria-label="Add To Wishlist" class="action-btn hover-up"
+                                href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                            <a aria-label="Compare" class="action-btn hover-up"
+                                href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
+                        </div>
+                        <div class="product-badges product-badges-position product-badges-mrg">
+                            <span class="hot">Hot</span>
                         </div>
                     </div>
-                    <div class="col-lg-3 primary-sidebar sticky-sidebar">
-                        <!--Filter by Category-->
-                        <div class="widget-category mb-30">
-                            <h5 class="section-title style-1 mb-30 wow fadeIn animated">Category</h5>
-                            <ul class="categories">
-                                <li><a href="/user/shop">All products</a></li>
-                                <% category.forEach(category=> { %>
-                                    <li><a href="/user/shop?category=<%= category.name %>">
-                                            <%= category.name %>
-                                        </a></li>
-                                    <% }); %>
-                            </ul>
+                    <div class="product-content-wrap">
+                        <div class="product-category">
+                            <a href="/user/singleproduct">
+                                ${product.category}
+                            </a>
                         </div>
-                        <!-- Fillter By Price -->
-                        <div class="sidebar-widget price_range range mb-30">
-                            <div class="widget-header position-relative mb-20 pb-10">
-                                <h5 class="widget-title mb-10">Fill by price</h5>
-                                <div class="bt-1 border-color-1"></div>
-                            </div>
-                            <div class="price-filter">
-                                <div class="price-filter-inner">
-                                    <div id="slider-range"></div>
-                                    <div class="price_slider_amount">
-                                        <div class="label-input">
-                                            <span>Range:</span><input type="text" id="amount" name="price"
-                                                placeholder="Add Your Price" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="list-group">
-                                <div class="list-group-item mb-10 mt-10">
-                                    <label class="fw-900">Color</label>
-                                    <div class="custome-checkbox">
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox1" value="">
-                                        <label class="form-check-label" for="exampleCheckbox1"><span>Red
-                                                (56)</span></label>
-                                        <br>
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox2" value="">
-                                        <label class="form-check-label" for="exampleCheckbox2"><span>Green
-                                                (78)</span></label>
-                                        <br>
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox3" value="">
-                                        <label class="form-check-label" for="exampleCheckbox3"><span>Blue
-                                                (54)</span></label>
-                                    </div>
-                                    <label class="fw-900 mt-15">Item Condition</label>
-                                    <div class="custome-checkbox">
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox11" value="">
-                                        <label class="form-check-label" for="exampleCheckbox11"><span>New
-                                                (1506)</span></label>
-                                        <br>
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox21" value="">
-                                        <label class="form-check-label" for="exampleCheckbox21"><span>Refurbished
-                                                (27)</span></label>
-                                        <br>
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="exampleCheckbox31" value="">
-                                        <label class="form-check-label" for="exampleCheckbox31"><span>Used
-                                                (45)</span></label>
-                                    </div>
-                                </div>
-                            </div>
-                            <a href="shop-grid-right.html" class="btn btn-sm btn-default"><i
-                                    class="fi-rs-filter mr-5"></i> Filter</a>
+                        <h2><a href="/user/singleproduct">
+                                ${product.productname}
+                            </a></h2>
+                        <div class="rating-result" title="90%">
+                            <span>
+                                <span>90%</span>
+                            </span>
                         </div>
-                        <!-- Product sidebar Widget -->
-                        <div class="sidebar-widget product-sidebar  mb-30 p-30 bg-grey border-radius-10">
-                            <div class="widget-header position-relative mb-20 pb-10">
-                                <h5 class="widget-title mb-10">New products</h5>
-                                <div class="bt-1 border-color-1"></div>
-                            </div>
-                            <div class="single-post clearfix">
-                                <div class="image">
-                                    <img src="/assets/imgs/shop/thumbnail-3.jpg" alt="#">
-                                </div>
-                                <div class="content pt-10">
-                                    <h5><a href="shop-product-detail.html">Chen Cardigan</a></h5>
-                                    <p class="price mb-0 mt-5">$99.50</p>
-                                    <div class="product-rate">
-                                        <div class="product-rating" style="width:90%"></div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="product-price">
+                            <span>$${product.price}</span>
+                            <span class="old-price">$245.8</span>
                         </div>
-                        <div class="banner-img wow fadeIn mb-45 animated d-lg-block d-none">
-                            <img src="/assets/imgs/banner/banner-11.jpg" alt="">
-                            <div class="banner-text">
-                                <span>Women Zone</span>
-                                <h4>Save 17% on <br>Office Dress</h4>
-                                <a href="shop-grid-right.html">Shop Now <i class="fi-rs-arrow-right"></i></a>
-                            </div>
+                        <div class="product-action-1 show">
+                            <form action="/user/cart" method="POST">
+                                <input type="hidden" name="productId" value="${product.id}">
+                                <button type="submit" aria-label="Add To Cart"
+                                    class="action-btn hover-up">
+                                    <i class="fi-rs-shopping-bag-add icon-center pb-10"></i>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-    </main>
-    <script>
-        function addToCart(productId) {
-            fetch('/user/cart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    productId: productId,
-                    quantity: 1,
-                })
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to add product to cart');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Redirect to the cart page after adding the product to the cart
-                    window.location.href = '/user/cart';
-                })
-                .catch(error => {
-                    console.error('Error adding product to cart:', error);
-                });
-        }
-    </script>
+            `;
+
+            productGrid.appendChild(productCard);
+        });
+    };
+</script>
 
 
-    <%- include("../layouts/userFooter") %>
+<%- include("../layouts/userFooter") %>

@@ -23,6 +23,9 @@ exports.cartGet = async (req, res) => {
     }
 };
 
+
+
+
 exports.cartPost = async (req, res) => {
     try {
         const { productId } = req.body;
@@ -67,47 +70,60 @@ exports.cartPost = async (req, res) => {
 exports.updateCart = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
-        const userId = req.session.user._id;
+        const userId = req.session.user._id; // Assuming you're using sessions to store user information
 
-        console.log("Updating cart for user ID:", userId);
-        console.log("Product ID:", productId);
-        console.log("Quantity:", quantity);
-
-        // Find the user
-        const user = await User.findById(userId);
+        // Find the user by ID
+        let user = await User.findById(userId);
         if (!user) {
-            console.error("User not found");
-            return res.status(404).send('User not found');
+            return res.status(404).json({ error: 'User not found' });
         }
 
-        // Find the product
+        // Find the product by ID
         const product = await Product.findById(productId);
         if (!product) {
-            console.error("Product not found");
-            return res.status(404).send('Product not found');
+            return res.status(404).json({ error: 'Product not found' });
         }
 
-        // Find the cart item corresponding to the provided productId
-        const cartItem = user.cart.find(item => String(item.product._id) === String(productId));
+        // Find the index of the product in the user's cart
+        const existingCartItemIndex = user.cart.findIndex(item => String(item.product._id) === String(productId));
 
-        if (!cartItem) {
-            console.error("Product not found in cart");
-            return res.status(404).send('Product not found in cart');
+        if (existingCartItemIndex !== -1) {
+            // If the product already exists in the cart, update its quantity and subtotal
+            if (quantity === 0) {
+                // If the quantity is zero, remove the product from the cart
+                user.cart.splice(existingCartItemIndex, 1);
+            } else {
+                // Update the quantity and subtotal
+                user.cart[existingCartItemIndex].quantity = quantity;
+                user.cart[existingCartItemIndex].subTotal = product.price * quantity;
+            }
+
+            // Save the updated user object to the database
+            await user.save();
+        } else {
+            // If the product does not exist in the cart, add it with the given quantity
+            user.cart.push({
+                product: product,
+                quantity: quantity,
+                subTotal: product.price * quantity
+            });
+
+            // Save the updated user object to the database
+            user = await user.save();
         }
 
-        // Update quantity
-        cartItem.quantity = Math.min(Math.max(parseInt(quantity), 1), 10); // Limit quantity to 1-10
-        cartItem.subTotal = cartItem.quantity * product.price; // Update subtotal
+        // Calculate the total price of all items in the cart
+        const totalPrice = user.cart.reduce((total, item) => total + item.subTotal, 0);
 
-        console.log("Updated cart item:", cartItem);
+        // Update the totalPrice field in the user object
+        user.totalPrice = totalPrice;
 
         // Save the updated user object to the database
-        await user.save();
+        user = await user.save();
 
-        // Send the updated cart item as a response
-        res.json({ cartItem });
+        res.json({ success: true, message: 'Cart updated successfully' });
     } catch (error) {
-        console.error("Error updating cart:", error);
-        res.status(500).send('Internal Server Error');
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 };

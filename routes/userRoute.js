@@ -34,9 +34,10 @@ router.post('/address', userProfileController.addressPost);
 router.put('/update-address', userProfileController.updateaddressPut);
 
 
-router.get('/cart', isLoggedIn, cartController.cartGet)
-router.post('/cart', isLoggedIn, cartController.cartPost)
-router.post('/updatecart',isLoggedIn, cartController.updateCart)
+router.get('/cart', isLoggedIn, cartController.cartGet);
+router.post('/cart', isLoggedIn, cartController.cartPost);
+router.post('/updatecart',isLoggedIn, cartController.updateCart);
+router.get('/sort',productController.sortproductGet)
 
 router.get('/logout', userController.logoutuser);
 

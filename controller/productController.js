@@ -224,4 +224,22 @@ exports.singleproductGet = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 }
-   
+
+
+exports.sortproductGet = async (req, res) => {
+    console.log("Heelooooss ")
+    const sortBy = req.query.sortBy;
+    let sortOption = {};
+    console.log(sortBy)
+    if (sortBy === 'lowToHigh') {
+        sortOption = { price: 1 }
+    } else if (sortBy === 'highToLow') {
+        sortOption = { price: -1 }
+    }
+    try {
+        const sortedProducts = await Product.find({}).sort(sortOption);
+        res.json(sortedProducts)
+    } catch (error) {
+        console.log("Error", error);
+    }
+}

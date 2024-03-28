@@ -118,6 +118,112 @@
 
     <script>
 
+        document.getElementById("productForm").addEventListener("submit", function (event) {
+            var productName = document.getElementById("productname").value.trim();
+            var description = document.getElementById("description").value.trim();
+            var category = document.getElementById("category").value.trim();
+            var regularPrice = document.getElementById("regularPrice").value.trim();
+            var remainingProducts = document.getElementById("remainingProducts").value.trim();
+            var productImages = document.getElementById("productGallery").files;
+            var length = document.getElementById("length").value.trim();
+            var width = document.getElementById("width").value.trim();
+            var height = document.getElementById("height").value.trim();
+            var material = document.getElementById("material").value.trim();
+            var shape = document.getElementById("shape").value.trim();
+            var weight = document.getElementById("weight").value.trim();
+
+            var isValid = true;
+
+            if (productName === "") {
+                document.getElementById("productNameError").innerText = "Please enter product name";
+                isValid = false;
+            } else {
+                document.getElementById("productNameError").innerText = "";
+            }
+
+            if (description === "") {
+                document.getElementById("descriptionError").innerText = "Please enter description";
+                isValid = false;
+            } else {
+                document.getElementById("descriptionError").innerText = "";
+            }
+
+            if (category === "") {
+                document.getElementById("categoryError").innerText = "Please select a category";
+                isValid = false;
+            } else {
+                document.getElementById("categoryError").innerText = "";
+            }
+
+            if (regularPrice === "") {
+                document.getElementById("priceError").innerText = "Please enter regular price";
+                isValid = false;
+            } else {
+                document.getElementById("priceError").innerText = "";
+            }
+
+            if (remainingProducts === "") {
+                document.getElementById("quantityError").innerText = "Please enter remaining products";
+                isValid = false;
+            } else {
+                document.getElementById("quantityError").innerText = "";
+            }
+
+            if (productImages.length === 0) {
+                document.getElementById("imageError").innerText = "Please upload at least one image";
+                isValid = false;
+            } else {
+                document.getElementById("imageError").innerText = "";
+            }
+
+            if (isNaN(length) || length === "") {
+                document.getElementById("lengthError").innerText = "Please enter a valid length";
+                isValid = false;
+            } else {
+                document.getElementById("lengthError").innerText = "";
+            }
+
+            if (isNaN(width) || width === "") {
+                document.getElementById("widthError").innerText = "Please enter a valid width";
+                isValid = false;
+            } else {
+                document.getElementById("widthError").innerText = "";
+            }
+
+            if (isNaN(height) || height === "") {
+                document.getElementById("heightError").innerText = "Please enter a valid height";
+                isValid = false;
+            } else {
+                document.getElementById("heightError").innerText = "";
+            }
+
+            if (material === "") {
+                document.getElementById("materialError").innerText = "Please enter the material";
+                isValid = false;
+            } else {
+                document.getElementById("materialError").innerText = "";
+            }
+
+            if (shape === "") {
+                document.getElementById("shapeError").innerText = "Please enter the shape";
+                isValid = false;
+            } else {
+                document.getElementById("shapeError").innerText = "";
+            }
+
+            if (isNaN(weight) || weight === "") {
+                document.getElementById("weightError").innerText = "Please enter a valid weight";
+                isValid = false;
+            } else {
+                document.getElementById("weightError").innerText = "";
+            }
+
+            if (!isValid) {
+                event.preventDefault(); // Prevent form submission if validation fails
+            }
+        });
+
+
         document.getElementById('productGallery').addEventListener('change', function (event) {
             const imagePreviewsContainer = document.getElementById('imagePreviewsContainer');
             imagePreviewsContainer.innerHTML = ''; // Clear existing previews
@@ -137,114 +243,6 @@
                     reader.readAsDataURL(files[i]);
                 }
             }
-        });
-
-
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById("productForm").addEventListener("submit", function (event) {
-                var productName = document.getElementById("productname").value.trim();
-                var description = document.getElementById("description").value.trim();
-                var category = document.getElementById("category").value.trim();
-                var regularPrice = document.getElementById("regularPrice").value.trim();
-                var remainingProducts = document.getElementById("remainingProducts").value.trim();
-                var productImages = document.getElementById("productGallery").files;
-                var length = document.getElementById("length").value.trim();
-                var width = document.getElementById("width").value.trim();
-                var height = document.getElementById("height").value.trim();
-                var material = document.getElementById("material").value.trim();
-                var shape = document.getElementById("shape").value.trim();
-                var weight = document.getElementById("weight").value.trim();
-
-                var isValid = true;
-
-                if (productName === "") {
-                    document.getElementById("productNameError").innerText = "Please enter product name";
-                    isValid = false;
-                } else {
-                    document.getElementById("productNameError").innerText = "";
-                }
-
-                if (description === "") {
-                    document.getElementById("descriptionError").innerText = "Please enter description";
-                    isValid = false;
-                } else {
-                    document.getElementById("descriptionError").innerText = "";
-                }
-
-                if (category === "") {
-                    document.getElementById("categoryError").innerText = "Please select a category";
-                    isValid = false;
-                } else {
-                    document.getElementById("categoryError").innerText = "";
-                }
-
-                if (regularPrice === "") {
-                    document.getElementById("priceError").innerText = "Please enter regular price";
-                    isValid = false;
-                } else {
-                    document.getElementById("priceError").innerText = "";
-                }
-
-                if (remainingProducts === "") {
-                    document.getElementById("quantityError").innerText = "Please enter remaining products";
-                    isValid = false;
-                } else {
-                    document.getElementById("quantityError").innerText = "";
-                }
-
-                if (productImages.length === 0) {
-                    document.getElementById("imageError").innerText = "Please upload at least one image";
-                    isValid = false;
-                } else {
-                    document.getElementById("imageError").innerText = "";
-                }
-
-                if (isNaN(length) || length === "") {
-                    document.getElementById("lengthError").innerText = "Please enter a valid length";
-                    isValid = false;
-                } else {
-                    document.getElementById("lengthError").innerText = "";
-                }
-
-                if (isNaN(width) || width === "") {
-                    document.getElementById("widthError").innerText = "Please enter a valid width";
-                    isValid = false;
-                } else {
-                    document.getElementById("widthError").innerText = "";
-                }
-
-                if (isNaN(height) || height === "") {
-                    document.getElementById("heightError").innerText = "Please enter a valid height";
-                    isValid = false;
-                } else {
-                    document.getElementById("heightError").innerText = "";
-                }
-
-                if (material === "") {
-                    document.getElementById("materialError").innerText = "Please enter the material";
-                    isValid = false;
-                } else {
-                    document.getElementById("materialError").innerText = "";
-                }
-
-                if (shape === "") {
-                    document.getElementById("shapeError").innerText = "Please enter the shape";
-                    isValid = false;
-                } else {
-                    document.getElementById("shapeError").innerText = "";
-                }
-
-                if (isNaN(weight) || weight === "") {
-                    document.getElementById("weightError").innerText = "Please enter a valid weight";
-                    isValid = false;
-                } else {
-                    document.getElementById("weightError").innerText = "";
-                }
-
-                if (!isValid) {
-                    event.preventDefault(); // Prevent form submission if validation fails
-                }
-            });
         });
 
 
