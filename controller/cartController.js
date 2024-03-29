@@ -38,7 +38,6 @@ exports.cartPost = async (req, res) => {
             return res.status(404).send('User not found');
         }
 
-        // Check if the product already exists in the cart
         const existingCartItemIndex = user.cart.findIndex(item => String(item.product._id) === String(productId));
         console.log(existingCartItemIndex)
         if (existingCartItemIndex !== -1) {
@@ -64,52 +63,60 @@ exports.cartPost = async (req, res) => {
 
 
 
-
 exports.updateCart = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
-        const userId = req.session.user._id; // Assuming you're using sessions to store user information
+        const userId = req.session.user._id;
 
-        let user = await User.findById(userId);
+        console.log('Received productId:', productId);
+        console.log('Received quantity:', quantity);
+        console.log('Extracted userId:', userId);
+
+        let user = await User.findById(userId).populate('cart.product');
+        console.log('User:', user);
         if (!user) {
+            console.log('User not found');
             return res.status(404).json({ error: 'User not found' });
         }
-
+        
         const product = await Product.findById(productId);
+        console.log('Product:', product);
         if (!product) {
+            console.log('Product not found');
             return res.status(404).json({ error: 'Product not found' });
         }
 
         const existingCartItemIndex = user.cart.findIndex(item => String(item.product._id) === String(productId));
-
+        console.log('Existing cart item index:', existingCartItemIndex);
         if (existingCartItemIndex !== -1) {
             if (quantity === 0) {
+                console.log('Removing item from cart');
                 user.cart.splice(existingCartItemIndex, 1);
             } else {
+                console.log('Updating quantity and subtotal');
                 user.cart[existingCartItemIndex].quantity = quantity;
                 user.cart[existingCartItemIndex].subTotal = product.price * quantity;
             }
-
-            await user.save();
         } else {
-            // If the product does not exist in the cart, add it with the given quantity
-            user.cart.push({
-                product: product,
-                quantity: quantity,
-                subTotal: product.price * quantity
-            });
-
-            // Save the updated user object to the database
-            user = await user.save();
+            if (quantity > 0) {
+                console.log('Adding new item to cart');
+                user.cart.push({
+                    product: product,
+                    quantity: quantity,
+                    subTotal: product.price * quantity
+                });
+            }
         }
+                                     
+        await user.save();
 
         const totalPrice = user.cart.reduce((total, item) => total + item.subTotal, 0);
-
+        console.log('Total price:', totalPrice);
         user.totalPrice = totalPrice;
+        await user.save();
 
-        user = await user.save();
-
-        res.json({ success: true, message: 'Cart updated successfully' });
+        console.log('Cart updated successfully');
+        res.status(201).json({ success: true, message: 'Cart updated successfully' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
