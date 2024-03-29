@@ -17,7 +17,7 @@ router.get('/auth/google', userController.googleSignIn);
 router.get('/auth/google/callback', userController.googleSignInCallback);
 router.get('/auth/google/failure', userController.googleSignInFailure);
 router.get('/auth/protected', userController.protectedRoute);
-router.use('/auth/logout', userController.logout);
+router.use('/auth/logout', userController.logout); 
 
 router.get('/verifyotp', userController.verifyOTPGet)
 router.post('/verifyotp', userController.verifyOTP)
@@ -33,11 +33,10 @@ router.get('/accountdetails', isLoggedIn, userProfileController.profileGet);
 router.post('/address', userProfileController.addressPost);
 router.put('/update-address', userProfileController.updateaddressPut);
 
-
 router.get('/cart', isLoggedIn, cartController.cartGet);
 router.post('/cart', isLoggedIn, cartController.cartPost);
-router.post('/updatecart',isLoggedIn, cartController.updateCart);
-router.get('/sort',productController.sortproductGet)
+router.post('/updatecart', isLoggedIn, cartController.updateCart);
+router.get('/sort', productController.sortproductGet);
 
 router.get('/logout', userController.logoutuser);
 
