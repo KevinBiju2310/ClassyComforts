@@ -115,8 +115,7 @@ exports.updateCart = async (req, res) => {
         user.totalPrice = totalPrice;
         await user.save();
 
-        console.log('Cart updated successfully');
-        res.status(201).json({ success: true, message: 'Cart updated successfully' });
+        res.status(200).send('cart updated successfully');
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
