@@ -60,8 +60,9 @@
                                                         <% if (item.product && item.product.productImages &&
                                                             item.product.productImages.length> 0) { %>
                                                             <!-- Display product image if available -->
-                                                            <img src="/uploads/<%= item.product.productImages[0] %>"
-                                                                alt="<%= item.product.productname %>">
+                                                            <a href="/user/singleproduct/<%= item.product._id %>"><img
+                                                                    src="/uploads/<%= item.product.productImages[0] %>"
+                                                                    alt="<%= item.product.productname %>"></a>
                                                             <% } else { %>
                                                                 <!-- Placeholder image or default image -->
                                                                 <img src="/images/default-product-image.jpg"

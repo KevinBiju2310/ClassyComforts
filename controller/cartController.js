@@ -12,8 +12,6 @@ exports.cartGet = async (req, res) => {
         if (user.cart.length === 0) {
             return res.render('cart', { cart: [], isEmpty: true });
         }
-
-        // Render cart.ejs with the populated cart items
         res.render('cart', { cart: user.cart, isEmpty: false });
     } catch (error) {
         console.error(error);
@@ -41,9 +39,8 @@ exports.cartPost = async (req, res) => {
         const existingCartItemIndex = user.cart.findIndex(item => String(item.product._id) === String(productId));
         console.log(existingCartItemIndex)
         if (existingCartItemIndex !== -1) {
-            return res.send('Product already added to cart'); // Send response and exit function
+            return res.send('Product already added to cart'); 
         } else {
-            // If the product does not exist in the cart, add it with quantity 1
             user.cart.push({
                 product: product,
                 quantity: 1,
@@ -52,7 +49,7 @@ exports.cartPost = async (req, res) => {
         }
 
         await user.save();
-        res.redirect('/user/cart'); // Redirect to the cart page after adding the item
+        res.redirect('/user/cart'); 
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
