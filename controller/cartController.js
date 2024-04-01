@@ -1,120 +1,102 @@
-const User = require("../modal/userModal");
-const Product = require("../modal/productModel");
+const User = require('../modal/userModal');
+const Product = require('../modal/productModel');
+const Cart = require('../modal/cartModel');
 
-exports.cartGet = async (req, res) => {
+exports.cartPage = async (req, res) => {
     try {
         const userId = req.session.user._id;
-        const user = await User.findById(userId).populate('cart.product');
-        if (!user) {
-            return res.status(404).send('User not found');
-        }
-
-        if (user.cart.length === 0) {
-            return res.render('cart', { cart: [], isEmpty: true });
-        }
-        res.render('cart', { cart: user.cart, isEmpty: false });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-    }
-};
-
-
-
-
-exports.cartPost = async (req, res) => {
-    try {
-        const { productId } = req.body;
-        const userId = req.session.user._id;
-        const product = await Product.findById(productId);
-
-        if (!product) {
-            return res.status(404).send('Product not found');
-        }
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).send('User not found');
-        }
-
-        const existingCartItemIndex = user.cart.findIndex(item => String(item.product._id) === String(productId));
-        console.log(existingCartItemIndex)
-        if (existingCartItemIndex !== -1) {
-            return res.send('Product already added to cart'); 
+        const cart = await Cart.findOne({ userId }).populate('products.productId')
+        if (!cart || !cart.products || cart.products.length === 0) {
+            res.render('cart', { cart: { products: [], total: 0 } })
         } else {
-            user.cart.push({
-                product: product,
-                quantity: 1,
-                subTotal: product.price
-            });
+            res.render('cart', { cart: cart })
         }
-
-        await user.save();
-        res.redirect('/user/cart'); 
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
+        console.log('Error Occured : ', error);
+        res.status(501).send('Internet Server Error');
     }
-};
+}
 
+exports.addtoCart = async (req, res) => {
+    try {
+        const productId = req.body.productId;
+        const userId = req.session.user._id;
+
+        const product = await Product.findById(productId);
+        let cart = await Cart.findOne({ userId: userId });
+
+        const existingProductIndex = cart ? cart.products.findIndex(item => item.productId.equals(productId)) : -1;
+
+        if (existingProductIndex !== -1) {
+            return res.status(400).send('Product already in cart');
+        }
+        if (!cart) {
+            cart = new Cart({ userId });
+        }
+        cart.products.push({ productId: productId, quantity: 1 });
+
+        cart.total += product.price;
+        await cart.save();
+        res.redirect('/user/cart');
+    } catch (error) {
+        console.log("Error Occured : ", error);
+        res.status(500).send('Internet Server Error');
+    }
+}
 
 
 
 
 exports.updateCart = async (req, res) => {
     try {
-        const { productId, quantity } = req.body;
+        const { productId, quantityChange } = req.body;
         const userId = req.session.user._id;
 
-        console.log('Received productId:', productId);
-        console.log('Received quantity:', quantity);
-        console.log('Extracted userId:', userId);
-
-        let user = await User.findById(userId).populate('cart.product');
-        console.log('User:', user);
-        if (!user) {
-            console.log('User not found');
-            return res.status(404).json({ error: 'User not found' });
-        }
-        
         const product = await Product.findById(productId);
-        console.log('Product:', product);
-        if (!product) {
-            console.log('Product not found');
-            return res.status(404).json({ error: 'Product not found' });
-        }
+        let cart = await Cart.findOne({ userId: userId }).populate('products.productId');
 
-        const existingCartItemIndex = user.cart.findIndex(item => String(item.product._id) === String(productId));
-        console.log('Existing cart item index:', existingCartItemIndex);
-        if (existingCartItemIndex !== -1) {
-            if (quantity === 0) {
-                console.log('Removing item from cart');
-                user.cart.splice(existingCartItemIndex, 1);
-            } else {
-                console.log('Updating quantity and subtotal');
-                user.cart[existingCartItemIndex].quantity = quantity;
-                user.cart[existingCartItemIndex].subTotal = product.price * quantity;
+        const existingProductIndex = cart ? cart.products.findIndex(item => item.productId.equals(productId)) : -1;
+
+        if (existingProductIndex !== -1) {
+            // Update quantity
+            cart.products[existingProductIndex].quantity += quantityChange;
+
+            // Ensure quantity doesn't go below 1
+            if (cart.products[existingProductIndex].quantity < 1) {
+                cart.products[existingProductIndex].quantity = 1;
             }
+
+            // Calculate subtotal
+            const subtotal = cart.products[existingProductIndex].quantity * product.price;
+
+            // Update total using reduce
+            cart.total = cart.products.reduce((acc, item) => {
+                if (item.productId.equals(productId)) {
+                    return acc + subtotal;
+                } else {
+                    return acc + (item.quantity * item.productId.price);
+                }
+            }, 0);
+
+            // Save cart changes
+            await cart.save();
+
+            // Calculate cart subtotal and total
+            const cartSubtotal = cart.products.reduce((acc, item) => acc + (item.quantity * item.productId.price), 0);
+            const cartTotal = cartSubtotal; // Assuming no shipping cost for now
+
+            // Send updated data in the response
+            res.json({
+                quantity: cart.products[existingProductIndex].quantity,
+                subtotal: subtotal,
+                cartSubtotal: cartSubtotal,
+                cartTotal: cartTotal,
+            });
         } else {
-            if (quantity > 0) {
-                console.log('Adding new item to cart');
-                user.cart.push({
-                    product: product,
-                    quantity: quantity,
-                    subTotal: product.price * quantity
-                });
-            }
+            return res.status(400).send('Product not found in cart');
         }
-                                     
-        await user.save();
-
-        const totalPrice = user.cart.reduce((total, item) => total + item.subTotal, 0);
-        console.log('Total price:', totalPrice);
-        user.totalPrice = totalPrice;
-        await user.save();
-
-        res.status(200).send('cart updated successfully');
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.log('Error Occurred : ', error);
+        res.status(500).send('Internal Server Error');
     }
 };

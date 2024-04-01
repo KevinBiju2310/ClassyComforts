@@ -3,22 +3,28 @@
     <style>
         .detail-qty {
             display: flex;
+            justify-content: center;
             align-items: center;
-            /* Align items vertically */
         }
 
-        .minus-btn,
-        .plus-btn {
-            padding: 5px 10px;
-            font-size: 1rem;
-            background-color: #f0f0f0;
+        .qty-btn {
+            background: none;
             border: none;
             cursor: pointer;
         }
 
+        .qty-down {
+            color: red;
+            /* Change color for minus button */
+        }
+
+        .qty-up {
+            color: green;
+            /* Change color for plus button */
+        }
+
         .qty-val {
             margin: 0 10px;
-            /* Add some space between buttons and quantity */
         }
     </style>
     <main class="main">
@@ -36,74 +42,68 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <table class="table shopping-summery text-center clean">
-                                <thead>
-                                    <tr class="main-heading">
-                                        <th scope="col">Image</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Price</th>
-                                        <th scope="col">Quantity</th>
-                                        <th scope="col">Subtotal</th>
-                                        <th scope="col">Remove</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (cart.length===0) { %>
-                                        <!-- If cart is empty, display a message -->
-                                        <tr>
-                                            <td colspan="6">Your cart is empty</td>
+                            <% if (cart.products && cart.products.length> 0) { %>
+                                <table class="table shopping-summery text-center clean">
+                                    <thead>
+                                        <tr class="main-heading">
+                                            <th scope="col">Image</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Price</th>
+                                            <th scope="col">Quantity</th>
+                                            <th scope="col">Subtotal</th>
+                                            <th scope="col">Remove</th>
                                         </tr>
-                                        <% } else { %>
-                                            <% cart.forEach((item, index)=> { %>
-                                                <tr>
-                                                    <td class="image product-thumbnail">
-                                                        <% if (item.product && item.product.productImages &&
-                                                            item.product.productImages.length> 0) { %>
-                                                            <!-- Display product image if available -->
-                                                            <a href="/user/singleproduct/<%= item.product._id %>"><img
-                                                                    src="/uploads/<%= item.product.productImages[0] %>"
-                                                                    alt="<%= item.product.productname %>"></a>
-                                                            <% } else { %>
-                                                                <!-- Placeholder image or default image -->
-                                                                <img src="/images/default-product-image.jpg"
-                                                                    alt="Product Image">
-                                                                <% } %>
-                                                    </td>
-                                                    <td class="product-des product-name">
-                                                        <h5 class="product-name">
-                                                            <%= item.product.productname %>
-                                                        </h5>
-                                                    </td>
-                                                    <td class="price" data-title="Price">
-                                                        <!-- Display product price -->
-                                                        <span>$<%= item.product.price %></span>
-                                                    </td>
-                                                    <td class="text-center" data-title="Quantity">
-                                                        <!-- Quantity buttons -->
-                                                        <div class="detail-qty radius m-auto">
-                                                            <button class="minus-btn"
-                                                                data-productid="<%= item.product._id %>">-</button>
-                                                            <span class="qty-val">
-                                                                <%= item.quantity %>
-                                                            </span>
-                                                            <button class="plus-btn"
-                                                                data-productid="<%= item.product._id %>">+</button>
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-right subtotal" data-title="Subtotal"
-                                                        data-price="<%= item.product.price %>">
-                                                        <!-- Display subtotal -->
-                                                        <span>$<%= item.subTotal %></span>
-                                                    </td>
-                                                    <td class="action" data-title="Remove">
-                                                        <!-- Remove button -->
-                                                        <a href="#" class="text-muted"><i class="fi-rs-trash"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <% }); %>
-                                                    <% } %>
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        <% cart.products.forEach(product=> { %>
+                                            <tr>
+                                                <td class="image product-thumbnail">
+                                                    <img src="/uploads/<%= product.productId.productImages[0] %>"
+                                                        alt="<%= product.productId.productname %>">
+                                                </td>
+                                                <td class="product-des product-name">
+                                                    <h5 class="product-name"><a
+                                                            href="/user/singleproduct/<%= product.productId._id %>">
+                                                            <%= product.productId.productname %>
+                                                        </a></h5>
+                                                </td>
+                                                <td class="price" data-title="Price"><span>$<%=
+                                                            product.productId.price.toFixed(2) %></span></td>
+                                                <td class="text-center" data-title="Stock">
+                                                    <div
+                                                        class="detail-qty border radius m-auto d-flex align-items-center">
+                                                        <!-- Pass productId to updateQuantity function -->
+                                                        <button class="qty-btn qty-down"
+                                                            onclick="updateQuantity('<%= product.productId._id %>', -1)"><i
+                                                                class="fi-rs-minus"></i>
+                                                        </button>
+                                                        <span id="quantity-<%= product.productId._id %>"
+                                                            class="qty-val">
+                                                            <%= product.quantity %>
+                                                        </span>
+                                                        <button class="qty-btn qty-up"
+                                                            onclick="updateQuantity('<%= product.productId._id %>', 1)"><i
+                                                                class="fi-rs-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td class="text-right" data-title="Subtotal">
+                                                    <span id="subtotal-<%= product.productId._id %>">$<%=
+                                                            (product.productId.price * product.quantity).toFixed(2) %>
+                                                    </span>
+                                                </td>
+                                                <td class="action" data-title="Remove">
+                                                    <a href="#" class="text-muted"><i class="fi-rs-trash"></i></a>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                                <% } else { %>
+                                    <div class="empty-cart-message">
+                                        <p>Your cart is empty.</p>
+                                    </div>
+                                    <% } %>
                         </div>
                         <div class="cart-action text-end">
                             <a class="btn  mr-10 mb-sm-15" id="update-cart-btn"><i
@@ -148,7 +148,7 @@
                                                 <tr>
                                                     <td class="cart_total_label">Cart Subtotal</td>
                                                     <td class="cart_total_amount"><span
-                                                            class="font-lg fw-900 text-brand">$<span
+                                                            class="font-lg fw-900 text-brand"><span
                                                                 id="cart-subtotal"></span></span></td>
                                                 </tr>
                                                 <tr>
@@ -159,7 +159,7 @@
                                                 <tr>
                                                     <td class="cart_total_label">Total</td>
                                                     <td class="cart_total_amount"><strong><span
-                                                                class="font-xl fw-900 text-brand">$<span
+                                                                class="font-xl fw-900 text-brand"><span
                                                                     id="cart-total"></span></span></strong>
                                                     </td>
                                                 </tr>
@@ -177,72 +177,45 @@
         </section>
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const minusBtns = document.querySelectorAll('.minus-btn');
-            const plusBtns = document.querySelectorAll('.plus-btn');
-            const qtyVals = document.querySelectorAll('.qty-val');
-            const subtotalVals = document.querySelectorAll('.subtotal');
+    <%- include("../layouts/userFooter") %>
 
-            // Add event listeners to all minus buttons 
-            minusBtns.forEach((btn, index) => {
-                btn.addEventListener('click', async function () {
-                    const productId = btn.dataset.productid;
-                    let newQuantity = parseInt(qtyVals[index].textContent) - 1;
-                    if (newQuantity < 1) return; // Quantity can't be less than 1
-                    qtyVals[index].textContent = newQuantity;
-
-                    // Update subtotal for this product
-                    const price = parseFloat(subtotalVals[index].dataset.price); // Get product price
-                    const newSubtotal = price * newQuantity;
-                    subtotalVals[index].textContent = '$' + newSubtotal.toFixed(2);
-
-                    await updateCart(productId, newQuantity);
-                });
-            });
-
-            // Add event listeners to all plus buttons
-            plusBtns.forEach((btn, index) => {
-                btn.addEventListener('click', async function () {
-                    const productId = btn.dataset.productid;
-                    let newQuantity = parseInt(qtyVals[index].textContent) + 1;
-                    if (newQuantity > 10) return; // Limit quantity to 10
-                    qtyVals[index].textContent = newQuantity;
-
-                    // Update subtotal for this product
-                    const price = parseFloat(subtotalVals[index].dataset.price); // Get product price
-                    const newSubtotal = price * newQuantity;
-                    subtotalVals[index].textContent = '$' + newSubtotal.toFixed(2);
-
-                    await updateCart(productId, newQuantity);
-                });
-            });
-
-            async function updateCart(productId, quantity) {
+        <script>
+            // Function to update quantity, subtotal, and total
+            async function updateQuantity(productId, quantityChange) {
                 try {
-                    const response = await fetch('/user/updatecart', {
+                    const response = await fetch('/user/update', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
                             productId: productId,
-                            quantity: quantity
+                            quantityChange: quantityChange
                         })
                     });
+
                     if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    } else {
-                        const data = await response.text();
-                        console.log('Response data:', data);
-                        console.log('cart updated successfully...')
+                        throw new Error('Failed to update cart');
                     }
 
+                    const responseData = await response.json();
+
+                    // Update quantity and subtotal in the UI
+                    const quantityElement = document.querySelector(`#quantity-${productId}`);
+                    const subtotalElement = document.querySelector(`#subtotal-${productId}`);
+                    const cartSubtotalElement = document.getElementById('cart-subtotal');
+                    const cartTotalElement = document.getElementById('cart-total');
+
+                    if (quantityElement && subtotalElement && cartSubtotalElement && cartTotalElement) {
+                        quantityElement.textContent = responseData.quantity;
+                        subtotalElement.textContent = `$${responseData.subtotal.toFixed(2)}`;
+
+                        // Update cart subtotal and total
+                        cartSubtotalElement.textContent = `$${responseData.cartSubtotal.toFixed(2)}`;
+                        cartTotalElement.textContent = `$${responseData.cartTotal.toFixed(2)}`;
+                    }
                 } catch (error) {
-                    console.error(error);
+                    console.error('Error updating cart:', error);
                 }
             }
-
-        });
-    </script>
-    <%- include("../layouts/userFooter") %>
+        </script>
