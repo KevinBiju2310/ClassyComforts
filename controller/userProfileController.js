@@ -1,58 +1,55 @@
 const Address = require('../modal/addressModel');
-const User = require('../modal/userModal')
-
 
 exports.profileGet = async (req, res) => {
     try {
         if (!req.session.user) {
-            return res.status(401).send('Please log in to view addresses');
+            // If the user is not logged in, redirect them to the login page or show an appropriate message
+            return res.redirect('/login'); // Redirect to the login page
         }
+
+        // Fetch the user's address data from the database
         const userId = req.session.user._id;
-        const addresses = await Address.find({ userId })
-        res.render('accountdetails', { addresses })
+        const addresses = await Address.find({ userId });
+
+        // Render the 'accountdetails' view and pass the address data to it
+        res.render('accountdetails', { addresses });
     } catch (error) {
-        console.log("Error Occured : ", error)
+        console.log("Error Occurred: ", error);
+        res.status(500).send('Error occurred while fetching user profile');
     }
 }
 
-
-
-exports.addressPost = async (req, res) => {
+exports.addAddress = async (req, res) => {
     try {
-
         if (!req.session.user) {
-            return res.redirect('/user/signin');
+            return res.status(401).send('Please log in to add an address');
         }
-
+        
+        const { name, phone, address, district, state, city, pincode, addressType } = req.body;
         const userId = req.session.user._id;
-        const { name, phone, address, district, city, state, pincode, addressType } = req.body;
 
+        // Create a new address object
         const newAddress = new Address({
-            userId: userId,
-            name,
-            phone,
-            address,
-            district,
-            state,
-            city,
-            pincode,
-            addressType
-        })
+            userId,
+            addresses: [{
+                name,
+                phone,
+                address,
+                district,
+                state,
+                city,
+                pincode,
+                addressType
+            }]
+        });
 
-        await newAddress.save()
-        res.redirect('/user/accountdetails')
+        // Save the new address to the database
+        await newAddress.save();
+
+        // Redirect the user to the profile page after adding the address
+        res.redirect('/user/accountdetails');
     } catch (error) {
-        console.log(error);
-        res.status(501).send('Internet Server Error');
-    }
-}
-
-exports.updateaddressPut = async(req,res) => {
-    try{
-        let addresses = [];
-        const formData = req.body;
-        addresses.push(formData)
-    }catch(error){
-        console.log("Error Occured: ",error);
+        console.log("Error Occurred: ", error);
+        res.status(500).send('Error occurred while adding the address');
     }
 }

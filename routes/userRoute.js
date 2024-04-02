@@ -30,12 +30,14 @@ router.post('/resetpassword/:id/:token', userController.resetPasswordPost);
 router.get('/shop', userController.shoppageGet);
 router.get('/singleproduct/:id', productController.singleproductGet);
 router.get('/accountdetails', isLoggedIn, userProfileController.profileGet);
-router.post('/address', userProfileController.addressPost);
-router.put('/update-address', userProfileController.updateaddressPut);
+router.post('/address', userProfileController.addAddress);
+
 
 router.get('/cart', isLoggedIn, cartController.cartPage);
 router.post('/addtocart', isLoggedIn, cartController.addtoCart);
 router.post('/update', cartController.updateCart);
+router.delete('/:productId', cartController.deleteFromCart);
+
 router.get('/sort', productController.sortproductGet);
 
 router.get('/logout', userController.logoutuser);

@@ -58,18 +58,14 @@ exports.updateCart = async (req, res) => {
         const existingProductIndex = cart ? cart.products.findIndex(item => item.productId.equals(productId)) : -1;
 
         if (existingProductIndex !== -1) {
-            // Update quantity
             cart.products[existingProductIndex].quantity += quantityChange;
 
-            // Ensure quantity doesn't go below 1
             if (cart.products[existingProductIndex].quantity < 1) {
                 cart.products[existingProductIndex].quantity = 1;
             }
 
-            // Calculate subtotal
             const subtotal = cart.products[existingProductIndex].quantity * product.price;
 
-            // Update total using reduce
             cart.total = cart.products.reduce((acc, item) => {
                 if (item.productId.equals(productId)) {
                     return acc + subtotal;
@@ -81,11 +77,9 @@ exports.updateCart = async (req, res) => {
             // Save cart changes
             await cart.save();
 
-            // Calculate cart subtotal and total
             const cartSubtotal = cart.products.reduce((acc, item) => acc + (item.quantity * item.productId.price), 0);
-            const cartTotal = cartSubtotal; // Assuming no shipping cost for now
+            const cartTotal = cartSubtotal; 
 
-            // Send updated data in the response
             res.json({
                 quantity: cart.products[existingProductIndex].quantity,
                 subtotal: subtotal,
@@ -97,6 +91,36 @@ exports.updateCart = async (req, res) => {
         }
     } catch (error) {
         console.log('Error Occurred : ', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+exports.deleteFromCart = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const userId = req.session.user._id;
+
+        let cart = await Cart.findOne({ userId: userId }).populate('products.productId');
+
+        if (!cart) {
+            return res.status(404).send('Cart not found');
+        }
+
+        const index = cart.products.findIndex(item => item.productId.equals(productId));
+
+        if (index === -1) {
+            return res.status(404).send('Product not found in cart');
+        }
+
+        cart.products.splice(index, 1);
+
+        cart.total = cart.products.reduce((acc, item) => acc + (item.quantity * item.productId.price), 0);
+
+        await cart.save();
+
+        res.sendStatus(200);
+    } catch (error) {
+        console.error('Error deleting product from cart:', error);
         res.status(500).send('Internal Server Error');
     }
 };
