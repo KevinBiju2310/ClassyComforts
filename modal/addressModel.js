@@ -7,7 +7,7 @@ const addressSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    addresses:[{
+    items: [{
         name: {
             type: String,
             required: true
@@ -43,7 +43,7 @@ const addressSchema = new mongoose.Schema({
         }
     }]
 
-})
+});
 
 const Address = mongoose.model('address', addressSchema);
 module.exports = Address;

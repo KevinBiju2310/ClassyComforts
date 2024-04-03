@@ -31,7 +31,8 @@ router.get('/shop', userController.shoppageGet);
 router.get('/singleproduct/:id', productController.singleproductGet);
 router.get('/accountdetails', isLoggedIn, userProfileController.profileGet);
 router.post('/address', userProfileController.addAddress);
-
+router.post('/editaddress/:addressId', userProfileController.editAddress);
+router.delete('/deleteaddress/:addressId', userProfileController.deleteAddress);
 
 router.get('/cart', isLoggedIn, cartController.cartPage);
 router.post('/addtocart', isLoggedIn, cartController.addtoCart);
