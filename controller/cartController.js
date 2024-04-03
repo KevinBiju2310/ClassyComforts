@@ -12,8 +12,8 @@ exports.cartPage = async (req, res) => {
             res.render('cart', { cart: cart })
         }
     } catch (error) {
-        console.log('Error Occured : ', error);
-        res.status(501).send('Internet Server Error');
+        console.log('Error Occurred: ', error);
+        res.status(501).send('Internal Server Error');
     }
 }
 
@@ -39,17 +39,15 @@ exports.addtoCart = async (req, res) => {
         await cart.save();
         res.redirect('/user/cart');
     } catch (error) {
-        console.log("Error Occured : ", error);
-        res.status(500).send('Internet Server Error');
+        console.log("Error Occurred: ", error);
+        res.status(500).send('Internal Server Error');
     }
 }
 
-
-
-
 exports.updateCart = async (req, res) => {
     try {
-        const { productId, quantityChange } = req.body;
+        console.log("start of updatecart");
+        const { productId, quantityChange, checkedProducts } = req.body;
         const userId = req.session.user._id;
 
         const product = await Product.findById(productId);
@@ -67,18 +65,23 @@ exports.updateCart = async (req, res) => {
             const subtotal = cart.products[existingProductIndex].quantity * product.price;
 
             cart.total = cart.products.reduce((acc, item) => {
-                if (item.productId.equals(productId)) {
-                    return acc + subtotal;
-                } else {
+                if (checkedProducts.includes(item.productId._id.toString())) {
                     return acc + (item.quantity * item.productId.price);
+                } else {
+                    return acc;
                 }
             }, 0);
 
-            // Save cart changes
             await cart.save();
 
-            const cartSubtotal = cart.products.reduce((acc, item) => acc + (item.quantity * item.productId.price), 0);
-            const cartTotal = cartSubtotal; 
+            const cartSubtotal = cart.products.reduce((acc, item) => {
+                if (checkedProducts.includes(item.productId._id.toString())) {
+                    return acc + (item.quantity * item.productId.price);
+                } else {
+                    return acc;
+                }
+            }, 0);
+            const cartTotal = cartSubtotal;
 
             res.json({
                 quantity: cart.products[existingProductIndex].quantity,
@@ -90,11 +93,13 @@ exports.updateCart = async (req, res) => {
             return res.status(400).send('Product not found in cart');
         }
     } catch (error) {
-        console.log('Error Occurred : ', error);
+        console.log('Error Occurred: ', error);
         res.status(500).send('Internal Server Error');
     }
 };
 
+
+    
 exports.deleteFromCart = async (req, res) => {
     try {
         const { productId } = req.params;

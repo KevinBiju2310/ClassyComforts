@@ -46,6 +46,7 @@
                                 <table class="table shopping-summery text-center clean">
                                     <thead>
                                         <tr class="main-heading">
+                                            <th scope="col">Select</th> <!-- Add a column for checkboxes -->
                                             <th scope="col">Image</th>
                                             <th scope="col">Name</th>
                                             <th scope="col">Price</th>
@@ -57,6 +58,10 @@
                                     <tbody>
                                         <% cart.products.forEach(product=> { %>
                                             <tr data-product-id="<%= product.productId._id %>">
+                                                <td class="text-center" data-title="Select">
+                                                    <input type="checkbox" class="checkbox-product"
+                                                        data-product-id="<%= product.productId._id %>">
+                                                </td>
                                                 <td class="image product-thumbnail">
                                                     <img src="/uploads/<%= product.productId.productImages[0] %>"
                                                         alt="<%= product.productId.productname %>">
@@ -212,7 +217,8 @@
                         },
                         body: JSON.stringify({
                             productId: productId,
-                            quantityChange: quantityChange
+                            quantityChange: quantityChange,
+                            checkedProducts: getCheckedProducts() // Pass checked checkboxes IDs
                         })
                     });
 
@@ -239,6 +245,16 @@
                 } catch (error) {
                     console.error('Error updating cart:', error);
                 }
+            }
+
+            // Function to get checked checkboxes IDs
+            function getCheckedProducts() {
+                const checkedProducts = [];
+                const checkboxProducts = document.querySelectorAll('.checkbox-product:checked');
+                checkboxProducts.forEach(checkbox => {
+                    checkedProducts.push(checkbox.getAttribute('data-product-id'));
+                });
+                return checkedProducts;
             }
 
             let productIdToDelete = null;
@@ -275,5 +291,6 @@
                     }
                 }
             });
+
 
         </script>
