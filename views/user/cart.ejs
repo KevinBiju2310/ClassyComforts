@@ -175,8 +175,11 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <a href="#" class="btn "> <i class="fi-rs-box-alt mr-10"></i> Proceed To
-                                        CheckOut</a>
+                                    <form action="/user/checkout">
+                                        <button type="submit" class="btn">
+                                            <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -291,6 +294,37 @@
                     }
                 }
             });
+
+
+            // Function to update subtotal and total of checked products in cart totals
+            function updateCheckedTotals() {
+                const checkedProducts = getCheckedProducts();
+                let checkedSubtotal = 0;
+                checkedProducts.forEach(productId => {
+                    const subtotal = document.querySelector(`#subtotal-${productId}`);
+                    if (subtotal) {
+                        checkedSubtotal += parseFloat(subtotal.textContent.replace('$', ''));
+                    }
+                });
+
+                const cartSubtotalElement = document.getElementById('cart-subtotal');
+                const cartTotalElement = document.getElementById('cart-total');
+
+                if (cartSubtotalElement && cartTotalElement) {
+                    cartSubtotalElement.textContent = `$${checkedSubtotal.toFixed(2)}`;
+                    cartTotalElement.textContent = `$${checkedSubtotal.toFixed(2)}`;
+                }
+            }
+
+            // Add event listener to checkboxes to update checked subtotal and total
+            const checkboxes = document.querySelectorAll('.checkbox-product');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateCheckedTotals);
+            });
+
+            // Call the function initially to calculate subtotal and total for initially checked products
+            updateCheckedTotals();
+
 
 
         </script>

@@ -31,13 +31,17 @@ router.get('/shop', userController.shoppageGet);
 router.get('/singleproduct/:id', productController.singleproductGet);
 router.get('/accountdetails', isLoggedIn, userProfileController.profileGet);
 router.post('/address', userProfileController.addAddress);
-router.post('/editaddress/:addressId', userProfileController.editAddress);
+router.post('/editaddress/:addressId', userProfileController.editAddress); 
 router.delete('/deleteaddress/:addressId', userProfileController.deleteAddress);
 
 router.get('/cart', isLoggedIn, cartController.cartPage);
 router.post('/addtocart', isLoggedIn, cartController.addtoCart);
 router.post('/update', cartController.updateCart);
 router.delete('/:productId', cartController.deleteFromCart);
+
+router.get('/checkout',isLoggedIn,cartController.checkoutPage);
+router.post('/checkout/editaddress/:addressId',isLoggedIn,cartController.editAddress);
+router.post('/checkout/address',isLoggedIn, cartController.addAddress)
 
 router.get('/sort', productController.sortproductGet);
 

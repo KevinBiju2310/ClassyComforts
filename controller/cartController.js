@@ -1,6 +1,7 @@
-const User = require('../modal/userModal');
 const Product = require('../modal/productModel');
 const Cart = require('../modal/cartModel');
+const Address = require('../modal/addressModel');
+
 
 exports.cartPage = async (req, res) => {
     try {
@@ -99,7 +100,7 @@ exports.updateCart = async (req, res) => {
 };
 
 
-    
+
 exports.deleteFromCart = async (req, res) => {
     try {
         const { productId } = req.params;
@@ -129,3 +130,89 @@ exports.deleteFromCart = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
+
+
+exports.checkoutPage = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.redirect('/login');
+        }
+
+        const userId = req.session.user._id;
+        const addresses = await Address.find({ userId });
+
+        res.render('checkout', { addresses: addresses });
+    } catch (error) {
+        console.error('Error fetching addresses in checkout:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+
+exports.editAddress = async (req, res) => {
+    try {
+        const addressId = req.params.addressId;
+        const { name, phone, address, district, state, city, pincode, addressType } = req.body;
+
+        await Address.findOneAndUpdate(
+            { "items._id": addressId },
+            {
+                $set: {
+                    "items.$.name": name,
+                    "items.$.phone": phone,
+                    "items.$.address": address,
+                    "items.$.district": district,
+                    "items.$.state": state,
+                    "items.$.city": city,
+                    "items.$.pincode": pincode,
+                    "items.$.addressType": addressType
+                }
+            }
+        );
+
+        res.redirect('/user/checkout');
+    } catch (error) {
+        console.log("Error Occurred: ", error);
+        res.status(500).send('Error occurred while editing the address');
+    }
+}
+
+exports.    addAddress = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).send('Please log in to add an address');
+        }
+
+        const { name, phone, address, district, state, city, pincode, addressType } = req.body;
+        const userId = req.session.user._id;
+
+        let userAddress = await Address.findOne({ userId });
+
+        if (!userAddress) {
+            userAddress = new Address({
+                userId,
+                items: []
+            });
+        }
+
+        userAddress.items.push({
+            name,
+            phone,
+            address,
+            district,
+            state,
+            city,
+            pincode,
+            addressType
+        });
+
+        // Save the updated address document
+        await userAddress.save();
+        res.redirect('/user/checkout');
+    } catch (error) {
+        console.log("Error Occurred: ", error);
+        res.status(500).send('Error occurred while adding the address');
+    }
+}
