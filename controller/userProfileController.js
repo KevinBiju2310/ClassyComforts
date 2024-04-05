@@ -1,5 +1,6 @@
 const Address = require('../modal/addressModel');
-
+const User = require('../modal/userModal');
+const bcrypt = require('bcrypt')
 
 exports.profileGet = async (req, res) => {
     try {
@@ -118,3 +119,33 @@ exports.deleteAddress = async (req, res) => {
     }
 };
 
+
+
+exports.changepassword = async (req, res) => {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const userId = req.session.user._id;
+    console.log(userId)
+    try {
+        const user = await User.findById(userId);
+        console.log(user)
+        const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!passwordMatch) {
+            return res.render('accountdetails', { error: 'Current password is incorrect' });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.render('accountdetails', { error: 'New password and confirm password do not match' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update the user's password in the database
+        await User.findByIdAndUpdate(userId, { password: hashedPassword });
+
+        res.redirect('/user/accountdetails'); // Redirect to user profile page
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};

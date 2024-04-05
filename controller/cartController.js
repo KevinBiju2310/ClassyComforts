@@ -83,7 +83,6 @@ exports.updateCart = async (req, res) => {
                 }
             }, 0);
             const cartTotal = cartSubtotal;
-
             res.json({
                 quantity: cart.products[existingProductIndex].quantity,
                 subtotal: subtotal,
@@ -107,19 +106,15 @@ exports.deleteFromCart = async (req, res) => {
         const userId = req.session.user._id;
 
         let cart = await Cart.findOne({ userId: userId }).populate('products.productId');
-
         if (!cart) {
             return res.status(404).send('Cart not found');
         }
 
         const index = cart.products.findIndex(item => item.productId.equals(productId));
-
         if (index === -1) {
             return res.status(404).send('Product not found in cart');
         }
-
         cart.products.splice(index, 1);
-
         cart.total = cart.products.reduce((acc, item) => acc + (item.quantity * item.productId.price), 0);
 
         await cart.save();
@@ -136,7 +131,7 @@ exports.deleteFromCart = async (req, res) => {
 exports.checkoutPage = async (req, res) => {
     try {
         if (!req.session.user) {
-            return res.redirect('/login');
+            return res.redirect('/user/signin');
         }
 
         const userId = req.session.user._id;
@@ -179,7 +174,7 @@ exports.editAddress = async (req, res) => {
     }
 }
 
-exports.    addAddress = async (req, res) => {
+exports.addAddress = async (req, res) => {
     try {
         if (!req.session.user) {
             return res.status(401).send('Please log in to add an address');

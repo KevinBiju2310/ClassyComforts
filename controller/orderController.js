@@ -1,5 +1,3 @@
-
-
 exports.orderGet = async(req,res) =>{
     try{
         res.render('orders');
@@ -7,3 +5,5 @@ exports.orderGet = async(req,res) =>{
         console.log("Error Happend : ",error);
     }
 }
+
+

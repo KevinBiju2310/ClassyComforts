@@ -1,5 +1,12 @@
 <%- include("../layouts/userHeader") %>
 
+<style>
+    .error{
+        color: red;
+        font-size: 15px;
+    }
+</style>
+
     <main class="main">
         <div class="page-header breadcrumb-wrap">
             <div class="container">
@@ -202,13 +209,11 @@
                                     </div>
                                     <div class="tab-pane fade" id="account-detail" role="tabpanel"
                                         aria-labelledby="account-detail-tab">
-                                        <div class="card">
+                                        <!-- <div class="card">
                                             <div class="card-header">
                                                 <h5>Account Details</h5>
                                             </div>
                                             <div class="card-body">
-                                                <p>Already have an account? <a href="page-login-register.html">Log in
-                                                        instead!</a></p>
                                                 <form method="post" name="enq">
                                                     <div class="row">
                                                         <div class="form-group col-md-6">
@@ -230,26 +235,45 @@
                                                             <input required="" class="form-control square" name="email"
                                                                 type="email">
                                                         </div>
+                                                        <div class="col-md-12">
+                                                            <button type="submit" class="btn btn-fill-out submit"
+                                                                name="submit" value="Submit">Save</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div> -->
+                                        <div class="card mt-3">
+                                            <div class="card-header">
+                                                <h5>Change Password</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="changePasswordForm" action="/user/changepassword"
+                                                    method="post">
+                                                    <div class="row">
                                                         <div class="form-group col-md-12">
                                                             <label>Current Password <span
                                                                     class="required">*</span></label>
-                                                            <input required="" class="form-control square"
-                                                                name="password" type="password">
+                                                            <input class="form-control square" id="currentPassword"
+                                                                name="currentPassword" type="password">
+                                                            <span id="currentPasswordError" class="error"></span>
                                                         </div>
                                                         <div class="form-group col-md-12">
                                                             <label>New Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square"
-                                                                name="npassword" type="password">
+                                                            <input class="form-control square" id="newPassword"
+                                                                name="newPassword" type="password">
+                                                            <span id="newPasswordError" class="error"></span>
                                                         </div>
                                                         <div class="form-group col-md-12">
                                                             <label>Confirm Password <span
                                                                     class="required">*</span></label>
-                                                            <input required="" class="form-control square"
-                                                                name="cpassword" type="password">
+                                                            <input class="form-control square" id="confirmPassword"
+                                                                name="confirmPassword" type="password">
+                                                            <span id="confirmPasswordError" class="error"></span>
                                                         </div>
                                                         <div class="col-md-12">
-                                                            <button type="submit" class="btn btn-fill-out submit"
-                                                                name="submit" value="Submit">Save</button>
+                                                            <button type="submit"
+                                                                class="btn btn-fill-out submit">Save</button>
                                                         </div>
                                                     </div>
                                                 </form>
@@ -275,7 +299,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="addAddressForm" action="/user/address" method="post">
+                    <form action="/user/address" method="post">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="inputName" class="form-label">Name</label>
@@ -346,6 +370,7 @@
                         </div>
                         <div class="modal-body">
                             <form id="editAddressForm" action="/user/editaddress/<%= item._id %>" method="post">
+                                <div id="error-message"></div>
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label for="editInputName" class="form-label">Name</label>
@@ -462,7 +487,40 @@
                                 .catch(error => console.error('Error:', error));
                         });
 
+                        document.getElementById('changePasswordForm').addEventListener('submit', function (event) {
+                            const currentPassword = document.getElementById('currentPassword').value;
+                            const newPassword = document.getElementById('newPassword').value;
+                            const confirmPassword = document.getElementById('confirmPassword').value;
+                            const currentPasswordError = document.getElementById('currentPasswordError');
+                            const newPasswordError = document.getElementById('newPasswordError');
+                            const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+                            if (currentPassword.length < 6) {
+                                currentPasswordError.innerText = 'Current password is required';
+                                event.preventDefault(); // Prevent form submission
+                            } else {
+                                currentPasswordError.innerText = ''; // Clear error message
+                            }
+
+                            if (newPassword.length < 6) {
+                                newPasswordError.innerText = 'New password must be at least 6 characters long';
+                                event.preventDefault(); // Prevent form submission
+                            } else {
+                                newPasswordError.innerText = ''; // Clear error message
+                            }
+
+                            if (newPassword !== confirmPassword) {
+                                confirmPasswordError.innerText = 'Passwords do not match';
+                                event.preventDefault(); // Prevent form submission
+                            } else {
+                                confirmPasswordError.innerText = ''; // Clear error message
+                            }
+                        });
+
                     </script>
+
+
+
 
 
                     <%- include("../layouts/userFooter") %>
