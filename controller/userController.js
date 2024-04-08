@@ -98,7 +98,6 @@ exports.signupPost = [
                 password: hashedPassword,
                 otp,
             };
-            req.session.save()
             res.redirect('/user/verifyotp'); // Render OTP page
         } catch (error) {
             console.error("Error saving to database", error);
@@ -224,7 +223,6 @@ exports.logout = (req, res) => {
 
 
 exports.forgotPasswordGet = async (req, res) => {
-
     try {
         return res.render('forgotpassword', { errors: '' });
     } catch (error) {
@@ -235,7 +233,6 @@ exports.forgotPasswordGet = async (req, res) => {
 
 exports.forgotPasswordPost = async (req, res) => {
     const { email } = req.body;
-
     try {
         const user = await User.findOne({ email });
 

@@ -5,13 +5,14 @@ const bcrypt = require('bcrypt')
 exports.profileGet = async (req, res) => {
     try {
         if (!req.session.user) {
-            return res.redirect('/login');
+            return res.redirect('/user/signin');
         }
 
         const userId = req.session.user._id;
+        const user = await User.findById(userId);
         const addresses = await Address.find({ userId });
 
-        res.render('accountdetails', { addresses });
+        res.render('accountdetails', { addresses, user });
     } catch (error) {
         console.log("Error Occurred: ", error);
         res.status(500).send('Error occurred while fetching user profile');

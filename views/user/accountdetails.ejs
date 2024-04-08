@@ -1,11 +1,24 @@
 <%- include("../layouts/userHeader") %>
 
-<style>
-    .error{
-        color: red;
-        font-size: 15px;
-    }
-</style>
+    <style>
+        .error {
+            color: red;
+            font-size: 15px;
+        }
+
+        .address-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .address-item {
+            margin-bottom: 10px;
+        }
+
+        .address-item span {
+            margin-right: 5px;
+        }
+    </style>
 
     <main class="main">
         <div class="page-header breadcrumb-wrap">
@@ -50,7 +63,7 @@
                                         <li class="nav-item">
                                             <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab"
                                                 href="#account-detail" role="tab" aria-controls="account-detail"
-                                                aria-selected="true"><i class="fi-rs-user mr-10"></i>Account details</a>
+                                                aria-selected="true"><i class="fi-rs-user mr-10"></i>Change Password</a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link" href="page-login-register.html"><i
@@ -65,13 +78,27 @@
                                         aria-labelledby="dashboard-tab">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h5 class="mb-0">Hello Rosie! </h5>
+                                                <h5 class="mb-0">Profile</h5>
                                             </div>
                                             <div class="card-body">
-                                                <p>From your account dashboard. you can easily check &amp; view your <a
-                                                        href="#">recent orders</a>, manage your <a href="#">shipping and
-                                                        billing addresses</a> and <a href="#">edit your password and
-                                                        account details.</a></p>
+                                                <p>Your email: <%= user.email %>
+                                                </p>
+                                                <p>Your phone: <%= user.phone %>
+                                                </p>
+
+                                                <h6>Addresses:</h6>
+                                                <ul class="address-list">
+                                                    <% addresses.forEach(address=> { %>
+                                                        <% address.items.forEach(item=> { %>
+                                                            <li class="address-item">
+                                                                &#8226; <%= item.address %>, <%= item.city %>, <%=
+                                                                            item.state %>
+                                                                            ,
+                                                                            <%= item.pincode %>
+                                                            </li>
+                                                            <% }); %>
+                                                                <% }); %>
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
@@ -98,20 +125,6 @@
                                                                 <td>March 45, 2020</td>
                                                                 <td>Processing</td>
                                                                 <td>$125.00 for 2 item</td>
-                                                                <td><a href="#" class="btn-small d-block">View</a></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>#2468</td>
-                                                                <td>June 29, 2020</td>
-                                                                <td>Completed</td>
-                                                                <td>$364.00 for 5 item</td>
-                                                                <td><a href="#" class="btn-small d-block">View</a></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>#2366</td>
-                                                                <td>August 02, 2020</td>
-                                                                <td>Completed</td>
-                                                                <td>$280.00 for 3 item</td>
                                                                 <td><a href="#" class="btn-small d-block">View</a></td>
                                                             </tr>
                                                         </tbody>

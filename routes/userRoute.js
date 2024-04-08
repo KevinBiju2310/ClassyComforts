@@ -39,7 +39,8 @@ router.post('/addtocart', isLoggedIn, cartController.addtoCart);
 router.post('/update', cartController.updateCart);
 router.delete('/:productId', cartController.deleteFromCart);
 
-router.get('/checkout', isLoggedIn, cartController.checkoutPage);
+router.get('/checkout',isLoggedIn,cartController.checkoutPageGet)
+router.post('/checkout', isLoggedIn, cartController.checkoutPage);
 router.post('/checkout/editaddress/:addressId', isLoggedIn, cartController.editAddress);
 router.post('/checkout/address', isLoggedIn, cartController.addAddress);
 router.post('/changepassword', isLoggedIn, userProfileController.changepassword)

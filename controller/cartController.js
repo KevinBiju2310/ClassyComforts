@@ -25,7 +25,6 @@ exports.addtoCart = async (req, res) => {
 
         const product = await Product.findById(productId);
         let cart = await Cart.findOne({ userId: userId });
-
         const existingProductIndex = cart ? cart.products.findIndex(item => item.productId.equals(productId)) : -1;
 
         if (existingProductIndex !== -1) {
@@ -45,6 +44,7 @@ exports.addtoCart = async (req, res) => {
     }
 }
 
+
 exports.updateCart = async (req, res) => {
     try {
         console.log("start of updatecart");
@@ -57,14 +57,21 @@ exports.updateCart = async (req, res) => {
         const existingProductIndex = cart ? cart.products.findIndex(item => item.productId.equals(productId)) : -1;
 
         if (existingProductIndex !== -1) {
+            // Update quantity with quantityChange
             cart.products[existingProductIndex].quantity += quantityChange;
+
+            if (cart.products[existingProductIndex].quantity > 10) {
+                cart.products[existingProductIndex].quantity = 10;
+            }
 
             if (cart.products[existingProductIndex].quantity < 1) {
                 cart.products[existingProductIndex].quantity = 1;
             }
 
+            // Calculate subtotal for this product
             const subtotal = cart.products[existingProductIndex].quantity * product.price;
 
+            // Calculate cart subtotal and total based on checked products
             cart.total = cart.products.reduce((acc, item) => {
                 if (checkedProducts.includes(item.productId._id.toString())) {
                     return acc + (item.quantity * item.productId.price);
@@ -127,6 +134,24 @@ exports.deleteFromCart = async (req, res) => {
 };
 
 
+exports.checkoutPageGet = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.redirect('/user/signin');
+        }
+        const userId = req.session.user._id;
+        const addresses = await Address.find({ userId });
+
+        res.render('checkout', { addresses });
+
+    } catch (error) {
+        console.error('Error getting checkoutpage:', error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
+
+
 
 exports.checkoutPage = async (req, res) => {
     try {
@@ -136,13 +161,31 @@ exports.checkoutPage = async (req, res) => {
 
         const userId = req.session.user._id;
         const addresses = await Address.find({ userId });
+        const cart = await Cart.findOne({ userId });
 
-        res.render('checkout', { addresses: addresses });
+        const checkedProductsIds = req.body.checkedProducts;
+        const checkedProducts = [];
+
+        // Fetch details for each checked product individually
+        for (const item of cart.products) {
+            if (checkedProductsIds.includes(item.productId.toString())) {
+                const product = await Product.findById(item.productId);
+                if (product) {
+                    checkedProducts.push({
+                        productId: product,
+                        quantity: item.quantity
+                    });
+                }
+            }
+        }
+
+        res.render('checkout', { addresses, checkedProducts, cart });
+
     } catch (error) {
-        console.error('Error fetching addresses in checkout:', error);
+        console.error('Error processing checkout page:', error);
         res.status(500).send('Internal Server Error');
     }
-};
+}
 
 
 
