@@ -3,7 +3,8 @@ const router = express.Router();
 const userController = require('../controller/userController');
 const productController = require('../controller/productController');
 const cartController = require('../controller/cartController');
-const userProfileController = require('../controller/userProfileController')
+const userProfileController = require('../controller/userProfileController');
+const orderController = require('../controller/orderController')
 const { isLoggedIn } = require('../middleware/auth');
 
 router.get('/home', userController.homeGet)
@@ -43,9 +44,12 @@ router.get('/checkout',isLoggedIn,cartController.checkoutPageGet)
 router.post('/checkout', isLoggedIn, cartController.checkoutPage);
 router.post('/checkout/editaddress/:addressId', isLoggedIn, cartController.editAddress);
 router.post('/checkout/address', isLoggedIn, cartController.addAddress);
-router.post('/changepassword', isLoggedIn, userProfileController.changepassword)
+router.post('/changepassword', isLoggedIn, userProfileController.changepassword);
 
 router.get('/sort', productController.sortproductGet);
+
+
+router.get('/ordered',isLoggedIn,orderController.orderPlaced);
 
 router.get('/logout', userController.logoutuser);
 

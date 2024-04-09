@@ -7,3 +7,10 @@ exports.orderGet = async(req,res) =>{
 }
 
 
+exports.orderPlaced = (req,res) =>{
+    try{
+        res.render('orderSuccessfull')
+    }catch(error){
+        
+    }
+}

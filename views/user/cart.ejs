@@ -236,8 +236,14 @@
                     const responseData = await response.json();
 
                     // Check if the quantity exceeds 10
-                    if (responseData.quantity > 10) {
+                    if (responseData.quantity >= 10) {
                         swal("Oops!", "You can only buy up to 10 products.", "warning");
+                        return;
+                    }
+
+                    // Check if the quantity exceeds the product stock
+                    if (responseData.quantityExceedsStock) {
+                        swal("Oops!", "Only " + responseData.productStock + " left in stock.", "warning");
                         return;
                     }
 
@@ -331,8 +337,15 @@
             updateCheckedTotals();
 
             document.getElementById('proceedToCheckoutBtn').addEventListener('click', () => {
-
+                console.log("Button clicked");
                 const checkedProducts = getCheckedProducts();
+
+                if (checkedProducts.length === 0) {
+                    event.preventDefault();
+                    swal("Oops!", "Please select at least one product.", "warning");
+                    return;
+                }
+
                 document.getElementById('checkedProductsInput').value = JSON.stringify(checkedProducts);
                 document.getElementById('checkoutForm').submit();
             });
