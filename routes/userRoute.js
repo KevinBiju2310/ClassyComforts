@@ -40,16 +40,17 @@ router.post('/addtocart', isLoggedIn, cartController.addtoCart);
 router.post('/update', cartController.updateCart);
 router.delete('/:productId', cartController.deleteFromCart);
 
-router.get('/checkout',isLoggedIn,cartController.checkoutPageGet)
-router.post('/checkout', isLoggedIn, cartController.checkoutPage);
-router.post('/checkout/editaddress/:addressId', isLoggedIn, cartController.editAddress);
-router.post('/checkout/address', isLoggedIn, cartController.addAddress);
+router.get('/checkout', isLoggedIn, orderController.checkoutPageGet)
+router.post('/checkout', isLoggedIn, orderController.checkoutPage);
+router.post('/checkout/editaddress/:addressId', isLoggedIn, orderController.editAddress);
+router.post('/checkout/address', isLoggedIn, orderController.addAddress);
 router.post('/changepassword', isLoggedIn, userProfileController.changepassword);
 
 router.get('/sort', productController.sortproductGet);
 
 
-router.get('/ordered',isLoggedIn,orderController.orderPlaced);
+// router.get('/ordered', isLoggedIn, orderController.orderPlaced);
+router.post('/placeorder',isLoggedIn, orderController.orderPlaced)
 
 router.get('/logout', userController.logoutuser);
 

@@ -53,7 +53,6 @@
                                                         <p>
                                                             <%= item.district %>
                                                         </p>
-                                                        </label>
                                                         <div class="d-flex justify-content">
                                                             <button type="button" class="btn btn-sm btn-primary mr-2"
                                                                 data-bs-toggle="modal"
@@ -137,7 +136,6 @@
                         <div class="form-group mb-30">
                             <textarea rows="5" placeholder="Order notes"></textarea>
                         </div>
-
                     </div>
                     <div class="col-md-6">
                         <div class="order_review">
@@ -154,52 +152,59 @@
                                     </thead>
                                     <tbody>
                                         <% if (checkedProducts && checkedProducts.length> 0) { %>
-                                            <% checkedProducts.forEach(product=> { %>
-                                                <tr>
-                                                    <td class="image product-thumbnail">
-                                                        <% if (product.productId &&
-                                                            product.productId.productImages.length> 0) { %>
-                                                            <img src="/uploads/<%= product.productId.productImages[0] %>"
-                                                                alt="<%= product.productId.productname %>">
-                                                            <% } %>
-                                                    </td>
-                                                    <td>
-                                                        <h5>
-                                                            <a
-                                                                href="<%= product.productId ? '/products/' + product.productId._id : '#' %>">
-                                                                <%= product.productId ? product.productId.productname
-                                                                    : 'Product Not Found' %>
-                                                            </a>
-                                                        </h5>
-                                                        <span class="product-qty">x <%= product.quantity %></span>
-                                                    </td>
-                                                    <td>
-                                                        $<%= product.productId ? (product.productId.price *
-                                                            product.quantity).toFixed(2) : '0.00' %>
-                                                    </td>
-                                                </tr>
-                                                <% }); %>
-                                                    <tr>
-                                                        <th colspan="2">SubTotal</th>
-                                                        <td class="product-subtotal">$<%= cart.total.toFixed(2) %>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th colspan="2">Shipping</th>
-                                                        <td><em>Free Shipping</em></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th colspan="2">Total</th>
-                                                        <td class="product-subtotal"><span
-                                                                class="font-xl text-brand fw-900">$<%=
-                                                                    cart.total.toFixed(2) %></span>
-                                                        </td>
-                                                    </tr>
-                                                    <% } else { %>
+                                            <% let subtotal=0; %>
+                                                <% checkedProducts.forEach(product=> { %>
+                                                    <% subtotal +=product.productId.price * product.quantity; %>
                                                         <tr>
-                                                            <td colspan="3">No products selected for checkout.</td>
+                                                            <td class="image product-thumbnail">
+                                                                <% if (product.productId &&
+                                                                    product.productId.productImages.length> 0) { %>
+                                                                    <img src="/uploads/<%= product.productId.productImages[0] %>"
+                                                                        alt="<%= product.productId.productname %>">
+                                                                    <% } %>
+                                                            </td>
+                                                            <td>
+                                                                <h5>
+                                                                    <a
+                                                                        href="<%= product.productId ? '/products/' + product.productId._id : '#' %>">
+                                                                        <%= product.productId ?
+                                                                            product.productId.productname
+                                                                            : 'Product Not Found' %>
+                                                                    </a>
+                                                                </h5>
+                                                                <span class="product-qty">x <%= product.quantity %>
+                                                                        </span>
+                                                            </td>
+                                                            <td>
+                                                                $<%= (product.productId ? (product.productId.price *
+                                                                    product.quantity).toFixed(2) : '0.00' ) %>
+                                                            </td>
                                                         </tr>
-                                                        <% } %>
+                                                        <% }); %>
+                                                            <tr>
+                                                                <th colspan="2">SubTotal</th>
+                                                                <td class="product-subtotal">$<%= subtotal.toFixed(2) %>
+                                                                </td>
+                                                            </tr>
+                                                            <!-- Add shipping charges if applicable -->
+                                                            <tr>
+                                                                <th colspan="2">Shipping</th>
+                                                                <td><em>Free Shipping</em></td>
+                                                            </tr>
+                                                            <!-- Calculate total -->
+                                                            <% const total=subtotal; %>
+                                                                <tr>
+                                                                    <th colspan="2">Total</th>
+                                                                    <td class="product-subtotal"><span
+                                                                            class="font-xl text-brand fw-900">$<%=
+                                                                                total.toFixed(2) %></span></td>
+                                                                </tr>
+                                                                <% } else { %>
+                                                                    <tr>
+                                                                        <td colspan="3">No products selected for
+                                                                            checkout.</td>
+                                                                    </tr>
+                                                                    <% } %>
                                     </tbody>
                                 </table>
                             </div>
@@ -230,8 +235,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-fill-out btn-block mt-30" id="placeOrderBtn">Place
-                                Order</button>
+                            <form id="placeOrderForm" method="post" action="/user/placeorder">
+                                <input type="hidden" name="selected_shipping_address" id="selectedShippingAddress">
+                                <button type="button" class="btn btn-fill-out btn-block mt-30" id="placeOrderBtn">Place
+                                    Order</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -324,18 +332,20 @@
 
                         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
                         <script>
-                            document.getElementById('placeOrderBtn').addEventListener('click', function () {
+                            document.getElementById('placeOrderBtn').addEventListener('click', function (event) {
+                                event.preventDefault(); // Prevent default form submission
+
                                 var shippingAddress = document.querySelector('input[name="shipping_address"]:checked');
                                 var paymentMethod = document.querySelector('input[name="payment_option"]:checked');
 
-                                if (!shippingAddress && !paymentMethod) {
+                                if (!shippingAddress || !paymentMethod) {
                                     swal("Error!", "Please select a shipping address and payment method.", "error");
-                                } else if (!shippingAddress) {
-                                    swal("Error!", "Please select a shipping address.", "error");
-                                } else if (!paymentMethod) {
-                                    swal("Error!", "Please select a payment method.", "error");
                                 } else {
-                                    window.location.href = '/user/ordered';
+                                    // Set the value of hidden input field to the selected shipping address value
+                                    document.getElementById('selectedShippingAddress').value = shippingAddress.value;
+
+                                    // Submit the form
+                                    document.getElementById('placeOrderForm').submit();
                                 }
                             });
                         </script>
