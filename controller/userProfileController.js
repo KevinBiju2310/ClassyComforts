@@ -1,6 +1,7 @@
 const Address = require('../modal/addressModel');
 const User = require('../modal/userModal');
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const Order = require('../modal/orderModel');
 
 exports.profileGet = async (req, res) => {
     try {
@@ -11,8 +12,9 @@ exports.profileGet = async (req, res) => {
         const userId = req.session.user._id;
         const user = await User.findById(userId);
         const addresses = await Address.find({ userId });
+        const order = await Order.find({ userId }).populate('products.productId')
 
-        res.render('accountdetails', { addresses, user });
+        res.render('accountdetails', { addresses, user, order });
     } catch (error) {
         console.log("Error Occurred: ", error);
         res.status(500).send('Error occurred while fetching user profile');
@@ -137,16 +139,16 @@ exports.changepassword = async (req, res) => {
         if (newPassword !== confirmPassword) {
             return res.render('accountdetails', { error: 'New password and confirm password do not match' });
         }
-
-        // Hash the new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-        // Update the user's password in the database
         await User.findByIdAndUpdate(userId, { password: hashedPassword });
 
-        res.redirect('/user/accountdetails'); // Redirect to user profile page
+        res.redirect('/user/accountdetails');
     } catch (error) {
         console.error('Error changing password:', error);
         res.status(500).send('Internal Server Error');
     }
 };
+
+
+
+

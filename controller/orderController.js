@@ -2,6 +2,7 @@ const Product = require('../modal/productModel');
 const Cart = require('../modal/cartModel');
 const Address = require('../modal/addressModel');
 const Order = require('../modal/orderModel');
+const mongoose = require('mongoose');
 
 const checkedProducts = [];
 
@@ -135,8 +136,6 @@ exports.orderGet = async (req, res) => {
 }
 
 
-
-
 exports.orderPlaced = async (req, res) => {
     try {
         if (!req.session.user) {
@@ -145,6 +144,8 @@ exports.orderPlaced = async (req, res) => {
 
         const userId = req.session.user._id;
         const addressId = req.body.selected_shipping_address;
+        const totalValue = parseFloat(req.body.total);
+        console.log(totalValue)
 
         const cart = await Cart.findOne({ userId });
 
@@ -166,7 +167,8 @@ exports.orderPlaced = async (req, res) => {
                 quantity: item.quantity
             })),
             address: address,
-            paymentMethod: 'cod'
+            paymentMethod: 'cod',
+            totalAmount: totalValue
         });
         await order.save();
 
@@ -192,3 +194,28 @@ exports.orderPlaced = async (req, res) => {
         res.status(500).send('Error occurred while placing the order');
     }
 }
+
+
+exports.orderDetails = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            return res.status(400).send('Invalid order ID');
+        }
+
+        const order = await Order.findById(orderId).populate('products.productId')
+
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+        res.render('orderdetails', { order });
+    } catch (err) {
+        console.log("Error fetching order details: ", err);
+        res.status(500).send('Internal server error');
+    }
+};
+
+
+

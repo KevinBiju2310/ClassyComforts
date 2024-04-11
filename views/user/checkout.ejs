@@ -173,7 +173,7 @@
                                                                     </a>
                                                                 </h5>
                                                                 <span class="product-qty">x <%= product.quantity %>
-                                                                        </span>
+                                                                </span>
                                                             </td>
                                                             <td>
                                                                 $<%= (product.productId ? (product.productId.price *
@@ -197,7 +197,8 @@
                                                                     <th colspan="2">Total</th>
                                                                     <td class="product-subtotal"><span
                                                                             class="font-xl text-brand fw-900">$<%=
-                                                                                total.toFixed(2) %></span></td>
+                                                                                total.toFixed(2) %></span>
+                                                                    </td>
                                                                 </tr>
                                                                 <% } else { %>
                                                                     <tr>
@@ -236,6 +237,7 @@
                                 </div>
                             </div>
                             <form id="placeOrderForm" method="post" action="/user/placeorder">
+                                <input type="hidden" name="total" id="totalval">
                                 <input type="hidden" name="selected_shipping_address" id="selectedShippingAddress">
                                 <button type="button" class="btn btn-fill-out btn-block mt-30" id="placeOrderBtn">Place
                                     Order</button>
@@ -343,6 +345,7 @@
                                 } else {
                                     // Set the value of hidden input field to the selected shipping address value
                                     document.getElementById('selectedShippingAddress').value = shippingAddress.value;
+                                    document.getElementById('totalval').value = document.querySelector('.product-subtotal span').innerText.slice(1);
 
                                     // Submit the form
                                     document.getElementById('placeOrderForm').submit();

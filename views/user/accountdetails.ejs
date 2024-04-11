@@ -30,7 +30,7 @@
                 </div>
             </div>
         </div>
-        <section class="pt-150 pb-150">
+        <section class="pt-150 pb-150 ml-3">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-10 m-auto">
@@ -103,36 +103,72 @@
                                         </div>
                                     </div>
                                     <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
-                                        <div class="card">
+                                        <div class="card" style="display: flex; flex-direction: column;">
                                             <div class="card-header">
                                                 <h5 class="mb-0">Your Orders</h5>
                                             </div>
-                                            <div class="card-body">
+                                            <div class="card-body" style="flex: 1;">
                                                 <div class="table-responsive">
                                                     <table class="table">
                                                         <thead>
                                                             <tr>
-                                                                <th>Order</th>
-                                                                <th>Date</th>
+                                                                <th>SrNo</th>
+                                                                <th>Image</th>
+                                                                <th>Name</th>
                                                                 <th>Status</th>
                                                                 <th>Total</th>
                                                                 <th>Actions</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <tr>
-                                                                <td>#1357</td>
-                                                                <td>March 45, 2020</td>
-                                                                <td>Processing</td>
-                                                                <td>$125.00 for 2 item</td>
-                                                                <td><a href="#" class="btn-small d-block">View</a></td>
-                                                            </tr>
+                                                            <% order.forEach((order, index)=> { %>
+                                                                <% order.products.forEach((product, productIndex)=> { %>
+                                                                    <tr>
+                                                                        <% if(productIndex===0) { %>
+                                                                            <td rowspan="<%= order.products.length %>">
+                                                                                <%= index + 1 %>
+                                                                            </td>
+                                                                            <td rowspan="<%= order.products.length %>">
+                                                                                <% order.products.forEach((product)=> {
+                                                                                    %>
+                                                                                    <% if
+                                                                                        (product.productId.productImages.length>
+                                                                                        0) { %>
+                                                                                        <img src="/uploads/<%= product.productId.productImages[0] %>"
+                                                                                            alt=""
+                                                                                            style="width: 150px;">
+                                                                                        <% } %>
+                                                                                            <% }) %>
+                                                                            </td>
+                                                                            <% } %>
+                                                                                <td>
+                                                                                    <%= product.productId.productname %>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <%= order.orderStatus %>
+                                                                                </td>
+                                                                                <% if(productIndex===0) { %>
+                                                                                    <td
+                                                                                        rowspan="<%= order.products.length %>">
+                                                                                        $<%= order.totalAmount.toFixed(2)
+                                                                                            %>
+                                                                                    </td>
+                                                                                    <td
+                                                                                        rowspan="<%= order.products.length %>">
+                                                                                        <a href="/user/orderdetails/<%= order._id %>"
+                                                                                            class="btn-small d-block">View</a>
+                                                                                    </td>
+                                                                                    <% } %>
+                                                                    </tr>
+                                                                    <% }) %>
+                                                                        <% }) %>
                                                         </tbody>
                                                     </table>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="tab-pane fade" id="track-orders" role="tabpanel"
                                         aria-labelledby="track-orders-tab">
                                         <div class="card">
@@ -202,8 +238,6 @@
                                                                             data-bs-target="#deleteConfirmationModal">
                                                                             Delete
                                                                         </button>
-
-
                                                                     </div>
                                                                 </div>
                                                             </div>

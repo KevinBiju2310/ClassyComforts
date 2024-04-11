@@ -65,6 +65,14 @@ const orderSchema = new mongoose.Schema({
         default: 'pending',
         required: true
     },
+    totalAmount: {
+        type: Number,
+        required: true,
+    },
+    cancelReason: {
+        type: String,
+        default: ''
+    }
 },
     {
         timestamps: true
