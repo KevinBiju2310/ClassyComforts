@@ -77,18 +77,21 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <% order.products.forEach(product=> { %>
+                                                        <% order.products.forEach((product, index)=> { %>
                                                             <tr>
                                                                 <td>
                                                                     <%= order.createdAt.toDateString() %>
                                                                 </td>
-                                                                <td><img src="/uploads/<%= product.productId.productImages[0] %>"
+                                                                <td>
+                                                                    <img src="/uploads/<%= product.productId.productImages[0] %>"
                                                                         alt="<%= product.productId.productname %>"
-                                                                        style="max-width: 100px;"></td>
+                                                                        style="max-width: 100px;">
+                                                                </td>
                                                                 <td>
                                                                     <%= product.productId.productname %>
                                                                 </td>
-                                                                <td>
+                                                                <td id="orderStatus_<%= index %>">
+                                                                    <!-- Unique identifier added -->
                                                                     <%= order.orderStatus %>
                                                                 </td>
                                                                 <td>
@@ -102,9 +105,9 @@
                                                                 <td>$<%= (product.productId.price *
                                                                         product.quantity).toFixed(2) %>
                                                                 </td>
-
                                                             </tr>
                                                             <% }); %>
+
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -137,7 +140,8 @@
                                         </table>
                                     </div>
                                     <div class="button-container">
-                                        <button id="cancelOrderBtn" class="btn btn-danger">Cancel Order</button>
+                                        <button id="cancelOrderBtn" class="btn btn-danger" data-toggle="modal"
+                                            data-target="#cancelOrderModal">Cancel Order</button>
                                         <button id="downloadInvoiceBtn" class="btn btn-primary">Download
                                             Invoice</button>
                                     </div>
@@ -149,6 +153,125 @@
             </div>
         </section>
     </main>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1" role="dialog" aria-labelledby="cancelOrderModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelOrderModalLabel">Cancel Order</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="cancelOrderForm">
+                        <div class="form-group">
+                            <label for="cancelReason">Reason for cancellation:</label>
+                            <input type="text" class="form-control" id="cancelReason" name="cancelReason" required>
+                            <input type="hidden" id="orderId" name="orderId">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add this at the end of the script block
+        document.addEventListener("DOMContentLoaded", function () {
+            const orderStatus = "<%= order.orderStatus %>";
+            if (orderStatus === "cancelled") {
+                document.getElementById('cancelOrderBtn').disabled = true;
+                document.getElementById('downloadInvoiceBtn').disabled = true;
+            }
+        });
+
+        document.getElementById('cancelOrderBtn').addEventListener('click', function () {
+            $('#cancelOrderModal').modal('show');
+            document.getElementById('orderId').value = "<%= order._id %>";
+        });
+
+        document.getElementById('cancelOrderForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const cancelReason = document.getElementById('cancelReason').value;
+            const orderId = document.getElementById('orderId').value;
+            try {
+                const response = await fetch('/user/cancelOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId, cancelReason })
+                });
+
+                if (response.ok) {
+                    $('#cancelOrderModal').modal('hide');
+                    // Update order status to "Cancelled" in frontend
+                    order.products.forEach((product, index) => {
+                        document.getElementById(`orderStatus_${index}`).innerText = 'cancelled';
+                    });
+                    // Disable cancel order and download invoice buttons
+                    document.getElementById('cancelOrderBtn').disabled = true;
+                    document.getElementById('downloadInvoiceBtn').disabled = true;
+                    // Store flag in local storage
+                    localStorage.setItem(`cancelled_${orderId}`, true);
+                } else {
+                    console.error('Failed to cancel order');
+                }
+            } catch (error) {
+                console.error('Error occurred:', error);
+            }
+        });
+
+
+
+
+        document.getElementById('downloadInvoiceBtn').addEventListener('click', async () => {
+            // Get the order ID
+            const orderId = '<%= order._id %>';
+
+            try {
+                // Fetch the invoice PDF using a POST request
+                const response = await fetch(`/user/invoice/${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to download invoice');
+                    return;
+                }
+
+                // Convert the response to a blob
+                const blob = await response.blob();
+
+                // Create a temporary URL for the blob
+                const url = window.URL.createObjectURL(blob);
+
+                // Create a link element to trigger the download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `invoice_${orderId}.pdf`;
+
+                // Trigger the click event on the link
+                a.click();
+
+                // Release the object URL
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error occurred while downloading invoice:', error);
+            }
+        });
+
+    </script>
 
 
     <%- include("../layouts/userFooter") %>

@@ -37,8 +37,8 @@ router.post('/editaddress/:addressId', userProfileController.editAddress);
 router.delete('/deleteaddress/:addressId', userProfileController.deleteAddress);
 router.post('/changepassword', isLoggedIn, userProfileController.changepassword);
 
-router.get('/orderdetails/:id', isLoggedIn, orderController.orderDetails)
-// router.post('/cancelOrder', orderController.cancelOrder);
+router.get('/orderdetails/:id', isLoggedIn, orderController.orderDetails);
+router.post('/cancelOrder', orderController.cancelOrder);
 
 router.get('/cart', isLoggedIn, cartController.cartPage);
 router.post('/addtocart', isLoggedIn, cartController.addtoCart);
@@ -49,7 +49,7 @@ router.get('/checkout', isLoggedIn, orderController.checkoutPageGet)
 router.post('/checkout', isLoggedIn, orderController.checkoutPage);
 router.post('/checkout/editaddress/:addressId', isLoggedIn, orderController.editAddress);
 router.post('/checkout/address', isLoggedIn, orderController.addAddress);
-
+router.post('/invoice/:id',orderController.downloadInvoice);
 
 router.get('/sort', productController.sortproductGet);
 
