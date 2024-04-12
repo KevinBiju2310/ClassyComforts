@@ -1,7 +1,122 @@
 <%- include("../layouts/adminHeader") %>
 
     <div id="content">
-        <h1>Order List</h1>
+        <h1>Orders</h1>
+        <div class="d-flex justify-content-end align-items-center mt-2">
+            <input type="text" id="searchBar" placeholder="Search..." class="form-control w-auto mr-2">
+            <button class="btn btn-primary mb-3" onclick="searchUsers()">Search</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Order Date</th>
+                    <th>Product Name</th>
+                    <th>Status</th>
+                    <th>Total Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% order.forEach(order=> { %>
+                    <tr>
+                        <td>
+                            <%= order.userId.name %>
+                        </td>
+                        <td>
+                            <%= order.createdAt.toDateString() %>
+                        </td>
+                        <td>
+
+                            <% order.products.forEach(product=> { %>
+                                <li>
+                                    <%= product.productId.productname %>
+                                </li>
+                                <% }); %>
+
+                        </td>
+                        <td>
+                            <%= order.orderStatus %>
+                        </td>
+                        <td>$<%= order.totalAmount.toFixed(2) %>
+                        </td>
+                        <td>
+                            <button type="submit" class="btn btn-danger" onclick="openModal('<%= order._id %>')">Change
+                                Status</button>
+                        </td>
+                    </tr>
+                    <% }); %>
+            </tbody>
+        </table>
     </div>
 
-<%- include("../layouts/adminFooter") %>
+    <div class="modal fade" id="changeStatusModal" tabindex="-1" role="dialog" aria-labelledby="changeStatusModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeStatusModalLabel">Change Order Status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="statusForm">
+                        <div class="form-group">
+                            <label for="statusSelect">Select Status:</label>
+                            <select class="form-control" id="statusSelect">
+                                <% /* Hardcode enum values */ %>
+                                    <option value="pending">Pending</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                    <option value="returned">Returned</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include("../layouts/adminFooter") %>
+
+
+        <script>
+            // Function to open the modal and populate dropdown options
+            function openModal(orderId) {
+                console.log("hello")
+                const modal = document.getElementById('changeStatusModal');
+                modal.querySelector('#statusForm').addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const newStatus = document.getElementById('statusSelect').value;
+                    console.log(newStatus)
+                    updateOrderStatus(orderId, newStatus);
+                });
+                $('#changeStatusModal').modal('show');
+            }
+
+            // Function to update order status using Fetch API
+            function updateOrderStatus(orderId, newStatus) {
+                fetch(`/admin/orders/${orderId}/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ newStatus })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            // Reload the page to reflect changes
+                            location.reload();
+                        } else {
+                            throw new Error('Failed to update order status');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        </script>

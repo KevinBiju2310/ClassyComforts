@@ -346,58 +346,65 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="/user/address" method="post">
+                    <form id="addressForm" action="/user/address" method="post">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="inputName" class="form-label">Name</label>
-                                <input type="text" class="form-control" name="name" id="inputName" required>
+                                <input type="text" class="form-control" name="name" id="inputName">
+                                <div id="nameError" class="error-message"></div>
                             </div>
                             <div class="col-md-6">
                                 <label for="inputMobile" class="form-label">Mobile Number</label>
-                                <input type="number" class="form-control" name="phone" id="inputMobile" required>
+                                <input type="number" class="form-control" name="phone" id="inputMobile">
+                                <div id="phoneError" class="error-message"></div>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="inputAddress" class="form-label">Address</label>
-                            <textarea class="form-control" id="inputAddress" rows="3" name="address"
-                                required></textarea>
+                            <textarea class="form-control" id="inputAddress" rows="3" name="address"></textarea>
+                            <div id="addressError" class="error-message"></div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="inputDistrict" class="form-label">District</label>
-                                <input type="text" class="form-control" id="inputDistrict" name="district" required>
+                                <input type="text" class="form-control" id="inputDistrict" name="district">
+                                <div id="districtError" class="error-message"></div>
                             </div>
                             <div class="col-md-6">
                                 <label for="inputState" class="form-label">State</label>
-                                <input type="text" class="form-control" id="inputState" name="state" required>
+                                <input type="text" class="form-control" id="inputState" name="state">
+                                <div id="stateError" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="inputCity" class="form-label">City</label>
-                                <input type="text" class="form-control" id="inputCity" name="city" required>
+                                <input type="text" class="form-control" id="inputCity" name="city">
+                                <div id="cityError" class="error-message"></div>
                             </div>
                             <div class="col-md-6">
                                 <label for="inputPincode" class="form-label">Pincode</label>
-                                <input type="number" class="form-control" id="inputPincode" name="pincode" required>
+                                <input type="number" class="form-control" id="inputPincode" name="pincode">
+                                <div id="pincodeError" class="error-message"></div>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label>Address Type</label>
                             <div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="addressType" id="workAddress"
+                                    <input class="form-check-input" type="radio" name="addressType" id="addressType"
                                         value="work">
                                     <label class="form-check-label" for="workAddress">Work</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="addressType" id="homeAddress"
-                                        value="home">
+                                    <input class="form-check-input" type="radio" name="addressType" id="addressType"
+                                        value="home" checked>
                                     <label class="form-check-label" for="homeAddress">Home</label>
+                                    <div id="addressTypeError" class="error-message"></div>
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="submit" class="btn btn-primary" onclick="validateAddress()">Submit</button>
                     </form>
                 </div>
             </div>
@@ -534,6 +541,8 @@
                                 .catch(error => console.error('Error:', error));
                         });
 
+
+
                         document.getElementById('changePasswordForm').addEventListener('submit', function (event) {
                             const currentPassword = document.getElementById('currentPassword').value;
                             const newPassword = document.getElementById('newPassword').value;
@@ -564,6 +573,101 @@
                             }
                         });
 
+
+
+                        function validateAddress() {
+                            event.preventDefault()
+                            var name = document.getElementById("inputName").value.trim();
+                            var phone = document.getElementById("inputMobile").value.trim();
+                            var address = document.getElementById("inputAddress").value.trim();
+                            var district = document.getElementById("inputDistrict").value.trim();
+                            var state = document.getElementById("inputState").value.trim();
+                            var city = document.getElementById("inputCity").value.trim();
+                            var pincode = document.getElementById("inputPincode").value.trim();
+                            var addressType = document.querySelector('input[name="addressType"]:checked').value;
+                            var valid = true;
+
+                            // Name validation
+                            if (!name) {
+                                document.getElementById("nameError").innerText =
+                                    "Name is required";
+                                document.getElementById("nameError").style.color = "red";
+                                valid = false;
+                            } else {
+                                document.getElementById("nameError").innerText = "";
+                            }
+
+
+                            if (!phone) {
+                                document.getElementById("phoneError").innerText = "Phone number is required";
+                                document.getElementById("phoneError").style.color = "red"; // Set color to red
+                                valid = false;
+                            } else if (phone.length !== 10) {
+                                document.getElementById("phoneError").innerText = "Please enter a 10-digit number";
+                                document.getElementById("phoneError").style.color = "red"; // Set color to red
+                                valid = false;
+                            } else {
+                                document.getElementById("phoneError").innerText = "";
+                            }
+
+                            if (!address) {
+                                document.getElementById("addressError").innerText =
+                                    "Address is required";
+                                document.getElementById("addressError").style.color = "red";
+                                valid = false;
+                            } else {
+                                document.getElementById("addressError").innerText = "";
+                            }
+
+                            if (!district) {
+                                document.getElementById("districtError").innerText =
+                                    "District is required";
+                                document.getElementById("districtError").style.color = "red";
+                                valid = false;
+                            } else {
+                                document.getElementById("districtError").innerText = "";
+                            }
+
+                            if (!state) {
+                                document.getElementById("stateError").innerText =
+                                    "State is required";
+                                document.getElementById("stateError").style.color = "red";
+                                valid = false;
+                            } else {
+                                document.getElementById("stateError").innerText = "";
+                            }
+
+                            if (!city) {
+                                document.getElementById("cityError").innerText =
+                                    "City is required";
+                                document.getElementById("cityError").style.color = "red";
+                                valid = false;
+                            } else {
+                                document.getElementById("cityError").innerText = "";
+                            }
+
+                            if (!pincode || pincode.length !== 6) {
+                                document.getElementById("pincodeError").innerText =
+                                    "Pincode must be 6-digits";
+                                document.getElementById("pincodeError").style.color = "red";
+                                valid = false;
+                            } else {
+                                document.getElementById("pincodeError").innerText = "";
+                            }
+
+                            if (!addressType) {
+                                document.getElementById("addressTypeError").innerText =
+                                    "AddressType is required";
+                                document.getElementById("addressTypeError").style.color = "red";
+                                valid = false;
+                            } else {
+                                document.getElementById("addressTypeError").innerText = "";
+                            }
+
+                            if (valid) {
+                                document.getElementById("addressForm").submit();
+                            }
+                        }
                     </script>
 
 

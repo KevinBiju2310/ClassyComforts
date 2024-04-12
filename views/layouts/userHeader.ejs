@@ -112,7 +112,7 @@
                     <div class="col-xl-3 col-lg-4">
                         <div class="header-info header-info-right">
                             <ul>
-                                <% if (user) { %>
+                                <% if (user && !user.isBlocked) { %>
                                     <li class="dropdown">
                                         <span class="dropdown-toggle" id="dropdownMenuLink">
                                             <%= user.name %>

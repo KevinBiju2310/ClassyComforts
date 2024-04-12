@@ -49,7 +49,7 @@
                 </div>
             </div>
         </div>
-        <section class="pt-70 pb-70">
+        <section class="pt-70 pb-70" id="invoiceSection">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12 m-auto"> <!-- Adjusted the column width -->
@@ -139,12 +139,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div class="button-container">
-                                        <button id="cancelOrderBtn" class="btn btn-danger" data-toggle="modal"
-                                            data-target="#cancelOrderModal">Cancel Order</button>
-                                        <button id="downloadInvoiceBtn" class="btn btn-primary">Download
-                                            Invoice</button>
-                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -152,6 +147,12 @@
                 </div>
             </div>
         </section>
+        <div class="button-container mb-15">
+            <button id="cancelOrderBtn" class="btn btn-danger" data-toggle="modal"
+                data-target="#cancelOrderModal">Cancel Order</button>
+            <button id="downloadInvoiceBtn" class="btn btn-primary">Download
+                Invoice</button>
+        </div>
     </main>
 
 
@@ -179,7 +180,7 @@
             </div>
         </div>
     </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -232,46 +233,57 @@
 
 
 
-        document.getElementById('downloadInvoiceBtn').addEventListener('click', async () => {
-            // Get the order ID
-            const orderId = '<%= order._id %>';
+        // document.getElementById('downloadInvoiceBtn').addEventListener('click', async () => {
+        //     // Get the order ID
+        //     const orderId = '<%= order._id %>';
 
-            try {
-                // Fetch the invoice PDF using a POST request
-                const response = await fetch(`/user/invoice/${orderId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+        //     try {
+        //         // Fetch the invoice PDF using a POST request
+        //         const response = await fetch(`/user/invoice/${orderId}`, {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json'
+        //             }
+        //         });
 
-                if (!response.ok) {
-                    console.error('Failed to download invoice');
-                    return;
-                }
+        //         if (!response.ok) {
+        //             console.error('Failed to download invoice');
+        //             return;
+        //         }
 
-                // Convert the response to a blob
-                const blob = await response.blob();
+        //         // Convert the response to a blob
+        //         const blob = await response.blob();
 
-                // Create a temporary URL for the blob
-                const url = window.URL.createObjectURL(blob);
+        //         // Create a temporary URL for the blob
+        //         const url = window.URL.createObjectURL(blob);
 
-                // Create a link element to trigger the download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `invoice_${orderId}.pdf`;
+        //         // Create a link element to trigger the download
+        //         const a = document.createElement('a');
+        //         a.href = url;
+        //         a.download = `invoice_${orderId}.pdf`;
 
-                // Trigger the click event on the link
-                a.click();
+        //         // Trigger the click event on the link
+        //         a.click();
 
-                // Release the object URL
-                window.URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error('Error occurred while downloading invoice:', error);
-            }
+        //         // Release the object URL
+        //         window.URL.revokeObjectURL(url);
+        //     } catch (error) {
+        //         console.error('Error occurred while downloading invoice:', error);
+        //     }
+        // });
+        document.getElementById('downloadInvoiceBtn').addEventListener('click', function () {
+            const invoiceSection = document.getElementById('invoiceSection');
+            const options = {
+                filename: 'invoice.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'A4', orientation: 'portrait' }
+            };
+            html2pdf().from(invoiceSection).set(options).save();
         });
 
     </script>
+
 
 
     <%- include("../layouts/userFooter") %>

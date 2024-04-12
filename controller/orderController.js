@@ -141,15 +141,6 @@ exports.addAddress = async (req, res) => {
 
 
 
-// Admin
-exports.orderGet = async (req, res) => {
-    try {
-        res.render('orders');
-    } catch (error) {
-        console.log("Error Happend : ", error);
-    }
-}
-
 
 exports.orderPlaced = async (req, res) => {
     try {
@@ -245,6 +236,8 @@ exports.cancelOrder = async (req, res) => {
 
 
 
+
+
 exports.downloadInvoice = async (req, res) => {
     try {
         const orderId = req.params.id;
@@ -278,7 +271,8 @@ exports.downloadInvoice = async (req, res) => {
 
         // Add user details
         doc.moveDown();
-        doc.fontSize(14).text(`Customer: ${user.name}`, { continued: true });
+        doc.fontSize(14).text(`Customer: ${user.name}`);
+        doc.moveDown();
         doc.fontSize(14).text(`Email: ${user.email}`, { align: 'left' });
 
         // Add order date
@@ -289,28 +283,34 @@ exports.downloadInvoice = async (req, res) => {
         doc.moveDown();
         doc.fontSize(16).text('Order Details:', { align: 'left' });
 
-        // Set up table headers
-        const tableHeaders = ['Product Name', 'Image', 'Price', 'Quantity', 'Total'];
-        const tableY = doc.y + 20;
+        // Define constants for column widths
+        const colWidth = 120;
+        const colImageWidth = 100;
+        const colQtyWidth = 60;
+        const colTotalWidth = 100;
 
         // Draw table headers
+        const tableX = 50;
+        const tableHeaders = ['Product Name', 'Image', 'Price', 'Quantity', 'Total'];
+        const tableY = doc.y + 30;
+
         doc.font('Helvetica-Bold');
-        doc.rect(50, tableY, 100, 20).fill('#f2f2f2');
-        doc.rect(150, tableY, 100, 20).fill('#f2f2f2');
-        doc.rect(250, tableY, 50, 20).fill('#f2f2f2');
-        doc.rect(300, tableY, 50, 20).fill('#f2f2f2');
-        doc.rect(350, tableY, 100, 20).fill('#f2f2f2');
+        doc.rect(tableX, tableY, colWidth, 20).fill('#f2f2f2');
+        doc.rect(tableX + colWidth, tableY, colImageWidth, 20).fill('#f2f2f2');
+        doc.rect(tableX + colWidth + colImageWidth, tableY, colWidth, 20).fill('#f2f2f2');
+        doc.rect(tableX + colWidth + colImageWidth + colWidth, tableY, colQtyWidth, 20).fill('#f2f2f2');
+        doc.rect(tableX + colWidth + colImageWidth + colWidth + colQtyWidth, tableY, colTotalWidth, 20).fill('#f2f2f2');
 
         doc.fontSize(12);
         doc.fillColor('#000000');
-        doc.text(tableHeaders[0], 55, tableY + 5);
-        doc.text(tableHeaders[1], 155, tableY + 5);
-        doc.text(tableHeaders[2], 255, tableY + 5);
-        doc.text(tableHeaders[3], 305, tableY + 5);
-        doc.text(tableHeaders[4], 355, tableY + 5);
+        doc.text(tableHeaders[0], tableX + 5, tableY + 5);
+        doc.text(tableHeaders[1], tableX + colWidth + 5, tableY + 5);
+        doc.text(tableHeaders[2], tableX + colWidth + colImageWidth + 5, tableY + 5);
+        doc.text(tableHeaders[3], tableX + colWidth + colImageWidth + colWidth + 5, tableY + 5);
+        doc.text(tableHeaders[4], tableX + colWidth + colImageWidth + colWidth + colQtyWidth + 5, tableY + 5);
 
         // Draw table rows
-        let yPos = tableY + 20;
+        let yPos = tableY + 30;
         order.products.forEach(product => {
             const productName = product.productId.productname;
             const image = path.join(__dirname, `../public/uploads/${product.productId.productImages[0]}`);
@@ -318,11 +318,11 @@ exports.downloadInvoice = async (req, res) => {
             const quantity = product.quantity;
             const total = `$${(product.productId.price * product.quantity).toFixed(2)}`;
 
-            doc.image(image, 155, yPos, { width: 50 });
-            doc.text(productName, 55, yPos + 5);
-            doc.text(price, 255, yPos + 5);
-            doc.text(quantity.toString(), 305, yPos + 5);
-            doc.text(total, 355, yPos + 5);
+            doc.image(image, tableX + colWidth + 5, yPos, { width: colImageWidth - 10 });
+            doc.text(productName, tableX + 5, yPos + 5);
+            doc.text(price, tableX + colWidth + colImageWidth + 5, yPos + 5);
+            doc.text(quantity.toString(), tableX + colWidth + colImageWidth + colWidth + 5, yPos + 5);
+            doc.text(total, tableX + colWidth + colImageWidth + colWidth + colQtyWidth + 5, yPos + 5);
 
             yPos += 20;
         });

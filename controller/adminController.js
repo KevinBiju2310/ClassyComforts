@@ -1,6 +1,7 @@
 const { check, validationResult } = require('express-validator')
 const User = require('../modal/userModal')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const Order = require('../modal/orderModel')
 const Category = require('../modal/categoryModel')
 
 
@@ -25,7 +26,7 @@ exports.signInPost = [
         const { email, password } = req.body;
 
         try {
-            const user = await User.findOne({ email })
+            const user = await User.findOne({ email });
             if (!user) {
                 res.render('login', { errors: { email: { msg: "User not found " } } })
             }
@@ -34,6 +35,7 @@ exports.signInPost = [
                 return res.render('login', { errors: { password: { msg: 'Incorrect password' } } });
             }
             if (user.isAdmin == 1) {
+                req.session.adminId = user._id;
                 return res.redirect('/admin/dashboard');
             } else {
                 return res.status(403).send('Forbidden');
@@ -78,6 +80,9 @@ exports.toggleUserBlock = async (req, res) => {
             return res.status(404).send('User not found');
         }
         user.isBlocked = !user.isBlocked;
+        if (req.session.user && req.session.user._id.toString() === userId) {
+            req.session.user.isBlocked = user.isBlocked;
+        }
         await user.save();
         res.status(200).json({ status: user.isBlocked ? 'Blocked' : 'Unblocked' });
     } catch (error) {
@@ -118,3 +123,28 @@ exports.toggleUserBlock = async (req, res) => {
 //     }
 // };
 
+
+// Admin
+exports.orderGet = async (req, res) => {
+    try {
+        const order = await Order.find().populate('userId').populate('products.productId');
+        res.render('orders', { order });
+    } catch (error) {
+        console.log("Error Happend : ", error);
+    }
+}
+
+
+exports.updateOrderStatus = async (req, res) => {
+    const orderId = req.params.orderId;
+    const { newStatus } = req.body;
+    console.log(newStatus);
+    try {
+        // Find the order by ID and update its status
+        const updatedOrder = await Order.findByIdAndUpdate(orderId, { orderStatus: newStatus }, { new: true });
+        res.status(200).json({ message: 'Order status updated successfully', order: updatedOrder });
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        res.status(500).json({ error: 'Failed to update order status' });
+    }
+};

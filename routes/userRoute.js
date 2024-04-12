@@ -29,12 +29,12 @@ router.get('/resetpassword/:id/:token', userController.resetPasswordGet);
 router.post('/resetpassword/:id/:token', userController.resetPasswordPost);
 
 router.get('/shop', userController.shoppageGet);
-router.get('/singleproduct/:id', productController.singleproductGet);
+router.get('/singleproduct/:id', isLoggedIn, productController.singleproductGet);
 
 router.get('/accountdetails', isLoggedIn, userProfileController.profileGet);
 router.post('/address', userProfileController.addAddress);
 router.post('/editaddress/:addressId', userProfileController.editAddress);
-router.delete('/deleteaddress/:addressId', userProfileController.deleteAddress);
+router.delete('/deleteaddress/:addressId',isLoggedIn, userProfileController.deleteAddress);
 router.post('/changepassword', isLoggedIn, userProfileController.changepassword);
 
 router.get('/orderdetails/:id', isLoggedIn, orderController.orderDetails);
@@ -49,9 +49,9 @@ router.get('/checkout', isLoggedIn, orderController.checkoutPageGet)
 router.post('/checkout', isLoggedIn, orderController.checkoutPage);
 router.post('/checkout/editaddress/:addressId', isLoggedIn, orderController.editAddress);
 router.post('/checkout/address', isLoggedIn, orderController.addAddress);
-router.post('/invoice/:id',orderController.downloadInvoice);
+router.post('/invoice/:id', orderController.downloadInvoice);
 
-router.get('/sort', productController.sortproductGet);
+router.get('/sort', isLoggedIn,productController.sortproductGet);
 
 
 // router.get('/ordered', isLoggedIn, orderController.orderPlaced);
