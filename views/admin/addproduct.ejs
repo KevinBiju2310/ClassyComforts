@@ -1,13 +1,5 @@
 <%- include("../layouts/adminHeader") %>
 
-    <style>
-        .invalid-feedback {
-            color: red;
-            font-size: 15x;
-            margin-top: 5px;
-        }
-    </style>
-
     <div id="content">
         <div class="container py-3">
             <form id="productForm" action="/admin/addproduct" method="post" enctype="multipart/form-data">
@@ -18,13 +10,13 @@
                         <label for="productName" class="form-label">Product Name</label>
                         <input type="text" class="form-control" id="productname" name="productname"
                             placeholder="Enter product name here">
-                        <div id="productNameError" class="invalid-feedback"></div>
+                        <div id="productNameError" class="error-message"></div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea class="form-control" id="description" rows="3" name="description"
                             placeholder="Type description here"></textarea>
-                        <div id="descriptionError" class="invalid-feedback"></div>
+                        <div id="descriptionError" class="error-message"></div>
                     </div>
                 </div>
                 <div class="row">
@@ -37,7 +29,7 @@
                                 </option>
                                 <% }) %>
                         </select>
-                        <div id="categoryError" class="invalid-feedback"></div>
+                        <div id="categoryError" class="error-message"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="regularPrice" class="form-label">Regular Price</label>
@@ -45,7 +37,7 @@
                             <span class="input-group-text">₹</span>
                             <input type="number" class="form-control" id="regularPrice" name="price"
                                 aria-label="Regular price">
-                            <div id="priceError" class="invalid-feedback"></div>
+                            <div id="priceError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -53,7 +45,7 @@
                         <div class="input-group">
                             <input type="number" class="form-control" id="remainingProducts" name="quantity"
                                 placeholder="Enter number of remaining products">
-                            <div id="quantityError" class="invalid-feedback"></div>
+                            <div id="quantityError" class="error-message"></div>
                         </div>
                     </div>
                 </div>
@@ -63,7 +55,7 @@
                             uploaded)</label>
                         <input type="file" class="form-control" id="productGallery" name="productImages" multiple>
                     </div>
-                    <div id="imageError" class="invalid-feedback"></div>
+                    <div id="imageError" class="error-message"></div>
                 </div>
                 <div class="row mb-3" id="imagePreviewsContainer">
                     <!-- Image previews will be appended here -->
@@ -73,18 +65,18 @@
                         <label for="length" class="form-label">Length</label>
                         <input type="number" class="form-control" id="length" name="length"
                             placeholder="Enter the Length">
-                        <div id="lengthError" class="invalid-feedback"></div>
+                        <div id="lengthError" class="error-message"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="width" class="form-label">Width</label>
                         <input type="number" class="form-control" id="width" name="width" placeholder="Enter the Width">
-                        <div id="widthError" class="invalid-feedback"></div>
+                        <div id="widthError" class="error-message"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="height" class="form-label">Height</label>
                         <input type="number" class="form-control" id="height" name="height"
                             placeholder="Enter the Height">
-                        <div id="heightError" class="invalid-feedback"></div>
+                        <div id="heightError" class="error-message"></div>
                     </div>
                 </div>
                 <div class="row">
@@ -92,23 +84,24 @@
                         <label for="material" class="form-label">Material</label>
                         <input type="text" class="form-control" id="material" name="material"
                             placeholder="Enter the Material">
-                        <div id="materialError" class="invalid-feedback"></div>
+                        <div id="materialError" class="error-message"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="shape" class="form-label">Shape</label>
                         <input type="text" class="form-control" id="shape" name="shape" placeholder="Enter the Shape">
-                        <div id="shapeError" class="invalid-feedback"></div>
+                        <div id="shapeError" class="error-message"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="weight" class="form-label">Weight</label>
                         <input type="number" class="form-control" id="weight" name="weight"
                             placeholder="Enter the Weight">
-                        <div id="weightError" class="invalid-feedback"></div>
+                        <div id="weightError" class="error-message"></div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary ms-auto" id="createProduct">Create Product</button>
+                        <button type="submit" class="btn btn-primary ms-auto" id="createProduct"
+                            onclick="validateProduct()">Create Product</button>
                         <button type="reset" class="btn btn-outline-secondary ms-2">Reset</button>
                     </div>
                 </div>
@@ -118,110 +111,135 @@
 
     <script>
 
-        document.getElementById("productForm").addEventListener("submit", function (event) {
-            var productName = document.getElementById("productname").value.trim();
+        function validateProduct() {
+            event.preventDefault()
+            var name = document.getElementById("productname").value.trim();
             var description = document.getElementById("description").value.trim();
             var category = document.getElementById("category").value.trim();
-            var regularPrice = document.getElementById("regularPrice").value.trim();
-            var remainingProducts = document.getElementById("remainingProducts").value.trim();
-            var productImages = document.getElementById("productGallery").files;
+            var price = document.getElementById("regularPrice").value.trim();
+            var quantity = document.getElementById("remainingProducts").value.trim();
+            var image = document.getElementById("productGallery").value.trim();
             var length = document.getElementById("length").value.trim();
             var width = document.getElementById("width").value.trim();
             var height = document.getElementById("height").value.trim();
-            var material = document.getElementById("material").value.trim();
             var shape = document.getElementById("shape").value.trim();
+            var material = document.getElementById("material").value.trim();
             var weight = document.getElementById("weight").value.trim();
+            var valid = true;
 
-            var isValid = true;
-
-            if (productName === "") {
-                document.getElementById("productNameError").innerText = "Please enter product name";
-                isValid = false;
+            // Name validation
+            if (!name) {
+                document.getElementById("productNameError").innerText =
+                    "Product name is required";
+                document.getElementById("productNameError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("productNameError").innerText = "";
             }
 
-            if (description === "") {
-                document.getElementById("descriptionError").innerText = "Please enter description";
-                isValid = false;
+            if (!description) {
+                document.getElementById("descriptionError").innerText =
+                    "Description is required";
+                document.getElementById("descriptionError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("descriptionError").innerText = "";
             }
 
-            if (category === "") {
-                document.getElementById("categoryError").innerText = "Please select a category";
-                isValid = false;
+            if (!category) {
+                document.getElementById("categoryError").innerText =
+                    "Category is required";
+                document.getElementById("categoryError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("categoryError").innerText = "";
             }
 
-            if (regularPrice === "") {
-                document.getElementById("priceError").innerText = "Please enter regular price";
-                isValid = false;
+            if (!price) {
+                document.getElementById("priceError").innerText =
+                    "Price is required";
+                document.getElementById("priceError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("priceError").innerText = "";
             }
 
-            if (remainingProducts === "") {
-                document.getElementById("quantityError").innerText = "Please enter remaining products";
-                isValid = false;
+            if (!quantity) {
+                document.getElementById("quantityError").innerText =
+                    "Quantity is required";
+                document.getElementById("quantityError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("quantityError").innerText = "";
             }
 
-            if (productImages.length === 0) {
-                document.getElementById("imageError").innerText = "Please upload at least one image";
-                isValid = false;
+            if (!image) {
+                document.getElementById("imageError").innerText =
+                    "Image is required";
+                document.getElementById("imageError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("imageError").innerText = "";
             }
 
-            if (isNaN(length) || length === "") {
-                document.getElementById("lengthError").innerText = "Please enter a valid length";
-                isValid = false;
+            if (!length) {
+                document.getElementById("lengthError").innerText =
+                    "Length is required";
+                document.getElementById("lengthError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("lengthError").innerText = "";
             }
 
-            if (isNaN(width) || width === "") {
-                document.getElementById("widthError").innerText = "Please enter a valid width";
-                isValid = false;
+            if (!width) {
+                document.getElementById("widthError").innerText =
+                    "Width is required";
+                document.getElementById("widthError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("widthError").innerText = "";
             }
 
-            if (isNaN(height) || height === "") {
-                document.getElementById("heightError").innerText = "Please enter a valid height";
-                isValid = false;
+            if (!height) {
+                document.getElementById("heightError").innerText =
+                    "Height is required";
+                document.getElementById("heightError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("heightError").innerText = "";
             }
 
-            if (material === "") {
-                document.getElementById("materialError").innerText = "Please enter the material";
-                isValid = false;
+            if (!material) {
+                document.getElementById("materialError").innerText =
+                    "Material is required";
+                document.getElementById("materialError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("materialError").innerText = "";
             }
 
-            if (shape === "") {
-                document.getElementById("shapeError").innerText = "Please enter the shape";
-                isValid = false;
+            if (!shape) {
+                document.getElementById("shapeError").innerText =
+                    "Shape is required";
+                document.getElementById("shapeError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("shapeError").innerText = "";
             }
 
-            if (isNaN(weight) || weight === "") {
-                document.getElementById("weightError").innerText = "Please enter a valid weight";
-                isValid = false;
+            if (!weight) {
+                document.getElementById("weightError").innerText =
+                    "Weight is required";
+                document.getElementById("weightError").style.color = "red";
+                valid = false;
             } else {
                 document.getElementById("weightError").innerText = "";
             }
 
-            if (!isValid) {
-                event.preventDefault(); // Prevent form submission if validation fails
+            if (valid) {
+                document.getElementById("productForm").submit();
             }
-        });
+        }
 
 
         document.getElementById('productGallery').addEventListener('change', function (event) {

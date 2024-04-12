@@ -11,6 +11,9 @@ require('../passportSetup')
 
 const emailConfig = {
     service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.EMAIL_ID,
         pass: process.env.PASS_ID,
@@ -44,16 +47,11 @@ function generateOTP() {
 
 
 exports.signupPost = [
+    // Validation checks
     check('name').trim()
         .notEmpty().withMessage('Name is Required')
-        .custom(value => {
-            const nameRegex = /^[a-zA-Z\s]+$/;
-            if (!nameRegex.test(value)) {
-                throw new Error('Name should contain only letters');
-            }
-            return true;
-        }),
-    check('email').trim().notEmpty().withMessage('Email is Required'),
+        .isAlpha().withMessage('Name should contain only letters'),
+    check('email').trim().notEmpty().withMessage('Email is Required').isEmail().withMessage('Invalid Email'),
     check('phone').trim().notEmpty().withMessage('Phone is Required'),
     check('password').trim()
         .notEmpty().withMessage('Password is Required')
@@ -77,33 +75,33 @@ exports.signupPost = [
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-            // Generate OTP
-            const otp = generateOTP(); // You need to implement generateOTP function
+            // Generate and send OTP
+            const otp = generateOTP();
             console.log(otp)
-            // Send OTP to user's email
             const mailOptions = {
                 from: process.env.EMAIL_ID,
                 to: email,
                 subject: 'OTP for Signup',
                 text: `Your OTP for signup is: ${otp}`,
             };
-
             await transporter.sendMail(mailOptions);
 
-            // Save user and OTP to session for verification
-            req.session.newUser = {
+            // Save user data and OTP to session
+            req.session.user = {
                 name,
                 email,
                 phone,
                 password: hashedPassword,
                 otp,
             };
-            res.redirect('/user/verifyotp'); // Render OTP page
+            res.redirect('/user/verifyotp');
         } catch (error) {
-            console.error("Error saving to database", error);
+            console.error("Error signing up:", error);
+            res.status(500).send('Internal Server Error');
         }
     },
-]
+];
+
 
 exports.verifyOTPGet = async (req, res) => {
     try {
@@ -117,31 +115,23 @@ exports.verifyOTPGet = async (req, res) => {
 
 exports.verifyOTP = async (req, res) => {
     const { otp } = req.body;
-    console.log(otp)
-    const finotp = parseInt(otp)
-    const newUser = req.session.newUser;
-    console.log(newUser)
-    console.log(newUser.otp)
-    if (newUser.otp !== finotp) {
-        return res.render('otppage', { errors: 'Invalid OTP' });
-    } else {
-        // Save user to the database
+    const newUser = req.session.user;
+    if (newUser && newUser.otp === parseInt(otp)) {
         const { name, phone, password, email } = newUser;
         const isAdmin = 0;
-        console.log(name, phone, password, email)
-        const user = new User({
-            name,
-            email,
-            phone,
-            password,
-            isAdmin,
-        });
-        await user.save();
-        req.session.newUser = null;
-        res.redirect('/user/home');
+        try {
+            const user = new User({ name, email, phone, password, isAdmin });
+            await user.save();
+            req.session.user = user;
+            res.redirect('/user/home');
+        } catch (error) {
+            console.error("Error saving user to database:", error);
+            res.status(500).send('Internal Server Error');
+        }
+    } else {
+        res.render('otppage', { errors: 'Invalid OTP' });
     }
 };
-
 
 exports.signinGet = async (req, res) => {
     try {
@@ -182,7 +172,6 @@ exports.signinPost = [
         } catch (error) {
             console.error("Error in signing in" + error)
         }
-
     },
 ];
 
@@ -198,27 +187,27 @@ exports.logoutuser = (req, res) => {
 };
 
 
-exports.googleSignIn = passport.authenticate('google', {
-    scope: ['profile'],
-});
+// exports.googleSignIn = passport.authenticate('google', {
+//     scope: ['profile'],
+// });
 
-exports.googleSignInCallback = passport.authenticate('google', {
-    successRedirect: '/user/auth/protected',
-    failureRedirect: '/user/auth/google/failure',
-});
+// exports.googleSignInCallback = passport.authenticate('google', {
+//     successRedirect: '/user/auth/protected',
+//     failureRedirect: '/user/auth/google/failure',
+// });
 
-exports.googleSignInFailure = (req, res) => {
-    res.send('Something went wrong with Google Sign-In!');
-};
+// exports.googleSignInFailure = (req, res) => {
+//     res.send('Something went wrong with Google Sign-In!');
+// };
 
-exports.protectedRoute = (req, res) => {
-    res.redirect('/user/home');
-};
+// exports.protectedRoute = (req, res) => {
+//     res.redirect('/user/home');
+// };
 
-exports.logout = (req, res) => {
-    req.logout();
-    res.send('See you again!');
-};
+// exports.logout = (req, res) => {
+//     req.logout();
+//     res.send('See you again!');
+// };
 
 
 
