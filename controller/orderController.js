@@ -11,15 +11,15 @@ const mongoose = require('mongoose');
 
 
 const checkedProducts = [];
-async function getOrderDetails(orderId) {
-    try {
-        const order = await Order.findById(orderId).populate('products.productId').populate('userId');
-        return order;
-    } catch (error) {
-        console.error('Error fetching order details:', error);
-        throw error;
-    }
-}
+// async function getOrderDetails(orderId) {
+//     try {
+//         const order = await Order.findById(orderId).populate('products.productId').populate('userId');
+//         return order;
+//     } catch (error) {
+//         console.error('Error fetching order details:', error);
+//         throw error;
+//     }
+// }
 
 exports.checkoutPageGet = async (req, res) => {
     try {
@@ -205,7 +205,7 @@ exports.orderPlaced = async (req, res) => {
 exports.orderDetails = async (req, res) => {
     try {
         const orderId = req.params.id;
-        console.log(orderId);
+        
 
         const order = await Order.findById(orderId).populate('products.productId');
 
@@ -223,10 +223,27 @@ exports.orderDetails = async (req, res) => {
 
 exports.cancelOrder = async (req, res) => {
     const { orderId, cancelReason } = req.body;
-    console.log(orderId)
-    console.log(cancelReason)
     try {
-        await Order.findByIdAndUpdate(orderId, { orderStatus: 'cancelled', cancelReason });
+        // Find the order to be canceled
+        const order = await Order.findById(orderId).populate('products.productId');
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+        // Update order status to 'cancelled' and save cancel reason
+        order.orderStatus = 'cancelled';
+        order.cancelReason = cancelReason;
+        await order.save();
+
+        // Increment product quantities for canceled order
+        for (const productItem of order.products) {
+            const product = await Product.findById(productItem.productId);
+            if (product) {
+                product.quantity += productItem.quantity;
+                await product.save();
+            }
+        }
+
         res.sendStatus(200);
     } catch (error) {
         console.error('Error occurred:', error);
@@ -236,109 +253,130 @@ exports.cancelOrder = async (req, res) => {
 
 
 
-
-
-exports.downloadInvoice = async (req, res) => {
+exports.removeproduct = async (req, res) => {
+    const { orderId, productId } = req.body;
+    console.log(orderId);
     try {
-        const orderId = req.params.id;
-        const order = await getOrderDetails(orderId);
-
+        // Find the order by ID and remove the product
+        const order = await Order.findById(orderId);
         if (!order) {
-            return res.status(404).send('Order not found');
+            return res.status(404).json({ error: 'Order not found' });
         }
 
-        const user = await User.findById(order.userId);
+        // Remove the product from the order's products array
+        order.products = order.products.filter(product => product.productId.toString() !== productId);
+        await order.save();
 
-        const invoiceDirectory = path.join(__dirname, '../invoices');
-        if (!fs.existsSync(invoiceDirectory)) {
-            fs.mkdirSync(invoiceDirectory);
-        }
-
-        const doc = new PDFDocument({ margin: 50 });
-
-        const invoicePath = path.join(__dirname, `../invoices/invoice_${orderId}.pdf`);
-        const writeStream = fs.createWriteStream(invoicePath);
-        doc.pipe(writeStream);
-
-        // Set up fonts
-        doc.font('Helvetica-Bold');
-        doc.fontSize(25).text('Invoice', { align: 'center' });
-        doc.moveDown();
-
-        // Add logo
-        const logoPath = path.join(__dirname, '../public/assets/imgs/theme/project-logo.png');
-        doc.image(logoPath, 50, 50, { width: 100 });
-
-        // Add user details
-        doc.moveDown();
-        doc.fontSize(14).text(`Customer: ${user.name}`);
-        doc.moveDown();
-        doc.fontSize(14).text(`Email: ${user.email}`, { align: 'left' });
-
-        // Add order date
-        doc.moveDown();
-        doc.fontSize(14).text(`Order Date: ${order.createdAt.toDateString()}`, { align: 'left' });
-
-        // Add order details
-        doc.moveDown();
-        doc.fontSize(16).text('Order Details:', { align: 'left' });
-
-        // Define constants for column widths
-        const colWidth = 120;
-        const colImageWidth = 100;
-        const colQtyWidth = 60;
-        const colTotalWidth = 100;
-
-        // Draw table headers
-        const tableX = 50;
-        const tableHeaders = ['Product Name', 'Image', 'Price', 'Quantity', 'Total'];
-        const tableY = doc.y + 30;
-
-        doc.font('Helvetica-Bold');
-        doc.rect(tableX, tableY, colWidth, 20).fill('#f2f2f2');
-        doc.rect(tableX + colWidth, tableY, colImageWidth, 20).fill('#f2f2f2');
-        doc.rect(tableX + colWidth + colImageWidth, tableY, colWidth, 20).fill('#f2f2f2');
-        doc.rect(tableX + colWidth + colImageWidth + colWidth, tableY, colQtyWidth, 20).fill('#f2f2f2');
-        doc.rect(tableX + colWidth + colImageWidth + colWidth + colQtyWidth, tableY, colTotalWidth, 20).fill('#f2f2f2');
-
-        doc.fontSize(12);
-        doc.fillColor('#000000');
-        doc.text(tableHeaders[0], tableX + 5, tableY + 5);
-        doc.text(tableHeaders[1], tableX + colWidth + 5, tableY + 5);
-        doc.text(tableHeaders[2], tableX + colWidth + colImageWidth + 5, tableY + 5);
-        doc.text(tableHeaders[3], tableX + colWidth + colImageWidth + colWidth + 5, tableY + 5);
-        doc.text(tableHeaders[4], tableX + colWidth + colImageWidth + colWidth + colQtyWidth + 5, tableY + 5);
-
-        // Draw table rows
-        let yPos = tableY + 30;
-        order.products.forEach(product => {
-            const productName = product.productId.productname;
-            const image = path.join(__dirname, `../public/uploads/${product.productId.productImages[0]}`);
-            const price = `$${product.productId.price.toFixed(2)}`;
-            const quantity = product.quantity;
-            const total = `$${(product.productId.price * product.quantity).toFixed(2)}`;
-
-            doc.image(image, tableX + colWidth + 5, yPos, { width: colImageWidth - 10 });
-            doc.text(productName, tableX + 5, yPos + 5);
-            doc.text(price, tableX + colWidth + colImageWidth + 5, yPos + 5);
-            doc.text(quantity.toString(), tableX + colWidth + colImageWidth + colWidth + 5, yPos + 5);
-            doc.text(total, tableX + colWidth + colImageWidth + colWidth + colQtyWidth + 5, yPos + 5);
-
-            yPos += 20;
-        });
-
-        // Add total amount
-        const grandTotal = `$${order.totalAmount.toFixed(2)}`;
-        doc.moveDown();
-        doc.fontSize(16).text(`Grand Total: ${grandTotal}`, { align: 'right' });
-
-        // Finalize the PDF
-        doc.end();
-
-        // Send the PDF file as a response
-        res.download(invoicePath);
-    } catch (err) {
-        console.error("Error occurred while generating or downloading invoice:", err);
-        res.status(500).send('Internal server error');
+        res.status(200).json({ message: 'Product removed successfully' });
+    } catch (error) {
+        console.error('Error removing product:', error);
+        res.status(500).json({ error: 'Failed to remove product' });
     }
 }
+
+
+
+// exports.downloadInvoice = async (req, res) => {
+//     try {
+//         const orderId = req.params.id;
+//         const order = await getOrderDetails(orderId);
+
+//         if (!order) {
+//             return res.status(404).send('Order not found');
+//         }
+
+//         const user = await User.findById(order.userId);
+
+//         const invoiceDirectory = path.join(__dirname, '../invoices');
+//         if (!fs.existsSync(invoiceDirectory)) {
+//             fs.mkdirSync(invoiceDirectory);
+//         }
+
+//         const doc = new PDFDocument({ margin: 50 });
+
+//         const invoicePath = path.join(__dirname, `../invoices/invoice_${orderId}.pdf`);
+//         const writeStream = fs.createWriteStream(invoicePath);
+//         doc.pipe(writeStream);
+
+//         // Set up fonts
+//         doc.font('Helvetica-Bold');
+//         doc.fontSize(25).text('Invoice', { align: 'center' });
+//         doc.moveDown();
+
+//         // Add logo
+//         const logoPath = path.join(__dirname, '../public/assets/imgs/theme/project-logo.png');
+//         doc.image(logoPath, 50, 50, { width: 100 });
+
+//         // Add user details
+//         doc.moveDown();
+//         doc.fontSize(14).text(`Customer: ${user.name}`);
+//         doc.moveDown();
+//         doc.fontSize(14).text(`Email: ${user.email}`, { align: 'left' });
+
+//         // Add order date
+//         doc.moveDown();
+//         doc.fontSize(14).text(`Order Date: ${order.createdAt.toDateString()}`, { align: 'left' });
+
+//         // Add order details
+//         doc.moveDown();
+//         doc.fontSize(16).text('Order Details:', { align: 'left' });
+
+//         // Define constants for column widths
+//         const colWidth = 120;
+//         const colImageWidth = 100;
+//         const colQtyWidth = 60;
+//         const colTotalWidth = 100;
+
+//         // Draw table headers
+//         const tableX = 50;
+//         const tableHeaders = ['Product Name', 'Image', 'Price', 'Quantity', 'Total'];
+//         const tableY = doc.y + 30;
+
+//         doc.font('Helvetica-Bold');
+//         doc.rect(tableX, tableY, colWidth, 20).fill('#f2f2f2');
+//         doc.rect(tableX + colWidth, tableY, colImageWidth, 20).fill('#f2f2f2');
+//         doc.rect(tableX + colWidth + colImageWidth, tableY, colWidth, 20).fill('#f2f2f2');
+//         doc.rect(tableX + colWidth + colImageWidth + colWidth, tableY, colQtyWidth, 20).fill('#f2f2f2');
+//         doc.rect(tableX + colWidth + colImageWidth + colWidth + colQtyWidth, tableY, colTotalWidth, 20).fill('#f2f2f2');
+
+//         doc.fontSize(12);
+//         doc.fillColor('#000000');
+//         doc.text(tableHeaders[0], tableX + 5, tableY + 5);
+//         doc.text(tableHeaders[1], tableX + colWidth + 5, tableY + 5);
+//         doc.text(tableHeaders[2], tableX + colWidth + colImageWidth + 5, tableY + 5);
+//         doc.text(tableHeaders[3], tableX + colWidth + colImageWidth + colWidth + 5, tableY + 5);
+//         doc.text(tableHeaders[4], tableX + colWidth + colImageWidth + colWidth + colQtyWidth + 5, tableY + 5);
+
+//         // Draw table rows
+//         let yPos = tableY + 30;
+//         order.products.forEach(product => {
+//             const productName = product.productId.productname;
+//             const image = path.join(__dirname, `../public/uploads/${product.productId.productImages[0]}`);
+//             const price = `$${product.productId.price.toFixed(2)}`;
+//             const quantity = product.quantity;
+//             const total = `$${(product.productId.price * product.quantity).toFixed(2)}`;
+
+//             doc.image(image, tableX + colWidth + 5, yPos, { width: colImageWidth - 10 });
+//             doc.text(productName, tableX + 5, yPos + 5);
+//             doc.text(price, tableX + colWidth + colImageWidth + 5, yPos + 5);
+//             doc.text(quantity.toString(), tableX + colWidth + colImageWidth + colWidth + 5, yPos + 5);
+//             doc.text(total, tableX + colWidth + colImageWidth + colWidth + colQtyWidth + 5, yPos + 5);
+
+//             yPos += 20;
+//         });
+
+//         // Add total amount
+//         const grandTotal = `$${order.totalAmount.toFixed(2)}`;
+//         doc.moveDown();
+//         doc.fontSize(16).text(`Grand Total: ${grandTotal}`, { align: 'right' });
+
+//         // Finalize the PDF
+//         doc.end();
+
+//         // Send the PDF file as a response
+//         res.download(invoicePath);
+//     } catch (err) {
+//         console.error("Error occurred while generating or downloading invoice:", err);
+//         res.status(500).send('Internal server error');
+//     }
+// }

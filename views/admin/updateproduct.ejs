@@ -1,20 +1,22 @@
 <%- include("../layouts/adminHeader") %>
 
     <div id="content">
-        <form action="/admin/updateproduct/<%= product._id %>" method="post" enctype="multipart/form-data">
-            <div class="container py-3">
-                <h1 class="h3">Update Product</h1>
+        <div class="container py-3">
+            <form action="/admin/updateproduct/<%= product._id %>" method="post" enctype="multipart/form-data">
+                <h1 class="h3">Product Creation</h1>
                 <hr>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="productName" class="form-label">Product Name</label>
                         <input type="text" class="form-control" id="productName" name="productname"
                             value="<%= product.productname %>" name="productname" placeholder="Enter product name here">
+                        <div id="productNameError" class="error-message"></div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea class="form-control" name="description" id="description" rows="3"
                             placeholder="Type description here"><%= product.description %></textarea>
+                        <div id="descriptionError" class="error-message"></div>
                     </div>
                 </div>
                 <div class="row">
@@ -28,6 +30,7 @@
                                 </option>
                                 <% }) %>
                         </select>
+                        <div id="categoryError" class="error-message"></div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label for="regularPrice" class="form-label">Regular Price</label>
@@ -35,6 +38,15 @@
                             <span class="input-group-text">₹</span>
                             <input type="number" class="form-control" value="<%= product.price %>" name="price"
                                 id="regularPrice" aria-label="Regular price">
+                            <div id="priceError" class="error-message"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="quantity" class="form-label">Remaining Products</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" value="<%= product.quantity %>" name="quantity"
+                                id="remainingProducts" placeholder="Enter number of remaining products">
+                            <div id="quantityError" class="error-message"></div>
                         </div>
                     </div>
                 </div>
@@ -44,20 +56,57 @@
                             uploaded)</label>
                         <input type="file" class="form-control mb-2" id="productGallery" name="productImages" multiple>
                         <div class="row">
-                            <% product.productImages.forEach(image=> { %>
+                            <% product.productImages.forEach((image, index)=> { %>
                                 <div class="col-md-3 mb-3">
                                     <img src="/uploads/<%= image %>" class="img-fluid" alt="Product Image">
-                                    <a href="#" class="btn-delete" data-image="<%= image %>">Delete</a>
+                                    <a href="#" class="btn-delete" data-index="<%= index %>"
+                                        data-image="<%= image %>">Delete</a>
                                 </div>
                                 <% }) %>
                         </div>
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="remainingProducts" class="form-label">Remaining Products</label>
-                        <input type="number" class="form-control" value="<%= product.quantity %>" name="quantity"
-                            id="remainingProducts" placeholder="Enter number of remaining products">
+                <div class="row mb-3" id="imagePreviewsContainer">
+                    <!-- Image previews will be appended here -->
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="length" class="form-label">Length</label>
+                        <input type="number" class="form-control" id="length" name="length"
+                            value="<%= product.length %>" placeholder="Enter the Length">
+                        <div id="lengthError" class="error-message"></div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="width" class="form-label">Width</label>
+                        <input type="number" class="form-control" id="width" name="width" value="<%= product.width %>"
+                            placeholder="Enter the Width">
+                        <div id="widthError" class="error-message"></div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="height" class="form-label">Height</label>
+                        <input type="number" class="form-control" id="height" name="height"
+                            value="<%= product.height %>" placeholder="Enter the Height">
+                        <div id="heightError" class="error-message"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="material" class="form-label">Material</label>
+                        <input type="text" class="form-control" id="material" name="material"
+                            value="<%= product.material %>" placeholder="Enter the Material">
+                        <div id="materialError" class="error-message"></div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="shape" class="form-label">Shape</label>
+                        <input type="text" class="form-control" id="shape" name="shape" value="<%= product.shape %>"
+                            placeholder="Enter the Shape">
+                        <div id="shapeError" class="error-message"></div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="weight" class="form-label">Weight</label>
+                        <input type="number" class="form-control" id="weight" name="weight"
+                            value="<%= product.weight %>" placeholder="Enter the Weight">
+                        <div id="weightError" class="error-message"></div>
                     </div>
                 </div>
                 <input type="hidden" id="productId" value="<%= product._id %>">
@@ -70,42 +119,217 @@
                         <a href="/admin/products" class="btn btn-outline-secondary">Cancel</a>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
-    <%- include("../layouts/adminFooter") %>
+    <script>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const deleteButtons = document.querySelectorAll(".btn-delete");
-                const form = document.querySelector('form');
+        function validateProduct() {
+            event.preventDefault()
+            var name = document.getElementById("productname").value.trim();
+            var description = document.getElementById("description").value.trim();
+            var category = document.getElementById("category").value.trim();
+            var price = document.getElementById("regularPrice").value.trim();
+            var quantity = document.getElementById("remainingProducts").value.trim();
+            var image = document.getElementById("productGallery").value.trim();
+            var length = document.getElementById("length").value.trim();
+            var width = document.getElementById("width").value.trim();
+            var height = document.getElementById("height").value.trim();
+            var shape = document.getElementById("shape").value.trim();
+            var material = document.getElementById("material").value.trim();
+            var weight = document.getElementById("weight").value.trim();
+            var valid = true;
 
-                deleteButtons.forEach(button => {
-                    button.addEventListener("click", function (event) {
-                        event.preventDefault();
+            // Name validation
+            if (!name) {
+                document.getElementById("productNameError").innerText =
+                    "Product name is required";
+                document.getElementById("productNameError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("productNameError").innerText = "";
+            }
 
-                        const index = this.dataset.index;
-                        const imageContainer = this.parentElement;
-                        const confirmation = confirm("Are you sure you want to delete this image?");
+            if (!description) {
+                document.getElementById("descriptionError").innerText =
+                    "Description is required";
+                document.getElementById("descriptionError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("descriptionError").innerText = "";
+            }
 
-                        if (confirmation) {
-                            // Remove the image container from the DOM
-                            imageContainer.remove();
-                            // Update deleted images input value
-                            const deletedImagesInput = document.getElementById('deletedImages');
-                            const deletedImages = deletedImagesInput.value.split(',');
-                            deletedImages.push(this.dataset.image);
-                            deletedImagesInput.value = deletedImages.join(',');
+            if (!category) {
+                document.getElementById("categoryError").innerText =
+                    "Category is required";
+                document.getElementById("categoryError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("categoryError").innerText = "";
+            }
+
+            if (!price) {
+                document.getElementById("priceError").innerText =
+                    "Price is required";
+                document.getElementById("priceError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("priceError").innerText = "";
+            }
+
+            if (!quantity) {
+                document.getElementById("quantityError").innerText =
+                    "Quantity is required";
+                document.getElementById("quantityError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("quantityError").innerText = "";
+            }
+
+            if (!image) {
+                document.getElementById("imageError").innerText =
+                    "Image is required";
+                document.getElementById("imageError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("imageError").innerText = "";
+            }
+
+            if (!length) {
+                document.getElementById("lengthError").innerText =
+                    "Length is required";
+                document.getElementById("lengthError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("lengthError").innerText = "";
+            }
+
+            if (!width) {
+                document.getElementById("widthError").innerText =
+                    "Width is required";
+                document.getElementById("widthError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("widthError").innerText = "";
+            }
+
+            if (!height) {
+                document.getElementById("heightError").innerText =
+                    "Height is required";
+                document.getElementById("heightError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("heightError").innerText = "";
+            }
+
+            if (!material) {
+                document.getElementById("materialError").innerText =
+                    "Material is required";
+                document.getElementById("materialError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("materialError").innerText = "";
+            }
+
+            if (!shape) {
+                document.getElementById("shapeError").innerText =
+                    "Shape is required";
+                document.getElementById("shapeError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("shapeError").innerText = "";
+            }
+
+            if (!weight) {
+                document.getElementById("weightError").innerText =
+                    "Weight is required";
+                document.getElementById("weightError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("weightError").innerText = "";
+            }
+
+            if (valid) {
+                document.getElementById("productForm").submit();
+            }
+        }
+
+
+        document.getElementById('productGallery').addEventListener('change', function (event) {
+            const imagePreviewsContainer = document.getElementById('imagePreviewsContainer');
+            imagePreviewsContainer.innerHTML = ''; // Clear existing previews
+
+            const files = event.target.files;
+            if (files) {
+                for (let i = 0; i < files.length; i++) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Product Image';
+                        img.style.maxWidth = '200px';
+                        img.style.maxHeight = '200px';
+                        imagePreviewsContainer.appendChild(img);
+                    }
+                    reader.readAsDataURL(files[i]);
+                }
+            }
+        });
+
+
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const deleteButtons = document.querySelectorAll(".btn-delete");
+
+            deleteButtons.forEach(button => {
+                button.addEventListener("click", async function (event) {
+                    event.preventDefault();
+
+                    const productId = document.getElementById('productId').value;
+                    const imageIndex = this.dataset.index;
+                    const imageName = this.dataset.image;
+
+                    // Use SweetAlert for confirmation
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'You are about to delete this image!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            try {
+                                const response = await fetch('/admin/deleteimage', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ productId, imageName })
+                                });
+                                const data = await response.json();
+                                if (response.ok) {
+                                    // Remove the image container from the DOM
+                                    this.parentElement.remove();
+                                    Swal.fire('Deleted!', data.message, 'success');
+                                } else {
+                                    Swal.fire('Error!', data.message, 'error');
+                                }
+                            } catch (error) {
+                                console.error(error);
+                                Swal.fire('Error!', 'Error deleting image', 'error');
+                            }
                         }
                     });
                 });
-
-                // Submit form when adding or deleting images
-                document.getElementById('updateProduct').addEventListener('click', function (event) {
-                    event.preventDefault();
-                    form.submit();
-                });
             });
+        });
 
-        </script>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <%- include("../layouts/adminFooter") %>

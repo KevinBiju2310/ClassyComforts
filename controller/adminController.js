@@ -2,6 +2,7 @@ const { check, validationResult } = require('express-validator')
 const User = require('../modal/userModal')
 const bcrypt = require('bcrypt');
 const Order = require('../modal/orderModel')
+const Product = require('../modal/productModel')
 const Category = require('../modal/categoryModel')
 
 
@@ -127,10 +128,26 @@ exports.toggleUserBlock = async (req, res) => {
 // Admin
 exports.orderGet = async (req, res) => {
     try {
-        const order = await Order.find().populate('userId').populate('products.productId');
-        res.render('orders', { order });
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 7;
+        const totalOrders = await Order.countDocuments();
+        const totalPages = Math.ceil(totalOrders / perPage);
+        const skip = (page - 1) * perPage;
+
+        const order = await Order.find()
+            .populate('userId')
+            .populate('products.productId')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(perPage);
+
+        res.render('orders', {
+            order,
+            currentPage: page,
+            totalPages
+        });
     } catch (error) {
-        console.log("Error Happend : ", error);
+        console.log("Error Happened: ", error);
     }
 }
 
@@ -140,8 +157,29 @@ exports.updateOrderStatus = async (req, res) => {
     const { newStatus } = req.body;
     console.log(newStatus);
     try {
-        // Find the order by ID and update its status
         const updatedOrder = await Order.findByIdAndUpdate(orderId, { orderStatus: newStatus }, { new: true });
+
+        if (newStatus === 'cancelled') {
+            const order = await Order.findById(orderId).populate('products.productId');
+
+            for (const productItem of order.products) {
+                const product = await Product.findById(productItem.productId);
+                if (product) {
+                    product.quantity += productItem.quantity;
+                    await product.save();
+                }
+            }
+        } else if (newStatus === 'shipped') {
+            const order = await Order.findById(orderId).populate('products.productId');
+
+            for (const productItem of order.products) {
+                const product = await Product.findById(productItem.productId);
+                if (product) {
+                    product.quantity -= productItem.quantity;
+                    await product.save();
+                }
+            }
+        }
         res.status(200).json({ message: 'Order status updated successfully', order: updatedOrder });
     } catch (error) {
         console.error('Error updating order status:', error);

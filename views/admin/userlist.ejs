@@ -1,5 +1,27 @@
 <%- include("../layouts/adminHeader") %>
 
+    <!-- Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to <span id="actionText"></span> this user?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmButton">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="content">
         <h1>User Details</h1>
         <div class="d-flex justify-content-end align-items-center mt-2">
@@ -29,8 +51,8 @@
                             <%= user.phone %>
                         </td>
                         <td>
-                            <button type="submit" class="btn <%= user.isBlocked ? 'btn-success' : 'btn-danger' %>"
-                                onclick="toggleUserBlock('<%= user._id %>')">
+                            <button type="button" class="btn <%= user.isBlocked ? 'btn-success' : 'btn-danger' %>"
+                                onclick="showConfirmationModal('<%= user._id %>', '<%= user.isBlocked %>')">
                                 <%= user.isBlocked ? 'Unblock' : 'Block' %>
                             </button>
                         </td>
@@ -70,15 +92,24 @@
     <%- include("../layouts/adminFooter") %>
 
         <script>
-            async function toggleUserBlock(userId) {
+            let userIdToDelete;
+
+            function showConfirmationModal(userId, isBlocked) {
+                userIdToDelete = userId;
+                const actionText = isBlocked ? 'unblock' : 'block';
+                document.getElementById('actionText').textContent = actionText;
+                $('#confirmationModal').modal('show');
+            }
+
+            async function toggleUserBlock() {
                 try {
-                    const response = await fetch(`/admin/toggleUserBlock/${userId}`, {
+                    const response = await fetch(`/admin/toggleUserBlock/${userIdToDelete}`, {
                         method: 'POST',
                     });
 
                     if (response.ok) {
                         const data = await response.json();
-                        const button = document.getElementById(`toggleButton-${userId}`);
+                        const button = document.getElementById(`toggleButton-${userIdToDelete}`);
 
                         // Update the button status based on the response from the server
                         button.innerHTML = data.status;
@@ -90,12 +121,15 @@
                 } catch (error) {
                     console.error('Error toggling user block status:', error);
                 } finally {
-                    location.reload()
+                    $('#confirmationModal').modal('hide');
+                    location.reload();
                 }
             }
-    
+
             function searchUsers() {
                 // Add logic for searching users
                 console.log('Searching users...');
             }
+
+            document.getElementById('confirmButton').addEventListener('click', toggleUserBlock);
         </script>

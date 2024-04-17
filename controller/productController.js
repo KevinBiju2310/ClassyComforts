@@ -199,6 +199,34 @@ exports.updateproductPost = async (req, res) => {
     }
 };
 
+
+
+exports.deleteimage = async (req, res) => {
+    try {
+        const { productId, imageName } = req.body; // Assuming you pass productId and imageName from the frontend
+
+        // Delete the image from the file system (if stored locally)
+        // Write your code here to delete the image from the file system
+
+        // Delete the image from the database
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        // Remove the image from the product's images array
+        const updatedImages = product.productImages.filter(image => image !== imageName);
+        product.productImages = updatedImages;
+        await product.save();
+
+        res.status(200).json({ message: 'Image deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+
 exports.deleteproductPost = async (req, res) => {
     try {
         const productId = req.params.id;
@@ -237,7 +265,7 @@ exports.sortproductGet = async (req, res) => {
         sortOption = { price: -1 }
     }
     try {
-        const sortedProducts = await Product.find({}).sort(sortOption);
+        const sortedProducts = await Product.find({ deleted: { $ne: true } }).sort(sortOption);
         res.json(sortedProducts)
     } catch (error) {
         console.log("Error", error);

@@ -25,7 +25,7 @@ const transporter = nodemailer.createTransport(emailConfig);
 exports.homeGet = async (req, res) => {
     try {
         const products = await Product.find({ deleted: false });
-        res.render('home', { products });
+        res.status(200).render('home', { products });
     } catch (error) {
         console.error("Error rendering home: ", error);
         res.status(500).send('Internet Server Error')
@@ -34,7 +34,7 @@ exports.homeGet = async (req, res) => {
 
 exports.signupGet = async (req, res) => {
     try {
-        await res.render('signup', { errors: '' });
+        await res.status(200).render('signup', { errors: '' });
     } catch (error) {
         console.error("Error rendering singup: ", error);
         res.status(500).send('Internet Server Error');
@@ -94,7 +94,7 @@ exports.signupPost = [
                 password: hashedPassword,
                 otp,
             };
-            res.redirect('/user/verifyotp');
+            res.status(200).redirect('/user/verifyotp');
         } catch (error) {
             console.error("Error signing up:", error);
             res.status(500).send('Internal Server Error');
@@ -187,33 +187,33 @@ exports.logoutuser = (req, res) => {
 };
 
 
-// exports.googleSignIn = passport.authenticate('google', {
-//     scope: ['profile'],
-// });
+exports.googleSignIn = passport.authenticate('google', {
+    scope: ['profile'],
+});
 
-// exports.googleSignInCallback = passport.authenticate('google', {
-//     successRedirect: '/user/auth/protected',
-//     failureRedirect: '/user/auth/google/failure',
-// });
+exports.googleSignInCallback = passport.authenticate('google', {
+    successRedirect: '/user/auth/protected',
+    failureRedirect: '/user/auth/google/failure',
+});
 
-// exports.googleSignInFailure = (req, res) => {
-//     res.send('Something went wrong with Google Sign-In!');
-// };
+exports.googleSignInFailure = (req, res) => {
+    res.send('Something went wrong with Google Sign-In!');
+};
 
-// exports.protectedRoute = (req, res) => {
-//     res.redirect('/user/home');
-// };
+exports.protectedRoute = (req, res) => {
+    res.redirect('/user/home');
+};
 
-// exports.logout = (req, res) => {
-//     req.logout();
-//     res.send('See you again!');
-// };
+exports.logout = (req, res) => {
+    req.logout();
+    res.send('See you again!');
+};
 
 
 
 exports.forgotPasswordGet = async (req, res) => {
     try {
-        return res.render('forgotpassword', { errors: '' });
+        return res.status(200).render('forgotpassword', { errors: '' });
     } catch (error) {
         console.error("Error rendering forgotpassword: ", error)
     }
@@ -262,7 +262,7 @@ exports.resetPasswordGet = async (req, res) => {
 
         const secret = process.env.JWT_SECRET + user.password;
         const payload = jwt.verify(token, secret);
-        return res.render('resetpassword', { id, token, email: user.email });
+        return res.status(200).render('resetpassword', { id, token, email: user.email });
     } catch (error) {
         console.error(error.message);
         return res.send(error.message);
@@ -319,7 +319,7 @@ exports.shoppageGet = async (req, res) => {
 
         const products = await Product.find(query).skip(skip).limit(perPage);
         const category = await Category.find({ deleted: false });
-        res.render('shop', { products, category, totalPages, currentPage: page });
+        res.status(200).render('shop', { products, category, totalPages, currentPage: page });
     } catch (error) {
         console.log("Error Occured");
     }

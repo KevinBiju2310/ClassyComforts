@@ -14,11 +14,11 @@ router.post('/signup', userController.signupPost);
 router.get('/signin', userController.signinGet);
 router.post('/signin', userController.signinPost);
 
-// router.get('/auth/google', userController.googleSignIn);
-// router.get('/auth/google/callback', userController.googleSignInCallback);
-// router.get('/auth/google/failure', userController.googleSignInFailure);
-// router.get('/auth/protected', userController.protectedRoute);
-// router.use('/auth/logout', userController.logout);
+router.get('/auth/google', userController.googleSignIn);
+router.get('/auth/google/callback', userController.googleSignInCallback);
+router.get('/auth/google/failure', userController.googleSignInFailure);
+router.get('/auth/protected', userController.protectedRoute);
+router.use('/auth/logout', userController.logout);
 
 router.get('/verifyotp', userController.verifyOTPGet)
 router.post('/verifyotp', userController.verifyOTP)
@@ -34,7 +34,7 @@ router.get('/singleproduct/:id', isLoggedIn, productController.singleproductGet)
 router.get('/accountdetails', isLoggedIn, userProfileController.profileGet);
 router.post('/address', userProfileController.addAddress);
 router.post('/editaddress/:addressId', userProfileController.editAddress);
-router.delete('/deleteaddress/:addressId',isLoggedIn, userProfileController.deleteAddress);
+router.delete('/deleteaddress/:addressId', isLoggedIn, userProfileController.deleteAddress);
 router.post('/changepassword', isLoggedIn, userProfileController.changepassword);
 
 router.get('/orderdetails/:id', isLoggedIn, orderController.orderDetails);
@@ -49,9 +49,10 @@ router.get('/checkout', isLoggedIn, orderController.checkoutPageGet)
 router.post('/checkout', isLoggedIn, orderController.checkoutPage);
 router.post('/checkout/editaddress/:addressId', isLoggedIn, orderController.editAddress);
 router.post('/checkout/address', isLoggedIn, orderController.addAddress);
-router.post('/invoice/:id', orderController.downloadInvoice);
+router.post('/remove-product', orderController.removeproduct)
+// router.post('/invoice/:id', orderController.downloadInvoice);
 
-router.get('/sort', isLoggedIn,productController.sortproductGet);
+router.get('/sort', isLoggedIn, productController.sortproductGet);
 
 
 // router.get('/ordered', isLoggedIn, orderController.orderPlaced);

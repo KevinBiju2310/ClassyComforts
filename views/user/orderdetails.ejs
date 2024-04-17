@@ -73,12 +73,16 @@
                                                             <th>Price</th>
                                                             <th>Quantity</th>
                                                             <th>Total</th>
-
+                                                            <% if (order.products.length> 1) { %>
+                                                                <!-- Check if there are more than one product -->
+                                                                <th>Action</th>
+                                                                <!-- Added a new column for the action button if more than one product -->
+                                                                <% } %>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <% order.products.forEach((product, index)=> { %>
-                                                            <tr>
+                                                            <tr id="orderRow_<%= index %>">
                                                                 <td>
                                                                     <%= order.createdAt.toDateString() %>
                                                                 </td>
@@ -105,6 +109,13 @@
                                                                 <td>$<%= (product.productId.price *
                                                                         product.quantity).toFixed(2) %>
                                                                 </td>
+                                                                <% if (order.products.length> 1) { %>
+                                                                    <!-- Check if there are more than one product -->
+                                                                    <td>
+                                                                        <button class="btn btn-danger"
+                                                                            onclick="removeProduct('<%= order._id %>', '<%= product.productId %>', '<%= index %>')">Remove</button>
+                                                                    </td>
+                                                                    <% } %>
                                                             </tr>
                                                             <% }); %>
 
@@ -190,6 +201,8 @@
             if (orderStatus === "cancelled") {
                 document.getElementById('cancelOrderBtn').disabled = true;
                 document.getElementById('downloadInvoiceBtn').disabled = true;
+            } else if (orderStatus === "shipped") {
+                document.getElementById('cancelOrderBtn').disabled = true;
             }
         });
 
@@ -282,6 +295,41 @@
             html2pdf().from(invoiceSection).set(options).save();
         });
 
+
+
+        function removeProduct(orderId, productId, rowIndex) {
+            console.log("order", orderId)
+            console.log("product", productId)
+            // Send a POST request to the backend route to remove the product
+            fetch('/user/remove-product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    orderId: orderId,
+                    productId: productId
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to remove product');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle successful response by removing the corresponding row from the table
+                    console.log(data.message);
+                    const tableRow = document.getElementById('orderRow_' + rowIndex);
+                    if (tableRow) {
+                        tableRow.remove();
+                    } 
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error:', error.message);
+                });
+        }
     </script>
 
 

@@ -31,6 +31,7 @@ router.get('/updateproduct/:id', isAdminLogin, productController.updateproductGe
 router.post('/updateproduct/:id', productController.updateproductPost)
 router.post('/deleteproduct/:id', productController.deleteproductPost);
 
+router.post('/deleteimage',productController.deleteimage)
 
 router.get('/orders', isAdminLogin, adminController.orderGet)
 router.post('/orders/:orderId/status', adminController.updateOrderStatus);
