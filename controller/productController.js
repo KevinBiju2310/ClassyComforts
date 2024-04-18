@@ -143,61 +143,66 @@ exports.updateproductGet = async (req, res) => {
     }
 };
 
+
+
 exports.updateproductPost = async (req, res) => {
     try {
         const productId = req.params.id;
-        const { productname, description, category, price, quantity, length, width, height, material, shape, weight } = req.body;
-        let productImages = [];
+        upload(req, res, async function (err) {
+            if (err instanceof multer.MulterError) {
+                console.log(`Multer error: ${err}`);
+                return res.status(500).send("Error uploading the images");
+            } else if (err) {
+                console.log(`Unknown error: ${err}`);
+                return res.status(500).send(`Unknown Error Occurred. The Error: ${err}`);
+            }
 
-        // Handle uploaded images
-        if (req.files && req.files.length > 0) {
-            await Promise.all(req.files.map(async file => {
-                const filename = file.path.split('/').pop();
-                const outputPath = `public/uploads/${filename}`;
-                await sharp(file.path)
-                    .resize(700, 700) // Crop and resize
-                    .toFile(outputPath); // Save cropped image
-                productImages.push(outputPath); // Push path to array
-            }));
-        }
+            try {
+                const productImages = req.files.map(file => file.path);
 
-        // Handle deleted images
-        if (req.body.deletedImages && req.body.deletedImages.length > 0) {
-            await Promise.all(req.body.deletedImages.map(async imagePath => {
-                // Remove image from filesystem
-                await fsmod.unlink(imagePath);
-                // Remove image path from database
-                await Product.findByIdAndUpdate(productId, {
-                    $pull: { productImages: imagePath }
-                });
-            }));
-        }
-        // Update product in database
-        const updatedProduct = await Product.findByIdAndUpdate(productId, {
-            productname,
-            description,
-            category,
-            price,
-            quantity,
-            length,
-            width,
-            height,
-            shape,
-            weight,
-            material,
-            $addToSet: { productImages: { $each: productImages } }
-        }, { new: true });
+                const resizedImages = await Promise.all(
+                    productImages.map(async filePath => {
+                        const resizedImageBuffer = await sharp(filePath)
+                            .resize(700, 700)
+                            .toBuffer();
+                        const { filename, destinationPath } = await saveResizedImage(resizedImageBuffer, path.basename(filePath));
+                        return filename;
+                    })
+                );
 
-        if (!updatedProduct) {
-            return res.status(404).send("Product not found");
-        }
+                const { productname, description, category, price, quantity, length, width, height, material, shape, weight } = req.body;
 
-        res.redirect('/admin/products');
-    } catch (error) {
-        console.log("Error Occurred: ", error);
-        res.status(500).send("Internal Server Error");
+                const updatedProduct = await Product.findByIdAndUpdate(productId, {
+                    productname,
+                    description,
+                    category,
+                    price,
+                    quantity,
+                    length,
+                    width,
+                    height,
+                    shape,
+                    weight,
+                    material,
+                    $push: { productImages: { $each: resizedImages } }
+                }, { new: true });
+
+                if (!updatedProduct) {
+                    return res.status(404).send("Product not found");
+                }
+
+                res.redirect('/admin/products');
+            } catch (err) {
+                console.log(`Error occurred while updating the product: ${err}`);
+                return res.status(500).send(`Error updating product: ${err.message}`);
+            }
+        });
+    } catch (err) {
+        console.log(`Error occurred: ${err}`);
+        res.status(500).send("Error editing Product.");
     }
 };
+
 
 
 
