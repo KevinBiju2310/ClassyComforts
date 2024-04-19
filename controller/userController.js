@@ -32,6 +32,12 @@ exports.homeGet = async (req, res) => {
     }
 }
 
+
+exports.pagenotfound = async(req,res) =>{
+    await res.render('pagenotfound')
+}
+
+
 exports.signupGet = async (req, res) => {
     try {
         await res.status(200).render('signup', { errors: '' });

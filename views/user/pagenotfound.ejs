@@ -1,0 +1,54 @@
+<%- include("../layouts/userHeader") %>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght400,700&display=swap');
+
+
+        h1 {
+            font-size: 96px;
+            font-weight: 700;
+            color: #ffc107;
+            margin-bottom: 20px;
+        }
+
+        .broken-shovel img {
+            max-width: 200px;
+        }
+
+        p {
+            margin: 20px 0;
+            color: #555;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #ffc107;
+            color: #2c2c2c;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #ffd54f;
+        }
+    </style>
+    <main class="main">
+        <section class="mt-50 mb-50">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 pt-3 pb-3" style="display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 10px 10px rgba(0, 0, 0, 0.3);">
+                        <h1>404</h1>
+                        <div class="broken-shovel">
+                            <img src="/assets/imgs/theme/404-chair.png" alt="404-PageNotFound-Image">
+                        </div>
+                        <p>PAGE NOT FOUND</p>
+                        <p>Sorry, but the page that you requested does not exist.</p>
+                        <a href="/user/home" class="btn">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <%- include("../layouts/userFooter") %>

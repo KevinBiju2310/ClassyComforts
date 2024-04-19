@@ -124,6 +124,25 @@ exports.deleteAddress = async (req, res) => {
 
 
 
+
+exports.changedetails = async (req, res) => {
+    const userId = req.session.user._id;
+    const { changename, changephone, changeemail } = req.body;
+    try {
+        const user = await User.findByIdAndUpdate(userId, { name: changename, email: changeemail, phone: changephone }, { new: true });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        return res.status(200).json({ message: "User details updated successfully" });
+    } catch (error) {
+        console.log("Error occurred", error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+
+
+
 exports.changepassword = async (req, res) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const userId = req.session.user._id;
@@ -133,11 +152,11 @@ exports.changepassword = async (req, res) => {
         console.log(user)
         const passwordMatch = await bcrypt.compare(currentPassword, user.password);
         if (!passwordMatch) {
-            return res.render('accountdetails', { error: 'Current password is incorrect' });
+            return res.status(400).json({ error: 'Current password is incorrect' });
         }
 
         if (newPassword !== confirmPassword) {
-            return res.render('accountdetails', { error: 'New password and confirm password do not match' });
+            return res.status(400).json({ error: 'New password and confirm password do not match' });
         }
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await User.findByIdAndUpdate(userId, { password: hashedPassword });
@@ -148,7 +167,6 @@ exports.changepassword = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
-
 
 
 

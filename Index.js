@@ -39,6 +39,10 @@ app.use(passport.session());
 app.use('/admin', adminRoute);
 app.use('/user', userRoute);
 
+app.use('/user/*',(req,res)=>{
+  res.redirect('/user/pagenotfound')
+})
+
 
 app.listen(5000, () => {
   console.log('Server is running');

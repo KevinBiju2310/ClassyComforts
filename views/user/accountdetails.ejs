@@ -258,40 +258,40 @@
                                     </div>
                                     <div class="tab-pane fade" id="account-detail" role="tabpanel"
                                         aria-labelledby="account-detail-tab">
-                                        <!-- <div class="card">
+                                        <div class="card">
                                             <div class="card-header">
                                                 <h5>Account Details</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form method="post" name="enq">
+                                                <form id="changeaccount" method="post">
                                                     <div class="row">
                                                         <div class="form-group col-md-6">
-                                                            <label>First Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="name"
+                                                            <label>Name</label>
+                                                            <input class="form-control square" name="name" id="name"
                                                                 type="text">
+                                                            <span id="changenameError" class="error"></span>
                                                         </div>
                                                         <div class="form-group col-md-6">
-                                                            <label>Last Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="phone">
+                                                            <label>Phone</label>
+                                                            <input class="form-control square" name="phone" id="phone"
+                                                                type="number">
+                                                            <span id="changephoneError" class="error"></span>
                                                         </div>
                                                         <div class="form-group col-md-12">
-                                                            <label>Display Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="dname"
-                                                                type="text">
-                                                        </div>
-                                                        <div class="form-group col-md-12">
-                                                            <label>Email Address <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="email"
+                                                            <label>Email Address</label>
+                                                            <input class="form-control square" name="email" id="email"
                                                                 type="email">
+                                                            <span id="changeemailError" class="error"></span>
                                                         </div>
                                                         <div class="col-md-12">
                                                             <button type="submit" class="btn btn-fill-out submit"
-                                                                name="submit" value="Submit">Save</button>
+                                                                name="submit" value="Submit"
+                                                                onclick="validateAccount()">Save</button>
                                                         </div>
                                                     </div>
                                                 </form>
                                             </div>
-                                        </div> -->
+                                        </div>
                                         <div class="card mt-3">
                                             <div class="card-header">
                                                 <h5>Change Password</h5>
@@ -321,7 +321,7 @@
                                                             <span id="confirmPasswordError" class="error"></span>
                                                         </div>
                                                         <div class="col-md-12">
-                                                            <button type="submit"
+                                                            <button type="submit" onclick="validateChangePassword()"
                                                                 class="btn btn-fill-out submit">Save</button>
                                                         </div>
                                                     </div>
@@ -515,6 +515,7 @@
                         </div>
                     </div>
 
+                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                     <script>
                         const deleteButtons = document.querySelectorAll('.deleteAddressButton');
                         const confirmDeleteButton = document.getElementById('confirmDelete');
@@ -533,7 +534,6 @@
                             })
                                 .then(response => response.json())
                                 .then(data => {
-                                    // Remove the card from the page
                                     const cardToRemove = document.querySelector(`[data-address-id='${addressId}']`).closest('.col-lg-6');
                                     cardToRemove.remove();
                                     // Close the modal
@@ -545,35 +545,77 @@
 
 
 
-                        document.getElementById('changePasswordForm').addEventListener('submit', function (event) {
-                            const currentPassword = document.getElementById('currentPassword').value;
-                            const newPassword = document.getElementById('newPassword').value;
-                            const confirmPassword = document.getElementById('confirmPassword').value;
-                            const currentPasswordError = document.getElementById('currentPasswordError');
-                            const newPasswordError = document.getElementById('newPasswordError');
-                            const confirmPasswordError = document.getElementById('confirmPasswordError');
+                        function validateChangePassword() {
+                            event.preventDefault();
+                            var currentPassword = document.getElementById("currentPassword").value.trim();
+                            var newPassword = document.getElementById("newPassword").value.trim();
+                            var confirmPassword = document.getElementById("confirmPassword").value.trim();
+                            var valid = true;
 
-                            if (currentPassword.length < 6) {
-                                currentPasswordError.innerText = 'Current password is required';
-                                event.preventDefault(); // Prevent form submission
-                            } else {
-                                currentPasswordError.innerText = ''; // Clear error message
+                            // Reset error messages
+                            document.getElementById("currentPasswordError").innerText = "";
+                            document.getElementById("newPasswordError").innerText = "";
+                            document.getElementById("confirmPasswordError").innerText = "";
+
+                            // Check if fields are empty
+                            if (!currentPassword) {
+                                document.getElementById("currentPasswordError").innerText = "Current password is required";
+                                document.getElementById("currentPasswordError").style.color = "red";
+                                valid = false;
                             }
 
-                            if (newPassword.length < 6) {
-                                newPasswordError.innerText = 'New password must be at least 6 characters long';
-                                event.preventDefault(); // Prevent form submission
-                            } else {
-                                newPasswordError.innerText = ''; // Clear error message
+                            if (!newPassword) {
+                                document.getElementById("newPasswordError").innerText = "New password is required";
+                                document.getElementById("newPasswordError").style.color = "red";
+                                valid = false;
+                            }
+
+                            if (!confirmPassword) {
+                                document.getElementById("confirmPasswordError").innerText = "Confirm password is required";
+                                document.getElementById("confirmPasswordError").style.color = "red";
+                                valid = false;
                             }
 
                             if (newPassword !== confirmPassword) {
-                                confirmPasswordError.innerText = 'Passwords do not match';
-                                event.preventDefault(); // Prevent form submission
-                            } else {
-                                confirmPasswordError.innerText = ''; // Clear error message
+                                document.getElementById("confirmPasswordError").innerText = "New password and confirm password do not match";
+                                document.getElementById("confirmPasswordError").style.color = "red";
+                                valid = false;
                             }
-                        });
+
+                            if (!valid) {
+                                return;
+                            }
+
+                            fetch('/user/changepassword', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+                            })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        return response.json().then(error => {
+                                            if (error.error === 'Current password is incorrect') {
+                                                document.getElementById("currentPasswordError").innerText = error.error;
+                                                document.getElementById("currentPasswordError").style.color = "red";
+                                            }
+                                        });
+                                    }
+
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success',
+                                        text: 'Password changed successfully',
+                                        timer: 2000
+                                    }).then(() => {
+                                        document.getElementById("changePasswordForm").reset();
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                });
+                        }
 
 
 
@@ -670,6 +712,82 @@
                                 document.getElementById("addressForm").submit();
                             }
                         }
+
+
+
+                        function validateAccount() {
+                            event.preventDefault();
+                            var changename = document.getElementById("name").value.trim();
+                            var changephone = document.getElementById("phone").value.trim();
+                            var changeemail = document.getElementById("email").value.trim();
+                            var valid = true;
+
+                            if (!changename) {
+                                document.getElementById("changenameError").innerText =
+                                    "Name is required";
+                                document.getElementById("changenameError").style.color = "red";
+                                valid = false;
+                            } else {
+                                document.getElementById("changenameError").innerText = "";
+                            }
+
+                            if (!changephone) {
+                                document.getElementById("changephoneError").innerText =
+                                    "Phone is required";
+                                document.getElementById("changephoneError").style.color = "red";
+                                valid = false;
+                            } else {
+                                document.getElementById("changephoneError").innerText = "";
+                            }
+
+                            if (!changeemail) {
+                                document.getElementById("changeemailError").innerText =
+                                    "Email is required";
+                                document.getElementById("changeemailError").style.color = "red";
+                                valid = false;
+                            } else {
+                                document.getElementById("changeemailError").innerText = "";
+                            }
+
+
+                            if (!valid) {
+                                return
+                            }
+
+
+                            fetch('/user/accountdetails', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ changename, changeemail, changephone })
+                            }).then(response => {
+                                if (response.ok) {
+                                    return response.json();
+                                }
+                                throw new Error('Network response was not ok.');
+                            }).then(data => {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: data.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                });
+                                document.getElementById('changeaccount').reset();
+                            }).catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Something went wrong. Please try again later.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            });
+                        }
+
+
+
+
                     </script>
 
 

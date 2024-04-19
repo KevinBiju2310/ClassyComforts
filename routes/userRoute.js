@@ -7,6 +7,8 @@ const userProfileController = require('../controller/userProfileController');
 const orderController = require('../controller/orderController')
 const { isLoggedIn } = require('../middleware/auth');
 
+
+router.get("/pagenotfound", userController.pagenotfound)
 router.get('/home', userController.homeGet)
 
 router.get('/signup', userController.signupGet);
@@ -36,6 +38,7 @@ router.post('/address', userProfileController.addAddress);
 router.post('/editaddress/:addressId', userProfileController.editAddress);
 router.delete('/deleteaddress/:addressId', isLoggedIn, userProfileController.deleteAddress);
 router.post('/changepassword', isLoggedIn, userProfileController.changepassword);
+router.post('/accountdetails',userProfileController.changedetails)
 
 router.get('/orderdetails/:id', isLoggedIn, orderController.orderDetails);
 router.post('/cancelOrder', orderController.cancelOrder);

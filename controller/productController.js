@@ -210,9 +210,6 @@ exports.deleteimage = async (req, res) => {
     try {
         const { productId, imageName } = req.body; // Assuming you pass productId and imageName from the frontend
 
-        // Delete the image from the file system (if stored locally)
-        // Write your code here to delete the image from the file system
-
         // Delete the image from the database
         const product = await Product.findById(productId);
         if (!product) {
