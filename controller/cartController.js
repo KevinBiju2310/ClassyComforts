@@ -32,7 +32,7 @@ exports.addtoCart = async (req, res) => {
         if (!cart) {
             cart = new Cart({ userId });
         }
-        cart.products.push({ productId: productId, quantity: 1 });
+        cart.products.push({ productId: productId, quantity: 1, productPrice: product.price });
 
         cart.total += product.price;
         await cart.save();

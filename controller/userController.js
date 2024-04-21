@@ -313,7 +313,6 @@ exports.shoppageGet = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const perPage = 12;
 
-
         let query = { deleted: false }
         if (req.query.category) {
             query.category = req.query.category;

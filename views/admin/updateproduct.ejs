@@ -49,6 +49,14 @@
                             <div id="quantityError" class="error-message"></div>
                         </div>
                     </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="quantity" class="form-label">Color</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="color" name="color" value="<%= product.color %>"
+                                placeholder="Enter Color">
+                            <div id="colorError" class="error-message"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-12">
@@ -139,6 +147,7 @@
             var shape = document.getElementById("shape").value.trim();
             var material = document.getElementById("material").value.trim();
             var weight = document.getElementById("weight").value.trim();
+            var color = document.getElementById("color").value.trim();
             var valid = true;
 
             // Name validation
@@ -248,6 +257,15 @@
                 valid = false;
             } else {
                 document.getElementById("weightError").innerText = "";
+            }
+
+            if (!color) {
+                document.getElementById("colorError").innerText =
+                    "Color is required";
+                document.getElementById("colorError").style.color = "red";
+                valid = false;
+            } else {
+                document.getElementById("colorError").innerText = "";
             }
 
             if (valid) {

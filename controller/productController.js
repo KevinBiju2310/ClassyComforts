@@ -78,7 +78,7 @@ exports.addproductPost = async (req, res) => {
                 }
             }
 
-            const { productname, description, category, price, quantity, length, width, height, material, shape, weight } = req.body;
+            const { productname, description, category, price, quantity, length, width, height, material, shape, weight, color } = req.body;
             const productImages = req.files.map(file => file.path);
 
             const resizedImages = await Promise.all(
@@ -103,6 +103,7 @@ exports.addproductPost = async (req, res) => {
                 shape,
                 weight,
                 material,
+                color,
                 productImages: resizedImages
             });
             await product.save();
@@ -170,7 +171,7 @@ exports.updateproductPost = async (req, res) => {
                     })
                 );
 
-                const { productname, description, category, price, quantity, length, width, height, material, shape, weight } = req.body;
+                const { productname, description, category, price, quantity, length, width, height, material, shape, weight, color } = req.body;
 
                 const updatedProduct = await Product.findByIdAndUpdate(productId, {
                     productname,
@@ -184,6 +185,7 @@ exports.updateproductPost = async (req, res) => {
                     shape,
                     weight,
                     material,
+                    color,
                     $push: { productImages: { $each: resizedImages } }
                 }, { new: true });
 
@@ -243,6 +245,7 @@ exports.deleteproductPost = async (req, res) => {
     }
 }
 
+
 exports.singleproductGet = async (req, res) => {
     try {
         const productId = req.params.id;
@@ -265,6 +268,10 @@ exports.sortproductGet = async (req, res) => {
         sortOption = { price: 1 }
     } else if (sortBy === 'highToLow') {
         sortOption = { price: -1 }
+    } else if (sortBy === 'atoz') {
+        sortOption = { productname: 1 }
+    } else if (sortBy === 'ztoa') {
+        sortOption = { productname: -1 }
     }
     try {
         const sortedProducts = await Product.find({ deleted: { $ne: true } }).sort(sortOption);

@@ -59,7 +59,8 @@ exports.checkoutPage = async (req, res) => {
                 if (product) {
                     checkedProducts.push({
                         productId: product,
-                        quantity: item.quantity
+                        quantity: item.quantity,
+                        productPrice: item.productPrice
                     });
                 }
             }
@@ -170,7 +171,8 @@ exports.orderPlaced = async (req, res) => {
             userId,
             products: checkedProducts.map(item => ({
                 productId: item.productId,
-                quantity: item.quantity
+                quantity: item.quantity,
+                productPrice: item.productPrice
             })),
             address: address,
             paymentMethod: 'cod',
@@ -205,7 +207,7 @@ exports.orderPlaced = async (req, res) => {
 exports.orderDetails = async (req, res) => {
     try {
         const orderId = req.params.id;
-        
+
 
         const order = await Order.findById(orderId).populate('products.productId');
 
@@ -253,24 +255,56 @@ exports.cancelOrder = async (req, res) => {
 
 
 
-exports.removeproduct = async (req, res) => {
-    const { orderId, productId } = req.body;
-    console.log(orderId);
+
+exports.removeProduct = async(req, res) => {
+    const { productId, orderId } = req.body;
+    console.log(productId,orderId)
     try {
-        // Find the order by ID and remove the product
+        // Fetch the order from the database
         const order = await Order.findById(orderId);
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        // Remove the product from the order's products array
-        order.products = order.products.filter(product => product.productId.toString() !== productId);
+        // Find the index of the product in the order
+        const productIndex = order.products.findIndex(
+            (product) => product.productId.toString() === productId
+        );
+
+        // If product not found in the order, return error
+        if (productIndex === -1) {
+            return res.status(404).json({ error: 'Product not found in order' });
+        }
+
+        // Get the product details
+        const productToRemove = order.products[productIndex];
+        const { productPrice, quantity } = productToRemove;
+
+        // Update total amount by subtracting the price of the removed product
+        order.totalAmount -= productPrice * quantity;
+
+        // Remove the product from the order
+        order.products.splice(productIndex, 1);
+
+        // Save the updated order
         await order.save();
 
-        res.status(200).json({ message: 'Product removed successfully' });
+        // Update the quantity of the product in the inventory
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        // Increase the quantity in inventory by the quantity that was in the order
+        product.quantity += quantity;
+
+        // Save the updated product
+        await product.save();
+
+        res.status(200).json({ message: 'Product removed from order and quantity updated', order });
     } catch (error) {
-        console.error('Error removing product:', error);
-        res.status(500).json({ error: 'Failed to remove product' });
+        console.error('Error removing product from order:', error);
+        res.status(500).json({ error: 'Failed to remove product from order' });
     }
 }
 
