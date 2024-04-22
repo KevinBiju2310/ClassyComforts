@@ -4,7 +4,8 @@ const userController = require('../controller/userController');
 const productController = require('../controller/productController');
 const cartController = require('../controller/cartController');
 const userProfileController = require('../controller/userProfileController');
-const orderController = require('../controller/orderController')
+const orderController = require('../controller/orderController');
+const wishlistController = require('../controller/wishlistController');
 const { isLoggedIn } = require('../middleware/auth');
 
 
@@ -47,6 +48,10 @@ router.get('/cart', isLoggedIn, cartController.cartPage);
 router.post('/addtocart', isLoggedIn, cartController.addtoCart);
 router.post('/update', cartController.updateCart);
 router.delete('/:productId', cartController.deleteFromCart);
+
+router.get('/wishlist',isLoggedIn, wishlistController.wishlistpage);
+router.post('/addtowishlist',wishlistController.addtoWishlist)
+router.delete('/wishlist/:productId', wishlistController.deleteFromWishlist);
 
 router.get('/checkout', isLoggedIn, orderController.checkoutPageGet)
 router.post('/checkout', isLoggedIn, orderController.checkoutPage);

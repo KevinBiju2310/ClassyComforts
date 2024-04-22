@@ -88,8 +88,11 @@
                                                 <a aria-label="Quick view" class="action-btn hover-up"
                                                     data-bs-toggle="modal" data-bs-target="#quickViewModal">
                                                     <i class="fi-rs-search"></i></a>
-                                                <a aria-label="Add To Wishlist" class="action-btn hover-up"
-                                                    href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                <a aria-label="Add To Wishlist"
+                                                    class="action-btn hover-up add-to-wishlist" href="#"
+                                                    data-product-id="<%= product.id %>">
+                                                    <i class="fi-rs-heart"></i>
+                                                </a>
                                                 <a aria-label="Compare" class="action-btn hover-up"
                                                     href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                             </div>
@@ -200,8 +203,7 @@
                                         <br>
                                         <input class="form-check-input" type="checkbox" name="checkbox"
                                             id="exampleCheckbox2" value="">
-                                        <label class="form-check-label"
-                                            for="exampleCheckbox2"><span>Blue</span></label>
+                                        <label class="form-check-label" for="exampleCheckbox2"><span>Blue</span></label>
                                         <br>
                                         <input class="form-check-input" type="checkbox" name="checkbox"
                                             id="exampleCheckbox3" value="">
@@ -350,7 +352,59 @@
                 productGrid.appendChild(productCard);
             });
         };
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const addToWishlistButtons = document.querySelectorAll(".add-to-wishlist");
+
+            addToWishlistButtons.forEach(button => {
+                button.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const productId = button.getAttribute("data-product-id");
+
+                    fetch("/user/addtowishlist", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ productId: productId })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Network response was not ok");
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.alreadyInWishlist) {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Already in Wishlist!',
+                                    text: 'This product is already in your wishlist.'
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Added to Wishlist!',
+                                    text: 'This product has been added to your wishlist.'
+                                })
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Something went wrong! Please try again.'
+                            });
+                        });
+                });
+            });
+        });
+
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 
     <%- include("../layouts/userFooter") %>

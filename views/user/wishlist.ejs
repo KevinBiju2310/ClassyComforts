@@ -1,0 +1,161 @@
+<%- include("../layouts/userHeader") %>
+
+
+    <main class="main">
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="index.html" rel="nofollow">Home</a>
+                    <span></span> Shop
+                    <span></span> Wishlist
+                </div>
+            </div>
+        </div>
+        <section class="mt-50 mb-50">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <% if(wishlist.products && wishlist.products.length>0) { %>
+                                <table class="table shopping-summery text-center">
+                                    <thead>
+                                        <tr class="main-heading">
+                                            <th scope="col" colspan="2">Product</th>
+                                            <th scope="col">Price</th>
+                                            <th scope="col">Stock Status</th>
+                                            <th scope="col">Action</th>
+                                            <th scope="col">Remove</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% wishlist.products.forEach(product=> { %>
+                                            <tr id="product-<%= product.productId._id %>">
+                                                <td class="image"><img
+                                                        src="/uploads/<%= product.productId.productImages[0] %>"
+                                                        alt="<%= product.productId.productname %>"></td>
+                                                <td class="product-des">
+                                                    <h5 class="product-name"><a
+                                                            href="/user/singleproduct/<%= product.productId._id %>">
+                                                            <%= product.productId.productname %>
+                                                        </a></h5>
+
+                                                </td>
+                                                <td class="price" data-title="Price"><span>$<%= product.productId.price
+                                                            %> </span></td>
+                                                <% if (product.productId.quantity> 10) { %>
+                                                    <td class="text-center" data-title="Stock">
+                                                        <span class="text-success font-weight-bold">In Stock</span>
+                                                    </td>
+                                                    <% } else if (product.productId.quantity> 0 &&
+                                                        product.productId.quantity <= 10) { %>
+                                                            <td class="text-center" data-title="Stock">
+                                                                <span class="text-warning font-weight-bold">Few Stock
+                                                                    available</span>
+                                                            </td>
+                                                            <% } else { %>
+                                                                <td class="text-center" data-title="Stock">
+                                                                    <span class="text-danger font-weight-bold">Out of
+                                                                        Stock</span>
+                                                                </td>
+                                                                <% } %>
+                                                                    <td class="text-right" data-title="Cart">
+                                                                        <% if (product.productId.quantity> 0) { %>
+                                                                            <form action="/user/addtocart"
+                                                                                method="POST">
+                                                                                <input type="hidden" name="productId"
+                                                                                    value="<%= product.productId._id %>">
+                                                                                <button type="submit"
+                                                                                    class="btn btn-sm"><i
+                                                                                        class="fi-rs-shopping-bag mr-5"></i>Add
+                                                                                    to cart</button>
+                                                                            </form>
+                                                                            <% } else { %>
+                                                                                <button class="btn btn-sm" disabled><i
+                                                                                        class="fi-rs-shopping-bag mr-5"></i>Add
+                                                                                    to cart</button>
+                                                                                <% } %>
+                                                                    </td>
+                                                                    <td class="action" data-title="Remove">
+                                                                        <button class="btn btn-sm btn-delete"
+                                                                            data-productid="<%= product.productId._id %>">
+                                                                            <i class="fi-rs-trash"></i> Remove
+                                                                        </button>
+                                                                    </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                                <% } else { %>
+                                    <div class="empty-cart-message">
+                                        <p>Your wishlist is empty.</p>
+                                    </div>
+                                    <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+        // Delete Product from Wishlist
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const productId = event.currentTarget.getAttribute('data-productid');
+
+                    // Show Confirmation Dialog
+                    const result = await Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'You won\'t be able to revert this!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, delete it!'
+                    });
+
+                    if (result.isConfirmed) {
+                        // Send DELETE request to server
+                        fetch(`/user/wishlist/${productId}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    // Product deleted successfully
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'Your product has been removed from wishlist.',
+                                        'success'
+                                    );
+                                    const productElement = document.getElementById(`product-${productId}`);
+                                    if (productElement) {
+                                        productElement.remove();
+                                    }
+                                } else {
+                                    // Error handling
+                                    Swal.fire(
+                                        'Error!',
+                                        'Failed to remove product from wishlist.',
+                                        'error'
+                                    );
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire(
+                                    'Error!',
+                                    'Failed to remove product from wishlist.',
+                                    'error'
+                                );
+                            });
+                    }
+                });
+            });
+        });
+    </script>
+
+    <%- include("../layouts/userFooter") %>
