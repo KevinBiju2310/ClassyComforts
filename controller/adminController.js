@@ -179,6 +179,9 @@ exports.updateOrderStatus = async (req, res) => {
                     await product.save();
                 }
             }
+        } else if (newStatus === 'delivered') {
+            const order = await Order.findByIdAndUpdate(orderId, { paymentStatus: "success" }, { new: true })
+            await order.save();
         }
         res.status(200).json({ message: 'Order status updated successfully', order: updatedOrder });
     } catch (error) {

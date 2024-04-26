@@ -39,7 +39,7 @@ router.post('/address', userProfileController.addAddress);
 router.post('/editaddress/:addressId', userProfileController.editAddress);
 router.delete('/deleteaddress/:addressId', isLoggedIn, userProfileController.deleteAddress);
 router.post('/changepassword', isLoggedIn, userProfileController.changepassword);
-router.post('/accountdetails', userProfileController.changedetails)
+router.post('/accountdetails', userProfileController.changedetails);
 
 router.get('/orderdetails/:id', isLoggedIn, orderController.orderDetails);
 router.post('/cancelOrder', orderController.cancelOrder);
@@ -49,9 +49,12 @@ router.post('/addtocart', isLoggedIn, cartController.addtoCart);
 router.post('/update', cartController.updateCart);
 router.delete('/:productId', cartController.deleteFromCart);
 
-router.get('/wishlist',isLoggedIn, wishlistController.wishlistpage);
-router.post('/addtowishlist',wishlistController.addtoWishlist)
+router.get('/wishlist', isLoggedIn, wishlistController.wishlistpage);
+router.post('/addtowishlist', wishlistController.addtoWishlist)
 router.delete('/wishlist/:productId', wishlistController.deleteFromWishlist);
+
+router.get('/orderSuccessfull', isLoggedIn, orderController.orderconfirm);
+router.post('/updatepayment',orderController.updatepaymentStatus);
 
 router.get('/checkout', isLoggedIn, orderController.checkoutPageGet)
 router.post('/checkout', isLoggedIn, orderController.checkoutPage);

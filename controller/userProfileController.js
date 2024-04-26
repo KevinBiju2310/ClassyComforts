@@ -2,6 +2,7 @@ const Address = require('../modal/addressModel');
 const User = require('../modal/userModal');
 const bcrypt = require('bcrypt');
 const Order = require('../modal/orderModel');
+const Wallet = require('../modal/walletModel');
 
 exports.profileGet = async (req, res) => {
     try {
@@ -12,9 +13,15 @@ exports.profileGet = async (req, res) => {
         const userId = req.session.user._id;
         const user = await User.findById(userId);
         const addresses = await Address.find({ userId });
-        const order = await Order.find({ userId }).populate('products.productId')
+        const order = await Order.find({ userId }).populate('products.productId');
+        const wallet = await Wallet.findOne({ userId });
 
-        res.render('accountdetails', { addresses, user, order });
+        if (!wallet) {
+            const defaultWalletAmount = 0; // Or any other default value you prefer
+            res.render('accountdetails', { addresses, user, order, wallet: { amount: defaultWalletAmount } });
+        } else {
+            res.render('accountdetails', { addresses, user, order, wallet });
+        }
     } catch (error) {
         console.log("Error Occurred: ", error);
         res.status(500).send('Error occurred while fetching user profile');

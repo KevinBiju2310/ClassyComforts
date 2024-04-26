@@ -13,7 +13,8 @@
                     <th>Name</th>
                     <th>Order Date</th>
                     <th>Product Name</th>
-                    <th>Status</th>
+                    <th>Order Status</th>
+                    <th>Payment Method</th>
                     <th>Total Amount</th>
                     <th>Action</th>
                 </tr>
@@ -38,6 +39,9 @@
                         </td>
                         <td>
                             <%= order.orderStatus %>
+                        </td>
+                        <td>
+                            <%= order.paymentMethod %>
                         </td>
                         <td>$<%= order.totalAmount.toFixed(2) %>
                         </td>
@@ -92,7 +96,6 @@
                         <div class="form-group">
                             <label for="statusSelect">Select Status:</label>
                             <select class="form-control" id="statusSelect">
-                                <% /* Hardcode enum values */ %>
                                     <option value="pending">Pending</option>
                                     <option value="shipped">Shipped</option>
                                     <option value="delivered">Delivered</option>

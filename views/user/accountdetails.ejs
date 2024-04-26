@@ -51,9 +51,9 @@
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab"
-                                                href="#track-orders" role="tab" aria-controls="track-orders"
+                                                href="#wallet" role="tab" aria-controls="track-orders"
                                                 aria-selected="false"><i
-                                                    class="fi-rs-shopping-cart-check mr-10"></i>Track Your Order</a>
+                                                    class="fi-rs-shopping-cart-check mr-10"></i>Wallet</a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address"
@@ -164,6 +164,67 @@
                                                                         <% }) %>
                                                         </tbody>
                                                     </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="wallet" role="tabpanel"
+                                        aria-labelledby="track-orders-tab">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Your Wallet</h5>
+                                            </div>
+
+                                            <div class="card-body contact-from-area">
+                                                <div id="balance">
+                                                    <h5>Account Balance</h5>
+                                                    <p>
+                                                        Your current balance:<span class="ml-10"
+                                                            style="font-size: medium; font-weight: 600">₹ <%=
+                                                                wallet.amount %></span>
+                                                    </p>
+                                                    <br /><br />
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-lg-8">
+                                                        <section id="transaction-history">
+                                                            <h5>Transaction History</h5>
+                                                            <table>
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Date</th>
+                                                                        <th>Type</th>
+                                                                        <th>Amount</th>
+                                                                        <th>Payment status</th>
+                                                                        <th>Transaction ID</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tr>
+                                                                    <td colspan="6">No Orders</td>
+                                                                </tr>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td>
+                                                                            date
+                                                                        </td>
+                                                                        <td>
+                                                                            paymentMethod
+                                                                        </td>
+                                                                        <td>
+                                                                            Amount
+                                                                        </td>
+                                                                        <td>
+                                                                            paymentstatus
+                                                                        </td>
+                                                                        <td>
+                                                                            id
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </section>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

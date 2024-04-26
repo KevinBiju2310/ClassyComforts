@@ -216,10 +216,10 @@
                                 </div>
                                 <div class="payment_option">
                                     <div class="custome-radio">
-                                        <!-- <input class="form-check-input" required="" type="radio" name="payment_option"
+                                        <input class="form-check-input" required="" type="radio" name="payment_option"
                                             id="exampleRadios3" value="wallet">
                                         <label class="form-check-label" for="exampleRadios3" data-bs-toggle="collapse"
-                                            data-target="#bankTranfer" aria-controls="bankTranfer">Wallet</label> -->
+                                            data-target="#wallet" aria-controls="wallet">Wallet</label>
                                     </div>
                                     <div class="custome-radio">
                                         <input class="form-check-input" required="" type="radio" name="payment_option"
@@ -229,16 +229,17 @@
                                             Delivery</label>
                                     </div>
                                     <div class="custome-radio">
-                                        <!-- <input class="form-check-input" required="" type="radio" name="payment_option"
+                                        <input class="form-check-input" required="" type="radio" name="payment_option"
                                             id="exampleRadios5" value="razorpay">
                                         <label class="form-check-label" for="exampleRadios5" data-bs-toggle="collapse"
-                                            data-target="#paypal" aria-controls="paypal">Razorpay</label> -->
+                                            data-target="#razorpay" aria-controls="razorpay">Razorpay</label>
                                     </div>
                                 </div>
                             </div>
                             <form id="placeOrderForm" method="post" action="/user/placeorder">
                                 <input type="hidden" name="total" id="totalval">
                                 <input type="hidden" name="selected_shipping_address" id="selectedShippingAddress">
+                                <input type="hidden" name="payment_option" id="paymentOption">
                                 <button type="button" class="btn btn-fill-out btn-block mt-30" id="placeOrderBtn">Place
                                     Order</button>
                             </form>
@@ -332,6 +333,7 @@
 
                     <%- include("../layouts/userFooter") %>
 
+                        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
                         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
                         <script>
                             document.getElementById('placeOrderBtn').addEventListener('click', function (event) {
@@ -346,9 +348,148 @@
                                     // Set the value of hidden input field to the selected shipping address value
                                     document.getElementById('selectedShippingAddress').value = shippingAddress.value;
                                     document.getElementById('totalval').value = document.querySelector('.product-subtotal span').innerText.slice(1);
+                                    document.getElementById('paymentOption').value = paymentMethod.value;
 
-                                    // Submit the form
-                                    document.getElementById('placeOrderForm').submit();
+                                    if (paymentMethod.value === 'cod') {
+                                        // Use fetch to send data to the backend
+                                        fetch("/user/placeorder", {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json"
+                                            },
+                                            body: JSON.stringify({
+                                                total: document.getElementById('totalval').value,
+                                                selected_shipping_address: document.getElementById('selectedShippingAddress').value,
+                                                payment_option: document.getElementById('paymentOption').value
+                                            })
+                                        })
+                                            .then(response => {
+                                                if (response.ok) {
+                                                    return response.json();
+                                                }
+                                                throw new Error('Network response was not ok.');
+                                            })
+                                            .then(data => {
+                                                window.location.href = '/user/orderSuccessfull';
+                                            })
+                                            .catch(error => {
+                                                console.error('Error:', error);
+                                                swal("Error!", "An error occurred while placing the order.", "error");
+                                            });
+                                    } else if (paymentMethod.value === 'razorpay') {
+                                        fetch('/user/placeorder', {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json"
+                                            },
+                                            body: JSON.stringify({
+                                                total: document.getElementById('totalval').value,
+                                                selected_shipping_address: document.getElementById('selectedShippingAddress').value,
+                                                payment_option: document.getElementById('paymentOption').value
+                                            })
+                                        }).then(response => {
+                                            if (response.ok) {
+                                                return response.json();
+                                            }
+                                            throw new Error('Network error');
+                                        }).then(data => {
+                                            // Initialize Razorpay payment
+                                            var options = {
+                                                key: "rzp_test_69SqlycyrhIrA0",
+                                                amount: data.amount,
+                                                currency: "INR",
+                                                name: "ClassyComforts",
+                                                description: "Purchase Description",
+                                                order_id: data.orderId,
+                                                handler: function (response) {
+                                                    fetch('/user/updatepayment', {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                        },
+                                                        body: JSON.stringify({
+                                                            razorpay_order_id: response.razorpay_order_id,
+                                                            razorpay_payment_id: response.razorpay_payment_id,
+                                                            razorpay_signature: response.razorpay_signature,
+                                                            orderID: data.orderID,
+                                                        }),
+                                                    }).then(response => response.json())
+                                                        .then(data => {
+                                                            console.log(data.message);
+                                                            window.location.href = '/user/orderSuccessfull';
+                                                        })
+                                                        .catch(error => {
+                                                            console.error('Error:', error);
+                                                            swal('Error!', 'An error occurred while verifying the payment.', 'error');
+                                                        });
+
+                                                },
+                                                "theme": {
+                                                    "color": "#3399cc"
+                                                }
+                                            };
+                                            var razorpayInstance = new Razorpay(options);
+                                            razorpayInstance.open();
+                                        })
+                                            .catch(error => {
+                                                console.error('Error:', error);
+                                                swal("Error!", "An error occurred while processing the payment.", "error");
+                                            });
+
+                                        razorpayInstance.on('payment.failure', function (response) {
+                                            // Handle Razorpay failure
+                                            console.log(response);
+                                            swal('Payment Failed', 'Your payment was not successful. Please try again.', 'error');
+
+                                            // Send the necessary data to the server for payment verification
+                                            fetch('/user/updatepayment', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify({
+                                                    razorpay_order_id: response.error.metadata.order_id,
+                                                    razorpay_payment_id: response.error.metadata.payment_id,
+                                                    razorpay_signature: response.error.signature,
+                                                    orderID: data.orderID,
+                                                }),
+                                            })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    console.log(data.message);
+                                                })
+                                                .catch(error => {
+                                                    console.error('Error:', error);
+                                                    swal('Error!', 'An error occurred while verifying the payment failure.', 'error');
+                                                });
+                                        });
+                                    } else if (paymentMethod.value === 'wallet') {
+                                        fetch('/user/placeorder', {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json"
+                                            },
+                                            body: JSON.stringify({
+                                                total: document.getElementById('totalval').value,
+                                                selected_shipping_address: document.getElementById('selectedShippingAddress').value,
+                                                payment_option: document.getElementById('paymentOption').value
+                                            })
+                                        }).then(function (response) {
+                                            if (!response.ok) {
+                                                throw new Error('Network response was not ok.');
+                                            }
+                                            return response.json();
+                                        }).then(function (data) {
+                                            if (data.success) {
+                                                window.location.href = '/user/orderSuccessfull';
+                                            } else {
+                                                swal("Error!", data.message, "error");
+                                            }
+                                        }).catch(function (error) {
+                                            console.error('Error:', error);
+                                            swal("Error!", "An error occurred while placing the order.", "error");
+                                        });
+                                    }
                                 }
                             });
                         </script>

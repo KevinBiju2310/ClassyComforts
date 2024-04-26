@@ -68,8 +68,9 @@
                                                             <th>Order Date</th>
                                                             <th>Image</th>
                                                             <th>Product Name</th>
-                                                            <th>Status</th>
+                                                            <th>Order Status</th>
                                                             <th>Payment Method</th>
+                                                            <th>Payment Status</th>
                                                             <th>Price</th>
                                                             <th>Quantity</th>
                                                             <th>Total</th>
@@ -100,6 +101,9 @@
                                                                 </td>
                                                                 <td>
                                                                     <%= order.paymentMethod %>
+                                                                </td>
+                                                                <td>
+                                                                    <%= order.paymentStatus %>
                                                                 </td>
                                                                 <td>$<%= product.productPrice.toFixed(2) %>
                                                                 </td>
@@ -186,6 +190,8 @@
                             <label for="cancelReason">Reason for cancellation:</label>
                             <input type="text" class="form-control" id="cancelReason" name="cancelReason" required>
                             <input type="hidden" id="orderId" name="orderId">
+                            <input type="hidden" id="paymentMethod" name="paymentMethod" value="<%= order.paymentMethod %>"> <!-- Add hidden input for paymentMethod -->
+                            <input type="hidden" id="paymentStatus" name="paymentStatus" value="<%= order.paymentStatus %>"> <!-- Add hidden input for paymentStatus -->
                         </div>
                         <button type="submit" class="btn btn-primary">Confirm</button>
                     </form>
@@ -205,7 +211,7 @@
             if (orderStatus === "cancelled") {
                 document.getElementById('cancelOrderBtn').disabled = true;
                 document.getElementById('downloadInvoiceBtn').disabled = true;
-            } else if (orderStatus === "shipped") {
+            } else if (orderStatus === "shipped" || orderStatus === "delivered") {
                 document.getElementById('cancelOrderBtn').disabled = true;
             }
         });
@@ -219,13 +225,15 @@
             event.preventDefault();
             const cancelReason = document.getElementById('cancelReason').value;
             const orderId = document.getElementById('orderId').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const paymentStatus = document.getElementById('paymentStatus').value;
             try {
                 const response = await fetch('/user/cancelOrder', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ orderId, cancelReason })
+                    body: JSON.stringify({ orderId, cancelReason, paymentMethod, paymentStatus })
                 });
 
                 if (response.ok) {
@@ -300,7 +308,7 @@
 
 
         function handleRemoveButtonClick(productId, orderId, index) {
-            console.log(productId,orderId,index)
+            console.log(productId, orderId, index)
             Swal.fire({
                 title: 'Are you sure?',
                 text: 'You are about to remove this product from your order',

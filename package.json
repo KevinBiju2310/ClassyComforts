@@ -11,6 +11,7 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "easyinvoice": "^3.0.47",
     "ejs": "^3.1.9",
@@ -25,6 +26,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth2": "^0.2.0",
     "pdfkit": "^0.15.0",
+    "razorpay": "^2.9.3",
     "sharp": "^0.33.2"
   }
 }

@@ -10,6 +10,7 @@ const adminRoute = require('./routes/adminRoute');
 const bodyparser = require('body-parser');
 const app = express();
 require('./passportSetup')
+require('dotenv').config();
 
 app.use(
   session({
@@ -39,7 +40,7 @@ app.use(passport.session());
 app.use('/admin', adminRoute);
 app.use('/user', userRoute);
 
-app.use('/user/*',(req,res)=>{
+app.use('/user/*', (req, res) => {
   res.redirect('/user/pagenotfound')
 })
 
