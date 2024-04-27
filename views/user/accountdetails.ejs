@@ -63,7 +63,7 @@
                                         <li class="nav-item">
                                             <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab"
                                                 href="#account-detail" role="tab" aria-controls="account-detail"
-                                                aria-selected="true"><i class="fi-rs-user mr-10"></i>Change Password</a>
+                                                aria-selected="true"><i class="fi-rs-user mr-10"></i>Account Details</a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link" href="page-login-register.html"><i
@@ -194,33 +194,30 @@
                                                                 <thead>
                                                                     <tr>
                                                                         <th>Date</th>
-                                                                        <th>Type</th>
+                                                                        <th>Payment Method</th>
                                                                         <th>Amount</th>
                                                                         <th>Payment status</th>
-                                                                        <th>Transaction ID</th>
+                                                                        
                                                                     </tr>
                                                                 </thead>
-                                                                <tr>
-                                                                    <td colspan="6">No Orders</td>
-                                                                </tr>
+                                                                
                                                                 <tbody>
+                                                                    <% wallet.transaction.forEach(function(transaction) {  %>
                                                                     <tr>
                                                                         <td>
-                                                                            date
+                                                                            <%= transaction.date %>
                                                                         </td>
                                                                         <td>
-                                                                            paymentMethod
+                                                                            <%= transaction.paymentMethod %>
                                                                         </td>
                                                                         <td>
-                                                                            Amount
+                                                                            <%= transaction.amount %>
                                                                         </td>
                                                                         <td>
-                                                                            paymentstatus
-                                                                        </td>
-                                                                        <td>
-                                                                            id
+                                                                            <%= transaction.paymentStatus %>
                                                                         </td>
                                                                     </tr>
+                                                                    <% }) %>
                                                                 </tbody>
                                                             </table>
                                                         </section>

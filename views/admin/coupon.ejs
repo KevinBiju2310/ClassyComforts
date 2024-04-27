@@ -1,0 +1,325 @@
+<%- include("../layouts/adminHeader") %>
+    <div id="content">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Coupon</h1>
+            <button class="btn btn-success" id="addCouponBtn" data-toggle="modal" data-target="#addCouponModal">
+                <i class="fas fa-plus"></i> Add Coupon
+            </button>
+        </div>
+
+        <!-- Category Table -->
+        <% if(coupon.length> 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Coupon Name</th>
+                        <th>Coupon Code</th>
+                        <th>Minimum Amount</th>
+                        <th>Discount Amount</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% coupon.forEach(function(coupon) { %>
+                        <tr>
+                            <td>
+                                <%= coupon.couponname %>
+                            </td>
+                            <td>
+                                <%= coupon.couponcode %>
+                            </td>
+                            <td>
+                                <%= coupon.minimumamount %>
+                            </td>
+                            <td>
+                                <%= coupon.discountamount %>%
+                            </td>
+                            <td>
+                                <%= coupon.startDate.toDateString() %>
+                            </td>
+                            <td>
+                                <%= coupon.endDate.toDateString() %>
+                            </td>
+                            <td>
+                                <%= coupon.status %>
+                            </td>
+                            <td>
+                                <% if (coupon.status==='active' ) { %>
+                                    <button class="btn toggle-status-btn btn-warning" data-coupon-id="<%= coupon._id %>"
+                                        data-status="inactive">Inactive</button>
+                                    <% } else { %>
+                                        <button class="btn toggle-status-btn btn-success"
+                                            data-coupon-id="<%= coupon._id %>" data-status="active">Active</button>
+                                        <% } %>
+                                            <button class="btn delete-btn"
+                                                data-coupon-id="<%= coupon._id %>">Delete</button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                            <!-- Add more rows as needed -->
+                </tbody>
+            </table>
+            <% } else { %>
+                <p class="text-center">No Coupons Applied</p>
+                <% } %>
+    </div>
+
+    <!-- Add Coupon Modal -->
+    <div class="modal fade" id="addCouponModal" tabindex="-1" role="dialog" aria-labelledby="addCouponModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCouponModalLabel">Add Coupon</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCouponForm" method="post" action="/admin/addcoupon">
+                        <div class="form-row mb-3">
+                            <div class="form-group col-md-6">
+                                <label for="couponName">Coupon Name</label>
+                                <input type="text" class="form-control" name="couponname" id="couponname"
+                                    placeholder="Enter coupon name" required>
+                                <div class="invalid-feedback" id="couponNameError"></div>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="couponCode">Coupon Code</label>
+                                <input type="text" class="form-control" name="couponcode" id="couponcode"
+                                    placeholder="Enter coupon code" required>
+                                <div class="invalid-feedback" id="couponCodeError"></div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-3">
+                            <div class="form-group col-md-6">
+                                <label for="minimumAmount">Minimum Amount</label>
+                                <input type="number" class="form-control" name="minimumamount" id="minimumamount"
+                                    placeholder="Enter minimum amount" min="0" required>
+                                <div class="invalid-feedback" id="minimumAmountError"></div>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="discountAmount">Discount Amount</label>
+                                <input type="number" class="form-control" name="discountamount" id="discountamount"
+                                    placeholder="Enter discount amount" min="0" required>
+                                <div class="invalid-feedback" id="discountAmountError"></div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-3">
+                            <div class="form-group col-md-6">
+                                <label for="startDate">Start Date</label>
+                                <input type="date" class="form-control" name="startDate" id="startDate"
+                                    min="<%= new Date().toISOString().split('T')[0] %>" required>
+                                <div class="invalid-feedback" id="startDateError"></div>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="endDate">End Date</label>
+                                <input type="date" class="form-control" name="endDate" id="endDate"
+                                    min="<%= new Date().toISOString().split('T')[0] %>" required>
+                                <div class="invalid-feedback" id="endDateError"></div>
+                            </div>
+                        </div>
+                        <div class="form-row mb-3">
+                            <label>Status</label>
+                            <div class="form-group col-md-12">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="status" id="statusActive"
+                                        value="active" checked>
+                                    <label class="form-check-label" for="statusActive">
+                                        Active
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="status" id="statusInactive"
+                                        value="inactive">
+                                    <label class="form-check-label" for="statusInactive">
+                                        Inactive
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="addCouponBtn">Add Coupon</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        // Toggle coupon status
+        const toggleStatusBtns = document.querySelectorAll('.toggle-status-btn');
+        toggleStatusBtns.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const couponId = btn.dataset.couponId;
+                const newStatus = btn.dataset.status;
+
+                try {
+                    const response = await fetch(`/admin/updatecoupon/${couponId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+
+                    if (response.ok) {
+                        window.location.reload(); // Reload the page to reflect the updated status
+                    } else {
+                        throw new Error('Failed to update coupon status');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to update coupon status');
+                }
+            });
+        });
+
+
+        // Delete coupon
+        const deleteBtns = document.querySelectorAll('.delete-btn');
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const couponId = btn.dataset.couponId;
+
+                const willDelete = await swal({
+                    title: "Are you sure?",
+                    text: "Once deleted, you will not be able to recover this coupon!",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                });
+
+                if (willDelete) {
+                    try {
+                        const response = await fetch(`/admin/deletecoupon/${couponId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            window.location.reload(); // Reload the page to reflect the deleted coupon
+                        } else {
+                            throw new Error('Failed to delete coupon');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('Failed to delete coupon');
+                    }
+                }
+            });
+        });
+
+
+        // Form validation
+        const addCouponForm = document.getElementById('addCouponForm');
+        const couponNameInput = document.getElementById('couponname');
+        const couponCodeInput = document.getElementById('couponcode');
+        const minimumAmountInput = document.getElementById('minimumamount');
+        const discountAmountInput = document.getElementById('discountamount');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        const couponNameError = document.getElementById('couponNameError');
+        const couponCodeError = document.getElementById('couponCodeError');
+        const minimumAmountError = document.getElementById('minimumAmountError');
+        const discountAmountError = document.getElementById('discountAmountError');
+        const startDateError = document.getElementById('startDateError');
+        const endDateError = document.getElementById('endDateError');
+
+        // Disable past dates in the calendar
+        const today = new Date().toISOString().split('T')[0];
+        startDateInput.min = today;
+        endDateInput.min = today;
+
+        addCouponForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            let isValid = true;
+
+            // Clear previous error messages
+            clearErrors();
+
+            // Validate coupon name and code
+            if (couponNameInput.value.trim() === '') {
+                couponNameError.textContent = 'Coupon name is required';
+                isValid = false;
+            }
+
+            if (couponCodeInput.value.trim() === '') {
+                couponCodeError.textContent = 'Coupon code is required';
+                isValid = false;
+            }
+
+            // Validate minimum and discount amounts
+            if (minimumAmountInput.value < 0) {
+                minimumAmountError.textContent = 'Minimum amount cannot be negative';
+                isValid = false;
+            }
+
+            if (discountAmountInput.value < 0) {
+                discountAmountError.innerHTML = 'Discount amount cannot be negative';
+                isValid = false;
+            }
+
+            // Validate start and end dates
+            if (startDateInput.value < today) {
+                startDateError.textContent = 'Start date cannot be in the past';
+                isValid = false;
+            }
+
+            if (endDateInput.value < today) {
+                endDateError.textContent = 'End date cannot be in the past';
+                isValid = false;
+            }
+
+            // Check if coupon name and code already exist
+            try {
+                const response = await fetch('/admin/checkvalidation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        couponname: couponNameInput.value.trim(),
+                        couponcode: couponCodeInput.value.trim()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.exists) {
+                    if (data.couponname) {
+                        couponNameError.textContent = 'Coupon name already exists';
+                        isValid = false;
+                    }
+
+                    if (data.couponcode) {
+                        couponCodeError.textContent = 'Coupon code already exists';
+                        isValid = false;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Failed to check coupon uniqueness');
+            }
+
+            if (isValid) {
+                addCouponForm.submit();
+            }
+        });
+
+        function clearErrors() {
+            couponNameError.textContent = '';
+            couponCodeError.textContent = '';
+            minimumAmountError.textContent = '';
+            discountAmountError.textContent = '';
+            startDateError.textContent = '';
+            endDateError.textContent = '';
+        }
+
+    </script>
+
+    <%- include("../layouts/adminFooter") %>

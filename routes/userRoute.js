@@ -54,7 +54,7 @@ router.post('/addtowishlist', wishlistController.addtoWishlist)
 router.delete('/wishlist/:productId', wishlistController.deleteFromWishlist);
 
 router.get('/orderSuccessfull', isLoggedIn, orderController.orderconfirm);
-router.post('/updatepayment',orderController.updatepaymentStatus);
+router.post('/updatepayment', orderController.updatepaymentStatus);
 
 router.get('/checkout', isLoggedIn, orderController.checkoutPageGet)
 router.post('/checkout', isLoggedIn, orderController.checkoutPage);

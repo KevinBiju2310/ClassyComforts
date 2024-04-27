@@ -209,6 +209,7 @@
                                     </tbody>
                                 </table>
                             </div>
+                            <button type="button" class="btn btn-outline-primary" id="applyCouponBtn">Apply Coupon</button>
                             <div class="bt-1 border-color-1 mt-30 mb-30"></div>
                             <div class="payment_method">
                                 <div class="mb-25">
@@ -474,18 +475,18 @@
                                                 selected_shipping_address: document.getElementById('selectedShippingAddress').value,
                                                 payment_option: document.getElementById('paymentOption').value
                                             })
-                                        }).then(function (response) {
-                                            if (!response.ok) {
-                                                throw new Error('Network response was not ok.');
+                                        }).then(response => {
+                                            if (response.ok) {
+                                                return response.json();
                                             }
-                                            return response.json();
-                                        }).then(function (data) {
+                                            throw new Error('Network response was not ok.');
+                                        }).then(data => {
                                             if (data.success) {
                                                 window.location.href = '/user/orderSuccessfull';
                                             } else {
-                                                swal("Error!", data.message, "error");
+                                                swal("Error!", data.message, "warning");
                                             }
-                                        }).catch(function (error) {
+                                        }).catch(error => {
                                             console.error('Error:', error);
                                             swal("Error!", "An error occurred while placing the order.", "error");
                                         });

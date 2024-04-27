@@ -190,8 +190,10 @@
                             <label for="cancelReason">Reason for cancellation:</label>
                             <input type="text" class="form-control" id="cancelReason" name="cancelReason" required>
                             <input type="hidden" id="orderId" name="orderId">
-                            <input type="hidden" id="paymentMethod" name="paymentMethod" value="<%= order.paymentMethod %>"> <!-- Add hidden input for paymentMethod -->
-                            <input type="hidden" id="paymentStatus" name="paymentStatus" value="<%= order.paymentStatus %>"> <!-- Add hidden input for paymentStatus -->
+                            <input type="hidden" id="paymentMethod" name="paymentMethod"
+                                value="<%= order.paymentMethod %>"> <!-- Add hidden input for paymentMethod -->
+                            <input type="hidden" id="paymentStatus" name="paymentStatus"
+                                value="<%= order.paymentStatus %>"> <!-- Add hidden input for paymentStatus -->
                         </div>
                         <button type="submit" class="btn btn-primary">Confirm</button>
                     </form>

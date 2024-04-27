@@ -250,10 +250,17 @@ exports.orderPlaced = async (req, res) => {
         } else if (paymentMethod === 'wallet') {
             const userWallet = await Wallet.findOne({ userId });
             if (!userWallet || userWallet.amount < totalValue) {
-                return res.status(400).json({ message: 'Insufficient wallet balance' });
+                return res.json({ success: false, message: 'Insufficient wallet balance' });
             }
+            userWallet.transaction.push({
+                date: new Date(),
+                paymentMethod: paymentMethod,
+                amount: -totalValue,
+                paymentStatus: 'debit'
+            });
             userWallet.amount -= totalValue;
             await userWallet.save();
+
 
             const order = new Order({
                 userId,
@@ -264,7 +271,8 @@ exports.orderPlaced = async (req, res) => {
                 })),
                 address: address,
                 paymentMethod: paymentMethod,
-                totalAmount: totalValue
+                totalAmount: totalValue,
+                paymentStatus: "success"
             });
             await order.save();
             for (const checkedProduct of checkedProducts) {
@@ -368,22 +376,57 @@ exports.cancelOrder = async (req, res) => {
             await order.save();
         } else if (paymentMethod === 'razorpay' && paymentStatus === 'success') {
             order.orderStatus = 'cancelled';
+            order.paymentStatus = 'refunded'
             order.cancelReason = cancelReason;
             const totalAmount = order.totalAmount;
             const wallet = await Wallet.findOne({ userId });
             if (wallet) {
-                wallet.amount += totalAmount;
-                await wallet.save()
+                // Check if transaction already exists
+                const existingTransaction = wallet.transaction.find(transaction => transaction.paymentMethod === 'razorpay' && transaction.paymentStatus === 'refund' && transaction.amount === totalAmount);
+                if (!existingTransaction) {
+                    // Refund amount to the wallet
+                    wallet.amount += totalAmount;
+                    // Add transaction to wallet
+                    const newTransaction = {
+                        date: new Date(),
+                        paymentMethod: 'razorpay',
+                        amount: totalAmount,
+                        paymentStatus: 'refund'
+                    };
+                    wallet.transaction.push(newTransaction);
+                    await Promise.all([wallet.save(), order.save()]);
+                }
             } else {
                 const newWallet = new Wallet({
                     userId,
-                    amount: totalAmount
+                    amount: totalAmount,
+                    transaction: [{
+                        date: new Date(),
+                        paymentMethod: 'razorpay',
+                        amount: totalAmount,
+                        paymentStatus: 'refund'
+                    }]
                 });
-                await newWallet.save();
+                await Promise.all([newWallet.save(), order.save()]);
             }
-            await order.save();
+        } else if (paymentMethod === 'wallet') {
+            order.orderStatus = 'cancelled';
+            order.paymentStatus = 'refunded';
+            const totalAmount = order.totalAmount;
+            const userWallet = await Wallet.findOne({ userId });
+            if (!userWallet) {
+                return res.status(404).send('Wallet not found');
+            }
+            userWallet.amount += totalAmount;
+            const newTransaction = {
+                date: new Date(),
+                paymentMethod: paymentMethod,
+                amount: totalAmount,
+                paymentStatus: 'refund'
+            };
+            userWallet.transaction.push(newTransaction);
+            await Promise.all([userWallet.save(), order.save()])
         }
-
 
         // Increment product quantities for canceled order
         for (const productItem of order.products) {

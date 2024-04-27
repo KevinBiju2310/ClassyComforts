@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router()
-const adminController = require('../controller/adminController')
-const productController = require('../controller/productController')
-const categoryController = require('../controller/categoryController')
-const orderController = require('../controller/orderController')
+const adminController = require('../controller/adminController');
+const productController = require('../controller/productController');
+const categoryController = require('../controller/categoryController');
+const couponController = require('../controller/couponController');
 const { isAdminLogin } = require('../middleware/auth');
 
 
@@ -35,6 +35,13 @@ router.post('/deleteimage',productController.deleteimage)
 
 router.get('/orders', isAdminLogin, adminController.orderGet)
 router.post('/orders/:orderId/status', adminController.updateOrderStatus);
+
+
+router.get('/coupon',isAdminLogin,couponController.couponPage);
+router.post('/addcoupon',isAdminLogin,couponController.addCoupon);
+router.put('/updatecoupon/:id',isAdminLogin,couponController.updateCoupon);
+router.delete('/deletecoupon/:id',isAdminLogin,couponController.deleteCoupon);
+router.post('/checkvalidation',isAdminLogin,couponController.checkvalidation);
 
     
 module.exports = router

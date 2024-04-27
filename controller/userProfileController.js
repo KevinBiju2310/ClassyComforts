@@ -17,7 +17,7 @@ exports.profileGet = async (req, res) => {
         const wallet = await Wallet.findOne({ userId });
 
         if (!wallet) {
-            const defaultWalletAmount = 0; // Or any other default value you prefer
+            const defaultWalletAmount = 0;
             res.render('accountdetails', { addresses, user, order, wallet: { amount: defaultWalletAmount } });
         } else {
             res.render('accountdetails', { addresses, user, order, wallet });
