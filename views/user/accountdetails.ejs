@@ -202,6 +202,7 @@
                                                                 </thead>
                                                                 
                                                                 <tbody>
+                                                                    <% if (wallet && wallet.transaction) { %>
                                                                     <% wallet.transaction.forEach(function(transaction) {  %>
                                                                     <tr>
                                                                         <td>
@@ -217,7 +218,14 @@
                                                                             <%= transaction.paymentStatus %>
                                                                         </td>
                                                                     </tr>
-                                                                    <% }) %>
+                                                                    <% }); %>
+                                                                    <% } else { %>
+                                                                        <tr>
+                                                                            <td colspan="4">
+                                                                                No transactions available.
+                                                                            </td>
+                                                                        </tr>
+                                                                    <% } %>
                                                                 </tbody>
                                                             </table>
                                                         </section>

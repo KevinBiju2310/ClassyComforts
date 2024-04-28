@@ -115,8 +115,13 @@
                                                 </span>
                                             </div>
                                             <div class="product-price">
-                                                <span>$<%= product.price %></span>
-                                                <span class="old-price">$245.8</span>
+                                                <% if(product.mainprice < product.price && product.mainprice !== 0) { %>
+                                                    <span>$<%= product.mainprice %></span>
+                                                    <span class="old-price">$<%= product.price %></span>
+                                                    <% } else { %>
+                                                        <span>$<%= product.price %></span>
+                                                        <span class="old-price">$<%= product.mainprice %></span>
+                                                        <% } %>
                                             </div>
                                             <div class="product-action-1 show">
                                                 <form action="/user/addtocart" method="POST">

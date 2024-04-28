@@ -58,6 +58,14 @@ const productSchema = new mongoose.Schema({
     deleted: {
         type: Boolean,
         default: false
+    },
+    discount: {
+        type: Number,
+        default: 0
+    },
+    mainprice: {
+        type: Number,
+        default: 0,
     }
 });
 

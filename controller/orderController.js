@@ -4,7 +4,8 @@ const Address = require('../modal/addressModel');
 const Order = require('../modal/orderModel');
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
-const Wallet = require("../modal/walletModel")
+const Wallet = require("../modal/walletModel");
+const Coupon = require('../modal/couponModel');
 
 
 
@@ -34,8 +35,9 @@ exports.checkoutPageGet = async (req, res) => {
         const userId = req.session.user._id;
         const addresses = await Address.find({ userId });
         const cart = await Cart.findOne({ userId });
+        const coupons = await Coupon.find();
 
-        res.render('checkout', { addresses, checkedProducts, cart });
+        res.render('checkout', { addresses, checkedProducts, cart, coupons });
 
     } catch (error) {
         console.error('Error getting checkoutpage:', error);
@@ -54,6 +56,7 @@ exports.checkoutPage = async (req, res) => {
         const userId = req.session.user._id;
         const addresses = await Address.find({ userId });
         const cart = await Cart.findOne({ userId });
+        const coupons = await Coupon.find();
 
         const checkedProductsIds = req.body.checkedProducts;
         checkedProducts.length = 0;
@@ -70,7 +73,7 @@ exports.checkoutPage = async (req, res) => {
                 }
             }
         }
-        res.render('checkout', { addresses, checkedProducts, cart });
+        res.render('checkout', { addresses, checkedProducts, cart, coupons });
 
     } catch (error) {
         console.error('Error processing checkout page:', error);

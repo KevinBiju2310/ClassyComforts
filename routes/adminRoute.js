@@ -4,6 +4,7 @@ const adminController = require('../controller/adminController');
 const productController = require('../controller/productController');
 const categoryController = require('../controller/categoryController');
 const couponController = require('../controller/couponController');
+const offerController = require('../controller/offerController');
 const { isAdminLogin } = require('../middleware/auth');
 
 
@@ -43,5 +44,14 @@ router.put('/updatecoupon/:id',isAdminLogin,couponController.updateCoupon);
 router.delete('/deletecoupon/:id',isAdminLogin,couponController.deleteCoupon);
 router.post('/checkvalidation',isAdminLogin,couponController.checkvalidation);
 
-    
+router.get('/productoffer',isAdminLogin,offerController.offerPage);
+router.post('/addproductoffer',offerController.addproductOffer);
+router.post('/updateproductoffer',offerController.updateproductOffer);
+router.delete('/deleteproductoffer/:id',offerController.deleteproductOffer);
+
+router.get('/categoryoffer',isAdminLogin, offerController.categoryofferPage);
+router.post('/addcategoryoffer', offerController.addcategoryOffer);
+router.post('/updatecategoryoffer',offerController.updatecategoryOffer);
+
+
 module.exports = router

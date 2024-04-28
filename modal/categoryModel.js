@@ -13,6 +13,10 @@ const categorySchema = new mongoose.Schema({
     deleted: {
         type: Boolean,
         default: false
+    },
+    discount: {
+        type: Number,
+        default: 0
     }
     
 });

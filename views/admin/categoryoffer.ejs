@@ -1,0 +1,142 @@
+<%- include("../layouts/adminHeader") %>
+
+
+    <div id="content">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Category Offer</h1>
+            <button class="btn btn-success" id="addOfferBtn" data-toggle="modal" data-target="#addOfferModal">
+                <i class="fas fa-plus"></i> Add Category Offer
+            </button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Category Name</th>
+                    <th>Discount Percentage</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% category.forEach((category)=> { %>
+                    <% if(category.discount !==0) { %>
+                        <tr>
+                            <td>
+                                <%= category.name %>
+                            </td>
+                            <td>
+                                <%= category.discount %>
+                            </td>
+                            <td>
+                                <button class="btn toggle-status-btn btn-warning" data-toggle="modal"
+                                    data-target="#updateOfferModal">Update</button>
+                                <button class="btn delete-btn btn-danger">Delete</button>
+                            </td>
+                        </tr>
+                        <% } %>
+                            <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- Add Offer Modal -->
+    <div class="modal fade" id="addOfferModal" tabindex="-1" role="dialog" aria-labelledby="addOfferModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addOfferModalLabel">Add Category Offer</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addOfferForm" method="post" action="/admin/addcategoryoffer">
+                        <div class="form-group">
+                            <label for="productName">Product Name</label>
+                            <select class="form-control" id="category" name="category" required>
+                                <% category.forEach(category=> { %>
+                                    <% if(category.discount===0) { %>
+                                        <option value="<%= category.name %>">
+                                            <%= category.name %>
+                                        </option>
+                                        <% } %>
+                                            <% }) %>
+                            </select>
+                            <div class="invalid-feedback" id="productNameError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="discountPercentage">Discount Percentage</label>
+                            <input type="number" class="form-control" name="discountPercentage" id="discountPercentage"
+                                placeholder="Enter discount percentage" min="0" max="100" required>
+                            <div class="invalid-feedback" id="discountPercentageError"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Offer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Update Offer Modal -->
+    <div class="modal fade" id="updateOfferModal" tabindex="-1" role="dialog" aria-labelledby="updateOfferModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateOfferModalLabel">Update Category Offer</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateOfferForm" method="post" action="/admin/updatecategoryoffer">
+                        <div class="form-group">
+                            <label for="updateProductName">Product Name</label>
+                            <input type="text" class="form-control" id="updateProductName" name="productName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="updateDiscountPercentage">Discount Percentage</label>
+                            <input type="number" class="form-control" name="discountPercentage"
+                                id="updateDiscountPercentage" placeholder="Enter discount percentage" min="0" max="100"
+                                required>
+                            <div class="invalid-feedback" id="updateDiscountPercentageError"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Offer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const updateOfferModal = document.getElementById('updateOfferModal');
+            const updateProductNameInput = document.getElementById('updateProductName');
+            const updateDiscountPercentageInput = document.getElementById('updateDiscountPercentage');
+
+            // Function to set values in the update modal
+            function setUpdateModalValues(productName, discountPercentage) {
+                updateProductNameInput.value = productName;
+                updateDiscountPercentageInput.value = discountPercentage;
+            }
+
+            // Event listener for "Update" button click
+            const updateButtons = document.querySelectorAll('.toggle-status-btn');
+            updateButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const row = this.closest('tr');
+                    const productName = row.querySelector('td:first-child').textContent.trim();
+                    const discountPercentage = row.querySelector('td:nth-child(2)').textContent.trim();
+                    setUpdateModalValues(productName, discountPercentage);
+                    $('#updateOfferModal').modal('show'); // Show the update modal
+                });
+            });
+        });
+    </script>
+
+
+    <%- include("../layouts/adminFooter") %>
