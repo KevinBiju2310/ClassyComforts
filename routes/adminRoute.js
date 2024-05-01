@@ -47,11 +47,12 @@ router.post('/checkvalidation',isAdminLogin,couponController.checkvalidation);
 router.get('/productoffer',isAdminLogin,offerController.offerPage);
 router.post('/addproductoffer',offerController.addproductOffer);
 router.post('/updateproductoffer',offerController.updateproductOffer);
-router.delete('/deleteproductoffer/:id',offerController.deleteproductOffer);
+router.delete('/deleteproductoffer/:productName',offerController.deleteproductOffer);
 
 router.get('/categoryoffer',isAdminLogin, offerController.categoryofferPage);
 router.post('/addcategoryoffer', offerController.addcategoryOffer);
 router.post('/updatecategoryoffer',offerController.updatecategoryOffer);
+router.delete('/deletecategoryoffer/:categoryName',offerController.deletecategoryOffer);
 
 
 module.exports = router

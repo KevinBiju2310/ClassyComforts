@@ -151,62 +151,55 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <% if (checkedProducts && checkedProducts.length> 0) { %>
-                                            <% let subtotal=0; %>
-                                                <% checkedProducts.forEach(product=> { %>
-                                                    <% subtotal +=product.productId.price * product.quantity; %>
-                                                        <tr>
-                                                            <td class="image product-thumbnail">
-                                                                <% if (product.productId &&
-                                                                    product.productId.productImages.length> 0) { %>
-                                                                    <img src="/uploads/<%= product.productId.productImages[0] %>"
-                                                                        alt="<%= product.productId.productname %>">
-                                                                    <% } %>
-                                                            </td>
-                                                            <td>
-                                                                <h5>
-                                                                    <a
-                                                                        href="<%= product.productId ? '/products/' + product.productId._id : '#' %>">
-                                                                        <%= product.productId ?
-                                                                            product.productId.productname
-                                                                            : 'Product Not Found' %>
-                                                                    </a>
-                                                                </h5>
-                                                                <span class="product-qty">x <%= product.quantity %>
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                $<%= (product.productId ? (product.productId.price *
-                                                                    product.quantity).toFixed(2) : '0.00' ) %>
-                                                            </td>
-                                                        </tr>
-                                                        <% }); %>
-                                                            <tr>
-                                                                <th colspan="2">SubTotal</th>
-                                                                <td class="product-subtotal">$<%= subtotal.toFixed(2) %>
-                                                                </td>
-                                                            </tr>
-                                                            <!-- Add shipping charges if applicable -->
-                                                            <tr>
-                                                                <th colspan="2">Shipping</th>
-                                                                <td><em>Free Shipping</em></td>
-                                                            </tr>
-                                                            <!-- Calculate total -->
-                                                            <% const total=subtotal; %>
-                                                                <tr>
-                                                                    <th colspan="2">Total</th>
-                                                                    <td class="product-subtotal"><span
-                                                                            class="font-xl text-brand fw-900">$<%=
-                                                                                total.toFixed(2) %></span>
-                                                                    </td>
-                                                                </tr>
-                                                                <% } else { %>
-                                                                    <tr>
-                                                                        <td colspan="3">No products selected for
-                                                                            checkout.</td>
-                                                                    </tr>
-                                                                    <% } %>
+                                        <% if (checkedProducts && checkedProducts.length > 0) { %>
+                                            <% let subtotal = 0; %>
+                                            <% checkedProducts.forEach(product => { %>
+                                                <% 
+                                                const productPrice = product.productId.mainprice !== 0 && product.productId.mainprice < product.productId.price ? product.productId.mainprice : product.productId.price;
+                                                const productSubtotal = product.quantity * productPrice;
+                                                subtotal += productSubtotal;
+                                                %>
+                                                <tr>
+                                                    <td class="image product-thumbnail">
+                                                        <% if (product.productId && product.productId.productImages.length > 0) { %>
+                                                            <img src="/uploads/<%= product.productId.productImages[0] %>"
+                                                                alt="<%= product.productId.productname %>">
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <h5>
+                                                            <a href="<%= product.productId ? '/products/' + product.productId._id : '#' %>">
+                                                                <%= product.productId ? product.productId.productname : 'Product Not Found' %>
+                                                            </a>
+                                                        </h5>
+                                                        <span class="product-qty">x <%= product.quantity %></span>
+                                                    </td>
+                                                    <td>
+                                                        $<%= productSubtotal.toFixed(2) %>
+                                                    </td>
+                                                </tr>
+                                            <% }); %>
+                                            <tr>
+                                                <th colspan="2">SubTotal</th>
+                                                <td class="product-subtotal">$<%= subtotal.toFixed(2) %></td>
+                                            </tr>
+                                            <!-- Add shipping charges if applicable -->
+                                            <tr>
+                                                <th colspan="2">Shipping</th>
+                                                <td><em>Free Shipping</em></td>
+                                            </tr>
+                                            <!-- Calculate total -->
+                                            <tr>
+                                                <th colspan="2">Total</th>
+                                                <td class="product-subtotal"><span class="font-xl text-brand fw-900">$<%= subtotal.toFixed(2) %></span></td>
+                                            </tr>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="3">No products selected for checkout.</td>
+                                            </tr>
+                                        <% } %>
                                     </tbody>
+                                    
                                 </table>
                             </div>
                             <button type="button" class="btn btn-primary mb-3" id="applyCouponBtn"

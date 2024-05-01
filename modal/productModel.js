@@ -59,6 +59,10 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    categorydiscount: {
+        type: Number,
+        default: 0
+    },
     discount: {
         type: Number,
         default: 0

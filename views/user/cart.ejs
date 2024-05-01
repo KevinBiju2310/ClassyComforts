@@ -75,8 +75,14 @@
                                                             <%= product.productId.productname %>
                                                         </a></h5>
                                                 </td>
-                                                <td class="price" data-title="Price"><span>$<%=
-                                                            product.productId.price.toFixed(2) %></span></td>
+                                                <td class="price" data-title="Price">
+                                                    <% if (product.productId.mainprice !==0 &&
+                                                        product.productId.mainprice < product.productId.price) { %>
+                                                        <span>$<%= product.productId.mainprice.toFixed(2) %></span>
+                                                        <% } else { %>
+                                                            <span>$<%= product.productId.price.toFixed(2) %></span>
+                                                            <% } %>
+                                                </td>
                                                 <td class="text-center" data-title="Stock">
                                                     <div
                                                         class="detail-qty border radius m-auto d-flex align-items-center">
@@ -96,10 +102,18 @@
                                                     </div>
                                                 </td>
                                                 <td class="text-right" data-title="Subtotal">
-                                                    <span id="subtotal-<%= product.productId._id %>">$<%=
-                                                            (product.productId.price * product.quantity).toFixed(2) %>
-                                                    </span>
+                                                    <% if (product.productId.mainprice < product.productId.price &&
+                                                        product.productId.mainprice!==0) { %>
+                                                        <span id="subtotal-<%= product.productId._id %>">$<%=
+                                                                (product.productId.mainprice *
+                                                                product.quantity).toFixed(2) %></span>
+                                                        <% } else { %>
+                                                            <span id="subtotal-<%= product.productId._id %>">$<%=
+                                                                    (product.productId.price *
+                                                                    product.quantity).toFixed(2) %></span>
+                                                            <% } %>
                                                 </td>
+
                                                 <td class="action" data-title="Remove">
                                                     <button class="text-muted delete-item" data-bs-toggle="modal"
                                                         data-bs-target="#deleteConfirmationModal"

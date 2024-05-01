@@ -17,6 +17,8 @@ exports.cartPage = async (req, res) => {
     }
 }
 
+
+
 exports.addtoCart = async (req, res) => {
     try {
         const productId = req.body.productId;
@@ -32,9 +34,15 @@ exports.addtoCart = async (req, res) => {
         if (!cart) {
             cart = new Cart({ userId });
         }
-        cart.products.push({ productId: productId, quantity: 1, productPrice: product.price });
+        let productPrice;
+        if (product.mainprice !== 0 && product.mainprice < product.price) {
+            productPrice = product.mainprice;
+        } else {
+            productPrice = product.price;
+        }
 
-        cart.total += product.price;
+        cart.products.push({ productId: productId, quantity: 1, productPrice: productPrice });
+        cart.total += productPrice; // Use the determined product price for calculation
         await cart.save();
         res.redirect('/user/cart');
     } catch (error) {
@@ -75,11 +83,20 @@ exports.updateCart = async (req, res) => {
                 cart.products[existingProductIndex].quantity = 1;
             }
 
-            const subtotal = cart.products[existingProductIndex].quantity * product.price;
+            // Determine the price to be used for calculation (mainprice or original price)
+            let productPrice;
+            if (cart.products[existingProductIndex].productId.mainprice < cart.products[existingProductIndex].productId.price) {
+                productPrice = cart.products[existingProductIndex].productId.mainprice !== 0 ? cart.products[existingProductIndex].productId.mainprice : cart.products[existingProductIndex].productId.price;
+            } else {
+                productPrice = cart.products[existingProductIndex].productId.price;
+            }
+
+            const subtotal = cart.products[existingProductIndex].quantity * productPrice;
 
             cart.total = cart.products.reduce((acc, item) => {
                 if (checkedProducts.includes(item.productId._id.toString())) {
-                    return acc + (item.quantity * item.productId.price);
+                    const price = item.productId.mainprice !== 0 && item.productId.mainprice < item.productId.price ? item.productId.mainprice : item.productId.price;
+                    return acc + (item.quantity * price);
                 } else {
                     return acc;
                 }
@@ -89,7 +106,8 @@ exports.updateCart = async (req, res) => {
 
             const cartSubtotal = cart.products.reduce((acc, item) => {
                 if (checkedProducts.includes(item.productId._id.toString())) {
-                    return acc + (item.quantity * item.productId.price);
+                    const price = item.productId.mainprice !== 0 && item.productId.mainprice < item.productId.price ? item.productId.mainprice : item.productId.price;
+                    return acc + (item.quantity * price);
                 } else {
                     return acc;
                 }
@@ -109,6 +127,7 @@ exports.updateCart = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
 
 
 

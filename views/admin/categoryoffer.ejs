@@ -17,10 +17,10 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="categoryOffersTableBody">
                 <% category.forEach((category)=> { %>
                     <% if(category.discount !==0) { %>
-                        <tr>
+                        <tr data-category-name="<%= category.name %>">
                             <td>
                                 <%= category.name %>
                             </td>
@@ -54,7 +54,7 @@
                 <div class="modal-body">
                     <form id="addOfferForm" method="post" action="/admin/addcategoryoffer">
                         <div class="form-group">
-                            <label for="productName">Product Name</label>
+                            <label for="categoryName">Category Name</label>
                             <select class="form-control" id="category" name="category" required>
                                 <% category.forEach(category=> { %>
                                     <% if(category.discount===0) { %>
@@ -64,7 +64,7 @@
                                         <% } %>
                                             <% }) %>
                             </select>
-                            <div class="invalid-feedback" id="productNameError"></div>
+                            <div class="invalid-feedback" id="categoryNameError"></div>
                         </div>
                         <div class="form-group">
                             <label for="discountPercentage">Discount Percentage</label>
@@ -94,8 +94,9 @@
                 <div class="modal-body">
                     <form id="updateOfferForm" method="post" action="/admin/updatecategoryoffer">
                         <div class="form-group">
-                            <label for="updateProductName">Product Name</label>
-                            <input type="text" class="form-control" id="updateProductName" name="productName" readonly>
+                            <label for="updateCategoryName">Category Name</label>
+                            <input type="text" class="form-control" id="updateCategoryName" name="categoryName"
+                                readonly>
                         </div>
                         <div class="form-group">
                             <label for="updateDiscountPercentage">Discount Percentage</label>
@@ -115,12 +116,12 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const updateOfferModal = document.getElementById('updateOfferModal');
-            const updateProductNameInput = document.getElementById('updateProductName');
+            const updateCategoryNameInput = document.getElementById('updateCategoryName');
             const updateDiscountPercentageInput = document.getElementById('updateDiscountPercentage');
 
             // Function to set values in the update modal
-            function setUpdateModalValues(productName, discountPercentage) {
-                updateProductNameInput.value = productName;
+            function setUpdateModalValues(categoryName, discountPercentage) {
+                updateCategoryNameInput.value = categoryName;
                 updateDiscountPercentageInput.value = discountPercentage;
             }
 
@@ -129,14 +130,69 @@
             updateButtons.forEach(button => {
                 button.addEventListener('click', function () {
                     const row = this.closest('tr');
-                    const productName = row.querySelector('td:first-child').textContent.trim();
+                    const categoryName = row.querySelector('td:first-child').textContent.trim();
                     const discountPercentage = row.querySelector('td:nth-child(2)').textContent.trim();
-                    setUpdateModalValues(productName, discountPercentage);
+                    setUpdateModalValues(categoryName, discountPercentage);
                     $('#updateOfferModal').modal('show'); // Show the update modal
                 });
             });
         });
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            const productOffersTableBody = document.getElementById('categoryOffersTableBody');
 
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const row = this.closest('tr');
+                    const productName = row.getAttribute('data-category-name');
+
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, remove it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/admin/deletecategoryoffer/${productName}`, {
+                                method: 'DELETE'
+                            })
+                                .then(response => {
+                                    if (response.ok) {
+                                        Swal.fire(
+                                            'Removed!',
+                                            'The category offer has been removed.',
+                                            'success'
+                                        ).then(() => {
+                                            // Remove the corresponding row from the table
+                                            row.remove();
+                                        });
+                                    } else {
+                                        Swal.fire(
+                                            'Error',
+                                            'Something went wrong while removing the category offer.',
+                                            'error'
+                                        );
+                                    }
+                                })
+                                .catch(error => {
+                                    Swal.fire(
+                                        'Error!',
+                                        'Something went wrong while removing the category offer.',
+                                        'error'
+                                    );
+                                    console.error('Error:', error);
+                                });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <%- include("../layouts/adminFooter") %>

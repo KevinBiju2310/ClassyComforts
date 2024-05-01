@@ -250,7 +250,7 @@ exports.singleproductGet = async (req, res) => {
     try {
         const productId = req.params.id;
         const product = await Product.findById(productId)
-        const relatedProducts = await Product.find({ category: product.category, _id: { $ne: productId } }).limit(4);
+        const relatedProducts = await Product.find({ category: product.category, _id: { $ne: productId }, deleted: false }).limit(4);
         res.render('singleproduct', { product, relatedProducts });
     } catch (error) {
         console.log("Error Occurred: ", error);

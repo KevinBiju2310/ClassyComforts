@@ -21,7 +21,7 @@
             </thead>
             <tbody id="productOffersTableBody">
                 <% products.forEach(function(product){ %>
-                    <% if(product.discount!==0 && product.mainprice!==0) { %>
+                    <% if(product.discount!==0) { %>
                         <tr data-product-name="<%= product.productname %>">
                             <td>
                                 <%= product.productname %>
@@ -60,12 +60,12 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="addOfferForm" method="post" action="/admin/addproductoffer">
+                    <form id="addOfferForm">
                         <div class="form-group">
                             <label for="productName">Product Name</label>
                             <select class="form-control" id="product" name="product" required>
                                 <% products.forEach(product=> { %>
-                                    <% if(product.mainprice===0 && product.discount===0) { %>
+                                    <% if(product.discount===0) { %>
                                         <option value="<%= product.productname %>" data-price="<%= product.price %>">
                                             <%= product.productname %>
                                         </option>
@@ -211,9 +211,63 @@
                     });
                 });
             });
+        });
+    </script>
 
-            // Existing code for update modal and product price
-            // ...
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addOfferForm = document.getElementById('addOfferForm');
+
+            addOfferForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                // Get values from the form
+                const productName = document.getElementById('product').value;
+                const productPrice = document.getElementById('productPrice').value;
+                const discountPercentage = document.getElementById('discountPercentage').value;
+
+                // Create an object with the data
+                const requestData = {
+                    product: productName,
+                    productPrice: productPrice,
+                    discountPercentage: discountPercentage
+                };
+
+                // Make a POST request with the data
+                fetch('/admin/addproductoffer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: data.message,
+                                icon: 'success'
+                            }).then(() => {
+                                window.location.href = '/admin/productoffer';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.error || 'Something went wrong!',
+                                icon: 'warning'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Something went wrong!',
+                            icon: 'error'
+                        });
+                    });
+            });
         });
     </script>
 

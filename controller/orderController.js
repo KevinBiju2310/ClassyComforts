@@ -27,6 +27,7 @@ exports.orderconfirm = (req, res) => {
 const checkedProducts = [];
 
 
+
 exports.checkoutPageGet = async (req, res) => {
     try {
         if (!req.session.user) {
@@ -71,6 +72,7 @@ exports.checkoutPage = async (req, res) => {
                         productPrice: item.productPrice
                     });
                 }
+                console.log(checkedProducts);
             }
         }
         res.render('checkout', { addresses, checkedProducts, cart, coupons });
