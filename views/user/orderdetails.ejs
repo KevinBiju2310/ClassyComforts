@@ -134,25 +134,33 @@
 
                                         <table class="delivery-table">
                                             <tbody>
-                                                <tr>
-                                                    <th>Grand Total</th>
-                                                    <td>$<%= order.totalAmount.toFixed(2) %>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Delivery Address</th>
-                                                    <td>
-                                                        <% order.address.forEach(addr=> { %>
-                                                            <address>
-                                                                <%= addr.name %><br>
-                                                                    <%= addr.address %><br>
-                                                                        <%= addr.city %>, <%= addr.state %>
-                                                                                <%= addr.pincode %><br>
-                                                                                    <%= addr.district %>
-                                                            </address>
-                                                            <% }); %>
-                                                    </td>
-                                                </tr>
+                                                <% if (order.couponPercentage !== 0) { %>
+                                                    <tr>
+                                                        <th>Coupon Applied</th>
+                                                        <td>
+                                                            <%= order.couponPercentage %>% Discount
+                                                        </td>
+                                                    </tr>
+                                                    <% } %>
+                                                        <tr>
+                                                            <th>Grand Total</th>
+                                                            <td>$<%= order.totalAmount.toFixed(2) %>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Delivery Address</th>
+                                                            <td>
+                                                                <% order.address.forEach(addr=> { %>
+                                                                    <address>
+                                                                        <%= addr.name %><br>
+                                                                            <%= addr.address %><br>
+                                                                                <%= addr.city %>, <%= addr.state %>
+                                                                                        <%= addr.pincode %><br>
+                                                                                            <%= addr.district %>
+                                                                    </address>
+                                                                    <% }); %>
+                                                            </td>
+                                                        </tr>
                                             </tbody>
                                         </table>
                                     </div>

@@ -163,9 +163,9 @@ exports.orderPlaced = async (req, res) => {
         const addressId = req.body.selected_shipping_address;
         const totalValue = parseFloat(req.body.total);
         const paymentMethod = req.body.payment_option;
-        console.log(paymentMethod);
-        console.log(totalValue)
-
+        const couponId = req.body.couponId || null;
+        const subtotal = parseFloat(req.body.subtotal);
+        console.log(subtotal);
         const cart = await Cart.findOne({ userId });
 
         const userAddresses = await Address.findOne({ userId }).populate('items');
@@ -179,6 +179,18 @@ exports.orderPlaced = async (req, res) => {
             return res.status(404).send('Address not found');
         }
 
+        let couponPercentage = 0;
+        let couponAmount = 0;
+
+        // Check if a coupon is provided
+        if (couponId) {
+            const coupon = await Coupon.findById(couponId);
+            if (coupon) {
+                couponPercentage = coupon.discountamount;
+                couponAmount = (subtotal * couponPercentage) / 100;
+            }
+        }
+
         if (paymentMethod === 'cod') {
             const order = new Order({
                 userId,
@@ -189,7 +201,9 @@ exports.orderPlaced = async (req, res) => {
                 })),
                 address: address,
                 paymentMethod: paymentMethod,
-                totalAmount: totalValue
+                totalAmount: totalValue,
+                couponPercentage,
+                couponAmount
             });
             await order.save();
 
@@ -228,7 +242,9 @@ exports.orderPlaced = async (req, res) => {
                 })),
                 address: address,
                 paymentMethod: paymentMethod,
-                totalAmount: totalValue
+                totalAmount: totalValue,
+                couponPercentage,
+                couponAmount
             });
             await order.save();
 
@@ -277,7 +293,9 @@ exports.orderPlaced = async (req, res) => {
                 address: address,
                 paymentMethod: paymentMethod,
                 totalAmount: totalValue,
-                paymentStatus: "success"
+                paymentStatus: "success",
+                couponPercentage,
+                couponAmount
             });
             await order.save();
             for (const checkedProduct of checkedProducts) {

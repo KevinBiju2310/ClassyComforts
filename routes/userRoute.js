@@ -6,6 +6,7 @@ const cartController = require('../controller/cartController');
 const userProfileController = require('../controller/userProfileController');
 const orderController = require('../controller/orderController');
 const wishlistController = require('../controller/wishlistController');
+const couponController = require('../controller/couponController');
 const { isLoggedIn } = require('../middleware/auth');
 
 
@@ -62,6 +63,8 @@ router.post('/checkout/editaddress/:addressId', isLoggedIn, orderController.edit
 router.post('/checkout/address', isLoggedIn, orderController.addAddress);
 router.delete('/removeproduct', isLoggedIn, orderController.removeProduct);
 // router.post('/invoice/:id', orderController.downloadInvoice);
+
+router.post('/applycoupon',isLoggedIn, couponController.applyCoupon);
 
 router.get('/sort', isLoggedIn, productController.sortproductGet);
 

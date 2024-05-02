@@ -82,6 +82,14 @@ const orderSchema = new mongoose.Schema({
     cancelReason: {
         type: String,
         default: ''
+    },
+    couponPercentage: {
+        type: Number,
+        default: 0
+    },
+    couponAmount: {
+        type: Number,
+        default: 0
     }
 },
     {
