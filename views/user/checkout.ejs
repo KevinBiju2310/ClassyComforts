@@ -378,76 +378,85 @@
                         </div>
                     </div>
 
-                    <script>
-                        let couponApplied = false;
-                        function openCouponModal() {
-                            const couponModal = new bootstrap.Modal(document.getElementById('couponModal'));
-                            couponModal.show();
-                        }
-
-                        const couponForm = document.getElementById('couponForm');
-                        const couponDiscountAmount = document.getElementById('couponDiscountAmount');
-                        const subtotalRow = document.getElementById('subtotalRow');
-                        const couponRow = document.getElementById('couponRow');
-                        const totalRow = document.getElementById('totalRow');
-
-                        couponForm.addEventListener('submit', function (event) {
-                            event.preventDefault();
-
-                            if (couponApplied) {
-                                swal('Error', 'Coupon has already been applied.', 'error');
-                                return;
-                            }
-
-                            const selectedCoupon = document.querySelector('input[name="coupon"]:checked');
-                            if (selectedCoupon) {
-                                const subtotal = parseFloat(document.querySelector('.product-subtotal').innerText.slice(1));
-                                if (subtotal < 1000) {
-                                    swal('Error', 'Minimum amount 1000 needed to apply coupon', 'error');
-                                    return;
-                                }
-                                fetch('/user/applycoupon', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({ couponId: selectedCoupon.value })
-                                })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            const subtotal = parseFloat(document.querySelector('.product-subtotal').innerText.slice(1));
-                                            const discountAmount = subtotal * (data.coupon.discountamount / 100);
-                                            const total = subtotal - discountAmount;
-
-                                            // Update the table
-                                            couponDiscountAmount.innerText = `-$${discountAmount.toFixed(2)}`;
-                                            couponRow.style.display = 'table-row';
-                                            document.querySelector('#totalRow .product-subtotal span').innerText = `$${total.toFixed(2)}`;
-                                            couponApplied = true;
-                                            swal('Success', data.message, 'success');
-                                        } else {
-                                            swal('Error', data.message, 'error');
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error:', error);
-                                        swal('Error', 'An error occurred while applying the coupon.', 'error');
-                                    });
-                            } else {
-                                swal('Error', 'Please select a coupon.', 'error');
-                            }
-
-                            // Close the modal
-                            const couponModal = bootstrap.Modal.getInstance(document.getElementById('couponModal'));
-                            couponModal.hide();
-                        });
-                    </script>
 
                     <%- include("../layouts/userFooter") %>
 
                         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
                         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+
+                        <script>
+                            let couponApplied = false;
+
+                            function openCouponModal() {
+                                const couponModal = new bootstrap.Modal(document.getElementById('couponModal'));
+                                couponModal.show();
+                            }
+
+                            const couponForm = document.getElementById('couponForm');
+                            const couponDiscountAmount = document.getElementById('couponDiscountAmount');
+                            const subtotalRow = document.getElementById('subtotalRow');
+                            const couponRow = document.getElementById('couponRow');
+                            const totalRow = document.getElementById('totalRow');
+
+                            couponForm.addEventListener('submit', function (event) {
+                                event.preventDefault();
+
+                                if (couponApplied) {
+                                    swal('Error', 'Coupon has already been applied.', 'error');
+                                    return;
+                                }
+
+                                const selectedCoupon = document.querySelector('input[name="coupon"]:checked');
+                                if (selectedCoupon) {
+                                    const subtotal = parseFloat(document.querySelector('.product-subtotal').innerText.slice(1));
+                                    fetch('/user/applycoupon', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ couponId: selectedCoupon.value, subtotal: subtotal })
+                                    })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                const subtotal = parseFloat(document.querySelector('.product-subtotal').innerText.slice(1));
+                                                const discountAmount = subtotal * (data.coupon.discountamount / 100);
+                                                const total = subtotal - discountAmount;
+
+                                                // Update the table
+                                                couponDiscountAmount.innerText = `-$${discountAmount.toFixed(2)}`;
+                                                couponRow.style.display = 'table-row';
+                                                document.querySelector('#totalRow .product-subtotal span').innerText = `$${total.toFixed(2)}`;
+                                                couponApplied = true;
+                                                removeCouponBtn.style.display = 'inline-block';
+                                                swal('Success', data.message, 'success');
+                                            } else {
+                                                swal('Error', data.message, 'error');
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error:', error);
+                                            swal('Error', 'An error occurred while applying the coupon.', 'error');
+                                        });
+                                } else {
+                                    swal('Error', 'Please select a coupon.', 'error');
+                                }
+                                const couponModal = bootstrap.Modal.getInstance(document.getElementById('couponModal'));
+                                couponModal.hide();
+                            });
+                            function removeCoupon() {
+                                couponApplied = false;
+                                removeCouponBtn.style.display = 'none'; // Hide the "Remove Coupon" button
+                                couponRow.style.display = 'none';
+                                couponDiscountAmount.innerText = '-$0.00';
+
+                                // Reset the total amount
+                                const subtotal = parseFloat(document.querySelector('.product-subtotal').innerText.slice(1));
+                                document.querySelector('#totalRow .product-subtotal span').innerText = `$${subtotal.toFixed(2)}`;
+
+                            }
+                        </script>
                         <script>
                             document.getElementById('placeOrderBtn').addEventListener('click', function (event) {
                                 event.preventDefault(); // Prevent default form submission
@@ -470,7 +479,6 @@
                                     }
 
                                     if (paymentMethod.value === 'cod') {
-                                        // Use fetch to send data to the backend
                                         fetch("/user/placeorder", {
                                             method: "POST",
                                             headers: {
@@ -491,7 +499,11 @@
                                                 throw new Error('Network response was not ok.');
                                             })
                                             .then(data => {
-                                                window.location.href = '/user/orderSuccessfull';
+                                                if (data.success) {
+                                                    window.location.href = '/user/orderSuccessfull';
+                                                } else {
+                                                    swal("Error!", data.message, "info");
+                                                }
                                             })
                                             .catch(error => {
                                                 console.error('Error:', error);

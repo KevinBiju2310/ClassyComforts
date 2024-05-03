@@ -1,0 +1,113 @@
+<%- include("../layouts/adminHeader") %>
+
+    <div id="content">
+        <h1>Sales Report</h1>
+
+        <% if(order.length> 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>Product Name</th>
+                        <th>Payment Method</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Discount</th>
+                        <th>Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% order.forEach(order=> { %>
+                        <tr>
+                            <td>
+                                <%= order.userId.name %>
+                            </td>
+                            <td>
+                                <ul>
+                                    <% order.products.forEach(product=> { %>
+                                        <li>
+                                            <%= product.productId.productname %>
+                                        </li>
+                                        <% }); %>
+                                </ul>
+                            </td>
+                            <td>
+                                <%= order.paymentMethod %>
+                            </td>
+                            <td>
+                                <ul>
+                                    <% order.products.forEach(product=> { %>
+                                        <li>
+                                            <%= product.quantity %>
+                                        </li>
+                                        <% }); %>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <% order.products.forEach(product=> { %>
+                                        <li>$<%= product.productPrice.toFixed(2) %>
+                                        </li>
+                                        <% }); %>
+                                </ul>
+                            </td>
+                            <td>$<%= order.couponAmount.toFixed(2) %>
+                            </td>
+                            <td>$<%= order.totalAmount.toFixed(2) %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+            <% } else { %>
+                <p class="text-center">No Orders Found</p>
+                <% } %>
+
+                    <!-- Overall sales count, total amount, and discount -->
+                    <% if(order.length> 0) { %>
+                        <% let overallSalesCount=order.length; %>
+                            <% let overallTotalAmount=order.reduce((total, order)=> total + order.totalAmount, 0); %>
+                                <% let overallDiscount=order.reduce((total, order)=> total + order.couponAmount, 0); %>
+                                    <div>
+                                        <p>Overall Sales Count: <%= overallSalesCount %>
+                                        </p>
+                                        <p>Overall Total Amount: $<%= overallTotalAmount.toFixed(2) %>
+                                        </p>
+                                        <p>Overall Discount: $<%= overallDiscount.toFixed(2) %>
+                                        </p>
+                                    </div>
+                                    <% } %>
+
+                                        <!-- Pagination links -->
+                                        <nav aria-label="Page navigation" class="mt-4">
+                                            <ul class="pagination justify-content-center">
+                                                <% if (currentPage> 1) { %>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page=<%= currentPage - 1 %>"
+                                                            aria-label="Previous">
+                                                            <span aria-hidden="true">&laquo;</span>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
+                                                        <% for(let i=1; i <=totalPages; i++) { %>
+                                                            <li
+                                                                class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                                <a class="page-link" href="?page=<%= i %>">
+                                                                    <%= i %>
+                                                                </a>
+                                                            </li>
+                                                            <% } %>
+                                                                <% if (currentPage < totalPages) { %>
+                                                                    <li class="page-item">
+                                                                        <a class="page-link"
+                                                                            href="?page=<%= currentPage + 1 %>"
+                                                                            aria-label="Next">
+                                                                            <span aria-hidden="true">&raquo;</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <% } %>
+                                            </ul>
+                                        </nav>
+    </div>
+
+    <%- include("../layouts/adminFooter") %>

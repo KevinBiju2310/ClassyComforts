@@ -192,6 +192,9 @@ exports.orderPlaced = async (req, res) => {
         }
 
         if (paymentMethod === 'cod') {
+            if (totalValue >= 1000) {
+                return res.json({ success: false, message: 'Above 1000 not allowed for Cash on Delivery' });
+            }
             const order = new Order({
                 userId,
                 products: checkedProducts.map(item => ({

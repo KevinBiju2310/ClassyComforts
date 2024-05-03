@@ -189,3 +189,30 @@ exports.updateOrderStatus = async (req, res) => {
         res.status(500).json({ error: 'Failed to update order status' });
     }
 };
+
+
+//Sales Report
+exports.salesreport = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 5;
+        const totalOrders = await Order.countDocuments({ orderStatus: 'delivered' });
+        const totalPages = Math.ceil(totalOrders / perPage);
+        const skip = (page - 1) * perPage;
+
+        const order = await Order.find({ orderStatus: 'delivered' })
+            .populate('userId')
+            .populate('products.productId')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(perPage);
+
+        res.render('salesreport', {
+            order,
+            currentPage: page,
+            totalPages
+        });
+    } catch (error) {
+        console.log("Error Happened: ", error);
+    }
+}

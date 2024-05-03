@@ -99,22 +99,25 @@ exports.checkvalidation = async (req, res) => {
 }
 
 
-exports.applyCoupon = async(req, res) => {
+exports.applyCoupon = async (req, res) => {
     try {
-        const { couponId } = req.body;
-
+        const { couponId, subtotal } = req.body;
         const coupon = await Coupon.findById(couponId);
-        console.log(coupon,"Coupons")
+        console.log(coupon, "Coupons")
         if (!coupon) {
-          return res.status(404).json({ success: false, message: 'Invalid coupon code.' });
+            return res.status(404).json({ success: false, message: 'Invalid coupon code.' });
         }
-    
+
         if (coupon.status !== 'active') {
-          return res.status(400).json({ success: false, message: 'Coupon is not active.' });
+            return res.status(400).json({ success: false, message: 'Coupon is not active.' });
         }
         const currentDate = new Date();
         if (coupon.endDate < currentDate) {
-          return res.status(400).json({ success: false, message: 'Coupon has expired.' });
+            return res.status(400).json({ success: false, message: 'Coupon has expired.' });
+        }
+
+        if (subtotal < coupon.minimumamount) {
+            return res.status(400).json({ success: false, message: 'Minimum amount not met to apply coupon.' });
         }
         res.status(200).json({ success: true, message: 'Coupon applied successfully.', coupon });
     } catch (err) {
@@ -122,3 +125,4 @@ exports.applyCoupon = async(req, res) => {
         res.status(500).json({ success: false, message: 'An error occurred while applying the coupon.' });
     }
 }
+

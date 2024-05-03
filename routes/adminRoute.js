@@ -55,4 +55,7 @@ router.post('/updatecategoryoffer',offerController.updatecategoryOffer);
 router.delete('/deletecategoryoffer/:categoryName',offerController.deletecategoryOffer);
 
 
+router.get('/salesreport',isAdminLogin,adminController.salesreport);
+
+
 module.exports = router
