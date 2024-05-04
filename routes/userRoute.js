@@ -70,8 +70,8 @@ router.get('/sort', isLoggedIn, productController.sortproductGet);
 
 
 // router.get('/ordered', isLoggedIn, orderController.orderPlaced);
-router.post('/placeorder', isLoggedIn, orderController.orderPlaced)
-
+router.post('/placeorder', isLoggedIn, orderController.orderPlaced);
+router.post('/retrypayment', orderController.retrypayment);
 router.get('/logout', userController.logoutuser);
 
 module.exports = router;

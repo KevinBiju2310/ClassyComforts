@@ -4,7 +4,7 @@
         <h1>Sales Report</h1>
 
         <% if(order.length> 0) { %>
-            <table>
+            <table style="font-size: 14px;">
                 <thead>
                     <tr>
                         <th>Customer Name</th>
@@ -24,8 +24,7 @@
                             </td>
                             <td>
                                 <ul>
-                                    <% order.products.forEach(product=> { %>
-                                        <li>
+                                    <% order.products.forEach(product=> { %><li>
                                             <%= product.productId.productname %>
                                         </li>
                                         <% }); %>
@@ -36,8 +35,7 @@
                             </td>
                             <td>
                                 <ul>
-                                    <% order.products.forEach(product=> { %>
-                                        <li>
+                                    <% order.products.forEach(product=> { %><li>
                                             <%= product.quantity %>
                                         </li>
                                         <% }); %>
@@ -45,8 +43,7 @@
                             </td>
                             <td>
                                 <ul>
-                                    <% order.products.forEach(product=> { %>
-                                        <li>$<%= product.productPrice.toFixed(2) %>
+                                    <% order.products.forEach(product=> { %><li>$<%= product.productPrice.toFixed(2) %>
                                         </li>
                                         <% }); %>
                                 </ul>
@@ -58,56 +55,58 @@
                         </tr>
                         <% }); %>
                 </tbody>
+                <tfoot>
+                    <% let overallSalesCount=order.length; %>
+                        <% let overallTotalAmount=order.reduce((total, order)=> total + order.totalAmount, 0); %>
+                            <% let overallDiscount=order.reduce((total, order)=> total + order.couponAmount, 0); %>
+                                <tr>
+                                    <td colspan="6" align="right"><strong>Total Sales Count:</strong></td>
+                                    <td><strong>
+                                            <%= overallSalesCount %>
+                                        </strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" align="right"><strong>Total Sales Amount:</strong></td>
+                                    <td><strong>$<%= overallTotalAmount.toFixed(2) %></strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" align="right"><strong>Total Discount:</strong></td>
+                                    <td><strong>$<%= overallDiscount.toFixed(2) %></strong></td>
+                                </tr>
+                </tfoot>
             </table>
+
             <% } else { %>
                 <p class="text-center">No Orders Found</p>
                 <% } %>
 
-                    <!-- Overall sales count, total amount, and discount -->
-                    <% if(order.length> 0) { %>
-                        <% let overallSalesCount=order.length; %>
-                            <% let overallTotalAmount=order.reduce((total, order)=> total + order.totalAmount, 0); %>
-                                <% let overallDiscount=order.reduce((total, order)=> total + order.couponAmount, 0); %>
-                                    <div>
-                                        <p>Overall Sales Count: <%= overallSalesCount %>
-                                        </p>
-                                        <p>Overall Total Amount: $<%= overallTotalAmount.toFixed(2) %>
-                                        </p>
-                                        <p>Overall Discount: $<%= overallDiscount.toFixed(2) %>
-                                        </p>
-                                    </div>
-                                    <% } %>
-
-                                        <!-- Pagination links -->
-                                        <nav aria-label="Page navigation" class="mt-4">
-                                            <ul class="pagination justify-content-center">
-                                                <% if (currentPage> 1) { %>
-                                                    <li class="page-item">
-                                                        <a class="page-link" href="?page=<%= currentPage - 1 %>"
-                                                            aria-label="Previous">
-                                                            <span aria-hidden="true">&laquo;</span>
-                                                        </a>
-                                                    </li>
-                                                    <% } %>
-                                                        <% for(let i=1; i <=totalPages; i++) { %>
-                                                            <li
-                                                                class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                                                <a class="page-link" href="?page=<%= i %>">
-                                                                    <%= i %>
-                                                                </a>
-                                                            </li>
-                                                            <% } %>
-                                                                <% if (currentPage < totalPages) { %>
-                                                                    <li class="page-item">
-                                                                        <a class="page-link"
-                                                                            href="?page=<%= currentPage + 1 %>"
-                                                                            aria-label="Next">
-                                                                            <span aria-hidden="true">&raquo;</span>
-                                                                        </a>
-                                                                    </li>
-                                                                    <% } %>
-                                            </ul>
-                                        </nav>
+                    <!-- Pagination links -->
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <% if (currentPage> 1) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                <% } %>
+                                    <% for(let i=1; i <=totalPages; i++) { %>
+                                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                            <a class="page-link" href="?page=<%= i %>">
+                                                <%= i %>
+                                            </a>
+                                        </li>
+                                        <% } %>
+                                            <% if (currentPage < totalPages) { %>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=<%= currentPage + 1 %>"
+                                                        aria-label="Next">
+                                                        <span aria-hidden="true">&raquo;</span>
+                                                    </a>
+                                                </li>
+                                                <% } %>
+                        </ul>
+                    </nav>
     </div>
 
     <%- include("../layouts/adminFooter") %>

@@ -13,14 +13,21 @@ exports.profileGet = async (req, res) => {
         const userId = req.session.user._id;
         const user = await User.findById(userId);
         const addresses = await Address.find({ userId });
-        const order = await Order.find({ userId }).populate('products.productId');
+        const orderPage = req.query.orderPage || 1;
+        const orderPerPage = 5; // Adjust as needed
+        const orderCount = await Order.countDocuments({ userId });
+        const totalPages = Math.ceil(orderCount / orderPerPage);
+        const order = await Order.find({ userId })
+            .populate('products.productId')
+            .skip((orderPage - 1) * orderPerPage)
+            .limit(orderPerPage);
         const wallet = await Wallet.findOne({ userId });
 
         if (!wallet) {
             const defaultWalletAmount = 0;
-            res.render('accountdetails', { addresses, user, order, wallet: { amount: defaultWalletAmount } });
+            res.render('accountdetails', { addresses, user, order, totalPages, orderPage, wallet: { amount: defaultWalletAmount } });
         } else {
-            res.render('accountdetails', { addresses, user, order, wallet });
+            res.render('accountdetails', { addresses, user, order, totalPages, orderPage, wallet });
         }
     } catch (error) {
         console.log("Error Occurred: ", error);

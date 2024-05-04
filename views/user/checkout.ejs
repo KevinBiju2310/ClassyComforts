@@ -537,6 +537,7 @@
                                                 description: "Purchase Description",
                                                 order_id: data.orderId,
                                                 handler: function (response) {
+                                                    // Handle successful payment
                                                     fetch('/user/updatepayment', {
                                                         method: 'POST',
                                                         headers: {
@@ -557,7 +558,6 @@
                                                             console.error('Error:', error);
                                                             swal('Error!', 'An error occurred while verifying the payment.', 'error');
                                                         });
-
                                                 },
                                                 "theme": {
                                                     "color": "#3399cc"
@@ -565,39 +565,38 @@
                                             };
                                             var razorpayInstance = new Razorpay(options);
                                             razorpayInstance.open();
+
+                                            // Handle payment failure
+                                            razorpayInstance.on('payment.failed', function (response) {
+                                                console.log(response);
+                                                swal('Payment Failed', 'Your payment was not successful. Please try again.', 'error');
+                                                // Send the necessary data to the server for payment verification
+                                                fetch('/user/updatepayment', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({
+                                                        razorpay_order_id: response.error.metadata.order_id,
+                                                        razorpay_payment_id: response.error.metadata.payment_id,
+                                                        razorpay_signature: response.error.signature,
+                                                        orderID: data.orderID,
+                                                    }),
+                                                })
+                                                    .then(response => response.json())
+                                                    .then(data => {
+                                                        console.log(data.message);
+                                                    })
+                                                    .catch(error => {
+                                                        console.error('Error:', error);
+                                                        swal('Error!', 'An error occurred while verifying the payment failure.', 'error');
+                                                    });
+                                            });
                                         })
                                             .catch(error => {
                                                 console.error('Error:', error);
                                                 swal("Error!", "An error occurred while processing the payment.", "error");
                                             });
-
-                                        razorpayInstance.on('payment.failure', function (response) {
-                                            // Handle Razorpay failure
-                                            console.log(response);
-                                            swal('Payment Failed', 'Your payment was not successful. Please try again.', 'error');
-
-                                            // Send the necessary data to the server for payment verification
-                                            fetch('/user/updatepayment', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                },
-                                                body: JSON.stringify({
-                                                    razorpay_order_id: response.error.metadata.order_id,
-                                                    razorpay_payment_id: response.error.metadata.payment_id,
-                                                    razorpay_signature: response.error.signature,
-                                                    orderID: data.orderID,
-                                                }),
-                                            })
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    console.log(data.message);
-                                                })
-                                                .catch(error => {
-                                                    console.error('Error:', error);
-                                                    swal('Error!', 'An error occurred while verifying the payment failure.', 'error');
-                                                });
-                                        });
                                     } else if (paymentMethod.value === 'wallet') {
                                         fetch('/user/placeorder', {
                                             method: "POST",

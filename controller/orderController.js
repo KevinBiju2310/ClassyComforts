@@ -354,13 +354,43 @@ exports.updatepaymentStatus = async (req, res) => {
                     await product.save();
                 }
             }
-
             res.status(400).json({ message: 'Payment failed' });
         }
 
     } catch (error) {
         console.error('Error verifying payment:', error);
         res.status(500).json({ message: 'Error verifying payment' });
+    }
+}
+
+
+
+exports.retrypayment = async (req, res) => {
+    try {
+        const orderId = req.body.orderId;
+        const order = await Order.findById(orderId);
+        console.log(orderId);
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        const options = {
+            amount: order.totalAmount * 100,
+            currency: 'INR',
+            receipt: order._id.toString()
+        };
+
+        // Create a new Razorpay order
+        const razorpayOrder = await razorpayInstance.orders.create(options);
+
+        return res.status(200).json({
+            orderId: razorpayOrder.id,
+            amount: razorpayOrder.amount,
+            orderID: order._id
+        });
+    } catch (error) {
+        console.error('Error occurred:', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
@@ -483,39 +513,29 @@ exports.removeProduct = async (req, res) => {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        // Find the index of the product in the order
         const productIndex = order.products.findIndex(
             (product) => product.productId.toString() === productId
         );
 
-        // If product not found in the order, return error
         if (productIndex === -1) {
             return res.status(404).json({ error: 'Product not found in order' });
         }
 
-        // Get the product details
         const productToRemove = order.products[productIndex];
         const { productPrice, quantity } = productToRemove;
 
-        // Update total amount by subtracting the price of the removed product
         order.totalAmount -= productPrice * quantity;
-
-        // Remove the product from the order
         order.products.splice(productIndex, 1);
 
-        // Save the updated order
         await order.save();
 
-        // Update the quantity of the product in the inventory
         const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
 
-        // Increase the quantity in inventory by the quantity that was in the order
         product.quantity += quantity;
 
-        // Save the updated product
         await product.save();
 
         res.status(200).json({ message: 'Product removed from order and quantity updated', order });
