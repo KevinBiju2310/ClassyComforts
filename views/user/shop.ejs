@@ -116,22 +116,21 @@
                                             </div>
                                             <div class="product-price">
                                                 <% if (product.mainprice < product.price && product.mainprice!==0) { %>
-                                                    <span>$<%= product.mainprice %></span> <!-- Displaying main price -->
-                                                    <span class="old-price">$<%= product.price %></span> <!-- Displaying original price as old price -->
-                                                <% } else { %>
-                                                    <span>$<%= product.price %></span> <!-- Displaying original price -->
-                                                    <span class="old-price">$<%= product.mainprice %></span> <!-- Displaying main price as old price -->
-                                                <% } %>
+                                                    <span>$<%= product.mainprice %></span>
+                                                    <!-- Displaying main price -->
+                                                    <span class="old-price">$<%= product.price %></span>
+                                                    <!-- Displaying original price as old price -->
+                                                    <% } else { %>
+                                                        <span>$<%= product.price %></span>
+                                                        <!-- Displaying original price -->
+                                                        <span class="old-price">$<%= product.mainprice %></span>
+                                                        <!-- Displaying main price as old price -->
+                                                        <% } %>
                                             </div>
-
-                                            <div class="product-action-1 show">
-                                                <form action="/user/addtocart" method="POST">
-                                                    <input type="hidden" name="productId" value="<%= product.id %>">
-                                                    <button type="submit" aria-label="Add To Cart"
-                                                        class="action-btn hover-up">
-                                                        <i class="fi-rs-shopping-bag-add icon-center pb-10"></i>
-                                                    </button>
-                                                </form>
+                                            <div class="show">
+                                                <a aria-label="Add To Cart" class="action-btn hover-up add-to-cart"
+                                                    href="#" data-product-id="<%= product.id %>">
+                                                    <i class="fi-rs-shopping-bag-add"></i></a>
                                             </div>
                                         </div>
                                     </div>
@@ -362,6 +361,7 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             const addToWishlistButtons = document.querySelectorAll(".add-to-wishlist");
+            const addToCartButtons = document.querySelectorAll(".add-to-cart");
 
             addToWishlistButtons.forEach(button => {
                 button.addEventListener("click", function (e) {
@@ -393,6 +393,50 @@
                                     icon: 'success',
                                     title: 'Added to Wishlist!',
                                     text: 'This product has been added to your wishlist.'
+                                })
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Something went wrong! Please try again.'
+                            });
+                        });
+                });
+            });
+
+            addToCartButtons.forEach(button => {
+                button.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const productId = button.getAttribute("data-product-id");
+
+                    fetch("/user/addtocart", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ productId: productId })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Network response was not ok");
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.alreadyInCart) {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Already in Cart!',
+                                    text: 'This product is already in your Cart.'
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Added to Cart!',
+                                    text: 'This product has been added to your Cart.'
                                 })
                             }
                         })

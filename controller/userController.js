@@ -2,6 +2,7 @@ const { check, validationResult } = require('express-validator');
 const User = require('../modal/userModal')
 const Product = require('../modal/productModel')
 const Category = require('../modal/categoryModel')
+const Wallet = require('../modal/walletModel')
 const bcrypt = require('bcrypt')
 const passport = require('passport')
 const nodemailer = require('nodemailer')
@@ -33,7 +34,7 @@ exports.homeGet = async (req, res) => {
 }
 
 
-exports.pagenotfound = async(req,res) =>{
+exports.pagenotfound = async (req, res) => {
     await res.render('pagenotfound')
 }
 
@@ -49,6 +50,20 @@ exports.signupGet = async (req, res) => {
 
 function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000);
+}
+
+
+function generateReferralCode() {
+    let length = 6;
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let referralCode = 'CLC';
+
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        referralCode += characters.charAt(randomIndex);
+    }
+
+    return referralCode;
 }
 
 
@@ -70,6 +85,22 @@ exports.signupPost = [
             }
             return true;
         }),
+    check('referralcode').optional().custom(async (value, { req }) => {
+        if (value) {
+            try {
+                console.log(value)
+                const existingUser = await User.findOne({ referralCode: value });
+                if (!existingUser) {
+                    throw new Error('Invalid referral code');
+                }
+                // Store the referred user's ID in the request for later use
+                req.referredUserId = existingUser._id;
+            } catch (error) {
+                throw new Error('Invalid referral code');
+            }
+        }
+        return true;
+    }),
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -98,6 +129,7 @@ exports.signupPost = [
                 email,
                 phone,
                 password: hashedPassword,
+                referredby: req.referredUserId,
                 otp,
             };
             res.status(200).redirect('/user/verifyotp');
@@ -123,11 +155,24 @@ exports.verifyOTP = async (req, res) => {
     const { otp } = req.body;
     const newUser = req.session.user;
     if (newUser && newUser.otp === parseInt(otp)) {
-        const { name, phone, password, email } = newUser;
+        const { name, phone, password, email, referredby } = newUser;
         const isAdmin = 0;
+        const referralCode = generateReferralCode();
+        console.log(referralCode)
         try {
-            const user = new User({ name, email, phone, password, isAdmin });
+            const user = new User({ name, email, phone, password, isAdmin, referralCode, referredby });
             await user.save();
+
+            const userWallet = new Wallet({
+                userId: user._id,
+                amount: 0
+            });
+            await userWallet.save();
+            if (referredby) {
+                userWallet.amount += 500;
+                await userWallet.save();
+                await Wallet.updateOne({ userId: referredby }, { $inc: { amount: 1000 } });
+            }
             req.session.user = user;
             res.redirect('/user/home');
         } catch (error) {
@@ -146,7 +191,6 @@ exports.signinGet = async (req, res) => {
         console.error("Error rendering signin: ", error);
         res.status(500).send('Internet Server Error');
     }
-
 };
 
 

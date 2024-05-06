@@ -24,6 +24,14 @@ const userSchema = new mongoose.Schema({
     isBlocked: {
         type: Boolean,
         default: false
+    },
+    referralCode: {
+        type: String,
+        unique: true
+    },
+    referredby: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users'
     }
 }
 )

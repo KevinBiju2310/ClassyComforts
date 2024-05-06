@@ -194,25 +194,69 @@ exports.updateOrderStatus = async (req, res) => {
 //Sales Report
 exports.salesreport = async (req, res) => {
     try {
+        // Get filter type from query parameters
+        const filterType = req.query.filter || 'day'; // Default to 'day' if no filter specified
+
+        // Initialize variables for pagination
         const page = parseInt(req.query.page) || 1;
         const perPage = 5;
-        const totalOrders = await Order.countDocuments({ orderStatus: 'delivered' });
-        const totalPages = Math.ceil(totalOrders / perPage);
-        const skip = (page - 1) * perPage;
+        let totalOrders, totalPages, skip;
 
-        const order = await Order.find({ orderStatus: 'delivered' })
+        // Calculate date range based on filter type
+        let startDate, endDate;
+        if (filterType === 'day') {
+            startDate = new Date(); // Today's date
+            startDate.setHours(0, 0, 0, 0); // Set time to the beginning of the day
+            endDate = new Date(); // Today's date
+            endDate.setHours(23, 59, 59, 999); // Set time to the end of the day
+        } else if (filterType === 'week') {
+            startDate = new Date();
+            startDate.setDate(startDate.getDate() - startDate.getDay()); // Start of current week (Sunday)
+            startDate.setHours(0, 0, 0, 0);
+            endDate = new Date();
+            endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // End of current week (Saturday)
+            endDate.setHours(23, 59, 59, 999);
+        } else if (filterType === 'month') {
+            startDate = new Date();
+            startDate.setDate(1); // Start of current month
+            startDate.setHours(0, 0, 0, 0);
+            endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + 1); // End of current month
+            endDate.setDate(0);
+            endDate.setHours(23, 59, 59, 999);
+        }
+
+        // Query total orders based on date range
+        totalOrders = await Order.countDocuments({
+            orderStatus: 'delivered',
+            updatedAt: { $gte: startDate, $lte: endDate }
+        });
+
+        // Calculate total pages and skip
+        totalPages = Math.ceil(totalOrders / perPage);
+        skip = (page - 1) * perPage;
+
+        // Query orders based on date range with pagination
+        const order = await Order.find({
+            orderStatus: 'delivered',
+            updatedAt: { $gte: startDate, $lte: endDate }
+        })
             .populate('userId')
             .populate('products.productId')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(perPage);
 
+        // Render the salesreport view with data
         res.render('salesreport', {
             order,
             currentPage: page,
-            totalPages
+            totalPages,
+            filterType // Pass filter type to the view for display
         });
     } catch (error) {
         console.log("Error Happened: ", error);
     }
 }
+
+

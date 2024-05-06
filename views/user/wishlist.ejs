@@ -60,15 +60,21 @@
                                                                 <% } %>
                                                                     <td class="text-right" data-title="Cart">
                                                                         <% if (product.productId.quantity> 0) { %>
-                                                                            <form action="/user/addtocart"
-                                                                                method="POST">
-                                                                                <input type="hidden" name="productId"
-                                                                                    value="<%= product.productId._id %>">
-                                                                                <button type="submit"
-                                                                                    class="btn btn-sm"><i
-                                                                                        class="fi-rs-shopping-bag mr-5"></i>Add
-                                                                                    to cart</button>
-                                                                            </form>
+
+
+                                                                            <button type="submit" class="btn btn-sm">
+                                                                                <div class="show">
+                                                                                    <a aria-label="Add To Cart"
+                                                                                        class="action-btn hover-up add-to-cart"
+                                                                                        href="#"
+                                                                                        data-product-id="<%= product.productId._id %>"
+                                                                                        style="color: white;">
+                                                                                        <i class="fi-rs-shopping-bag-add"
+                                                                                            style="color: white;"></i>
+                                                                                        Add To Cart</a>
+                                                                                </div>
+                                                                            </button>
+
                                                                             <% } else { %>
                                                                                 <button class="btn btn-sm" disabled><i
                                                                                         class="fi-rs-shopping-bag mr-5"></i>Add
@@ -102,7 +108,9 @@
     <script>
         // Delete Product from Wishlist
         document.addEventListener('DOMContentLoaded', () => {
+            const addToCartButtons = document.querySelectorAll('.add-to-cart');
             const deleteButtons = document.querySelectorAll('.btn-delete');
+
             deleteButtons.forEach(button => {
                 button.addEventListener('click', async (event) => {
                     const productId = event.currentTarget.getAttribute('data-productid');
@@ -153,6 +161,50 @@
                                 );
                             });
                     }
+                });
+            });
+
+            addToCartButtons.forEach(button => {
+                button.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const productId = button.getAttribute("data-product-id");
+
+                    fetch("/user/addtocart", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ productId: productId })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Network response was not ok");
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.alreadyInCart) {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Already in Cart!',
+                                    text: 'This product is already in your Cart.'
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Added to Cart!',
+                                    text: 'This product has been added to your Cart.'
+                                })
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Something went wrong! Please try again.'
+                            });
+                        });
                 });
             });
         });

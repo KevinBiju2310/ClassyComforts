@@ -1,6 +1,7 @@
 const path = require('path');
 const Product = require("../modal/productModel");
 const Category = require("../modal/categoryModel");
+const Cart = require("../modal/cartModel");
 const multer = require('multer');
 const sharp = require('sharp');
 const fs = require('fs').promises;
@@ -193,6 +194,22 @@ exports.updateproductPost = async (req, res) => {
                     return res.status(404).send("Product not found");
                 }
 
+                // Update product price in carts
+                await Cart.updateMany(
+                    { "products.productId": productId }, // Find all carts containing the updated product
+                    { $set: { "products.$.productPrice": price } } // Update product price
+                );
+
+                // Recalculate total in each cart
+                const carts = await Cart.find({ "products.productId": productId }); // Find all carts containing the updated product
+                for (const cart of carts) {
+                    let total = 0;
+                    for (const product of cart.products) {
+                        total += product.productPrice * product.quantity;
+                    }
+                    await Cart.findByIdAndUpdate(cart._id, { total });
+                }
+
                 res.redirect('/admin/products');
             } catch (err) {
                 console.log(`Error occurred while updating the product: ${err}`);
@@ -244,6 +261,25 @@ exports.deleteproductPost = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 }
+
+exports.stockCheck = async (req, res) => {
+    const productId = req.params.productId;
+
+    try {
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        res.json(product);
+    } catch (error) {
+        console.error('Error retrieving product:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+
 
 
 exports.singleproductGet = async (req, res) => {

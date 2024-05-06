@@ -252,6 +252,7 @@
                                 <input type="hidden" name="selected_shipping_address" id="selectedShippingAddress">
                                 <input type="hidden" name="payment_option" id="paymentOption">
                                 <input type="hidden" name="subtotal" id="subtotalValue">
+                                <input type="hidden" id="checkedProductsInput" value="<%= JSON.stringify(checkedProducts.map(product => product.productId._id)) %>">
                                 <button type="button" class="btn btn-fill-out btn-block mt-30" id="placeOrderBtn">Place
                                     Order</button>
                             </form>
@@ -458,7 +459,7 @@
                             }
                         </script>
                         <script>
-                            document.getElementById('placeOrderBtn').addEventListener('click', function (event) {
+                            document.getElementById('placeOrderBtn').addEventListener('click', async function (event) {
                                 event.preventDefault(); // Prevent default form submission
 
                                 var shippingAddress = document.querySelector('input[name="shipping_address"]:checked');
@@ -473,159 +474,191 @@
                                     document.getElementById('paymentOption').value = paymentMethod.value;
                                     document.getElementById('subtotalValue').value = document.querySelector('.product-subtotal').innerText.slice(1);
 
-                                    let couponId = null;
-                                    if (couponApplied) {
-                                        couponId = document.querySelector('input[name="coupon"]:checked').value;
+
+                                    // Check product quantity before placing the order
+                                    var productIds = JSON.parse(document.getElementById('checkedProductsInput').value);
+                                    var allProductsAvailable = true;
+
+                                    for (let productId of productIds) {
+                                        try {
+                                            const response = await fetch(`/user/stockcheck/${productId}`);
+                                            console.log("Response",response);
+                                            if (!response.ok) {
+                                                throw new Error('Failed to fetch product data');
+                                            }
+                                            const productData = await response.json();
+                                            if (productData.quantity === 0) {
+                                                allProductsAvailable = false;
+                                                swal("Oops!", `${productData.productname} is out of stock`, "warning");
+                                                break; // Stop further processing if any product is out of stock
+                                            }
+                                        } catch (error) {
+                                            console.error('Error checking product availability:', error);
+                                            swal("Oops!", "An error occurred while checking product availability.", "error");
+                                            return; // Exit the function if an error occurs
+                                        }
                                     }
 
-                                    if (paymentMethod.value === 'cod') {
-                                        fetch("/user/placeorder", {
-                                            method: "POST",
-                                            headers: {
-                                                "Content-Type": "application/json"
-                                            },
-                                            body: JSON.stringify({
-                                                total: document.getElementById('totalval').value,
-                                                selected_shipping_address: document.getElementById('selectedShippingAddress').value,
-                                                payment_option: document.getElementById('paymentOption').value,
-                                                subtotal: document.getElementById('subtotalValue').value,
-                                                couponId: couponId
+
+
+                                    if (allProductsAvailable) {
+                                        let couponId = null;
+                                        if (couponApplied) {
+                                            couponId = document.querySelector('input[name="coupon"]:checked').value;
+                                        }
+
+                                        if (paymentMethod.value === 'cod') {
+                                            fetch("/user/placeorder", {
+                                                method: "POST",
+                                                headers: {
+                                                    "Content-Type": "application/json"
+                                                },
+                                                body: JSON.stringify({
+                                                    total: document.getElementById('totalval').value,
+                                                    selected_shipping_address: document.getElementById('selectedShippingAddress').value,
+                                                    payment_option: document.getElementById('paymentOption').value,
+                                                    subtotal: document.getElementById('subtotalValue').value,
+                                                    couponId: couponId
+                                                })
                                             })
-                                        })
-                                            .then(response => {
+                                                .then(response => {
+                                                    if (response.ok) {
+                                                        return response.json();
+                                                    }
+                                                    throw new Error('Network response was not ok.');
+                                                })
+                                                .then(data => {
+                                                    if (data.success) {
+                                                        window.location.href = '/user/orderSuccessfull';
+                                                    } else {
+                                                        swal("Error!", data.message, "info");
+                                                    }
+                                                })
+                                                .catch(error => {
+                                                    console.error('Error:', error);
+                                                    swal("Error!", "An error occurred while placing the order.", "error");
+                                                });
+                                        } else if (paymentMethod.value === 'razorpay') {
+                                            fetch('/user/placeorder', {
+                                                method: "POST",
+                                                headers: {
+                                                    "Content-Type": "application/json"
+                                                },
+                                                body: JSON.stringify({
+                                                    total: document.getElementById('totalval').value,
+                                                    selected_shipping_address: document.getElementById('selectedShippingAddress').value,
+                                                    payment_option: document.getElementById('paymentOption').value,
+                                                    subtotal: document.getElementById('subtotalValue').value,
+                                                    couponId: couponId
+                                                })
+                                            }).then(response => {
                                                 if (response.ok) {
                                                     return response.json();
                                                 }
-                                                throw new Error('Network response was not ok.');
-                                            })
-                                            .then(data => {
-                                                if (data.success) {
-                                                    window.location.href = '/user/orderSuccessfull';
-                                                } else {
-                                                    swal("Error!", data.message, "info");
-                                                }
-                                            })
-                                            .catch(error => {
-                                                console.error('Error:', error);
-                                                swal("Error!", "An error occurred while placing the order.", "error");
-                                            });
-                                    } else if (paymentMethod.value === 'razorpay') {
-                                        fetch('/user/placeorder', {
-                                            method: "POST",
-                                            headers: {
-                                                "Content-Type": "application/json"
-                                            },
-                                            body: JSON.stringify({
-                                                total: document.getElementById('totalval').value,
-                                                selected_shipping_address: document.getElementById('selectedShippingAddress').value,
-                                                payment_option: document.getElementById('paymentOption').value,
-                                                subtotal: document.getElementById('subtotalValue').value,
-                                                couponId: couponId
-                                            })
-                                        }).then(response => {
-                                            if (response.ok) {
-                                                return response.json();
-                                            }
-                                            throw new Error('Network error');
-                                        }).then(data => {
-                                            // Initialize Razorpay payment
-                                            var options = {
-                                                key: "rzp_test_69SqlycyrhIrA0",
-                                                amount: data.amount,
-                                                currency: "INR",
-                                                name: "ClassyComforts",
-                                                description: "Purchase Description",
-                                                order_id: data.orderId,
-                                                handler: function (response) {
-                                                    // Handle successful payment
+                                                throw new Error('Network error');
+                                            }).then(data => {
+                                                // Initialize Razorpay payment
+                                                var options = {
+                                                    key: "rzp_test_69SqlycyrhIrA0",
+                                                    amount: data.amount,
+                                                    currency: "INR",
+                                                    name: "ClassyComforts",
+                                                    description: "Purchase Description",
+                                                    order_id: data.orderId,
+                                                    handler: function (response) {
+                                                        // Handle successful payment
+                                                        fetch('/user/updatepayment', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                            },
+                                                            body: JSON.stringify({
+                                                                razorpay_order_id: response.razorpay_order_id,
+                                                                razorpay_payment_id: response.razorpay_payment_id,
+                                                                razorpay_signature: response.razorpay_signature,
+                                                                orderID: data.orderID,
+                                                            }),
+                                                        }).then(response => response.json())
+                                                            .then(data => {
+                                                                console.log(data.message);
+                                                                window.location.href = '/user/orderSuccessfull';
+                                                            })
+                                                            .catch(error => {
+                                                                console.error('Error:', error);
+                                                                swal('Error!', 'An error occurred while verifying the payment.', 'error');
+                                                            });
+                                                    },
+                                                    "theme": {
+                                                        "color": "#3399cc"
+                                                    }
+                                                };
+                                                var razorpayInstance = new Razorpay(options);
+                                                razorpayInstance.open();
+
+                                                // Handle payment failure
+                                                razorpayInstance.on('payment.failed', function (response) {
+                                                    console.log(response);
+                                                    swal('Payment Failed', 'Your payment was not successful. Please try again.', 'error');
+                                                    // Send the necessary data to the server for payment verification
                                                     fetch('/user/updatepayment', {
                                                         method: 'POST',
                                                         headers: {
                                                             'Content-Type': 'application/json',
                                                         },
                                                         body: JSON.stringify({
-                                                            razorpay_order_id: response.razorpay_order_id,
-                                                            razorpay_payment_id: response.razorpay_payment_id,
-                                                            razorpay_signature: response.razorpay_signature,
+                                                            razorpay_order_id: response.error.metadata.order_id,
+                                                            razorpay_payment_id: response.error.metadata.payment_id,
+                                                            razorpay_signature: response.error.signature,
                                                             orderID: data.orderID,
                                                         }),
-                                                    }).then(response => response.json())
+                                                    })
+                                                        .then(response => response.json())
                                                         .then(data => {
                                                             console.log(data.message);
-                                                            window.location.href = '/user/orderSuccessfull';
                                                         })
                                                         .catch(error => {
                                                             console.error('Error:', error);
-                                                            swal('Error!', 'An error occurred while verifying the payment.', 'error');
+                                                            swal('Error!', 'An error occurred while verifying the payment failure.', 'error');
                                                         });
-                                                },
-                                                "theme": {
-                                                    "color": "#3399cc"
-                                                }
-                                            };
-                                            var razorpayInstance = new Razorpay(options);
-                                            razorpayInstance.open();
-
-                                            // Handle payment failure
-                                            razorpayInstance.on('payment.failed', function (response) {
-                                                console.log(response);
-                                                swal('Payment Failed', 'Your payment was not successful. Please try again.', 'error');
-                                                // Send the necessary data to the server for payment verification
-                                                fetch('/user/updatepayment', {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/json',
-                                                    },
-                                                    body: JSON.stringify({
-                                                        razorpay_order_id: response.error.metadata.order_id,
-                                                        razorpay_payment_id: response.error.metadata.payment_id,
-                                                        razorpay_signature: response.error.signature,
-                                                        orderID: data.orderID,
-                                                    }),
-                                                })
-                                                    .then(response => response.json())
-                                                    .then(data => {
-                                                        console.log(data.message);
-                                                    })
-                                                    .catch(error => {
-                                                        console.error('Error:', error);
-                                                        swal('Error!', 'An error occurred while verifying the payment failure.', 'error');
-                                                    });
-                                            });
-                                        })
-                                            .catch(error => {
-                                                console.error('Error:', error);
-                                                swal("Error!", "An error occurred while processing the payment.", "error");
-                                            });
-                                    } else if (paymentMethod.value === 'wallet') {
-                                        fetch('/user/placeorder', {
-                                            method: "POST",
-                                            headers: {
-                                                "Content-Type": "application/json"
-                                            },
-                                            body: JSON.stringify({
-                                                total: document.getElementById('totalval').value,
-                                                selected_shipping_address: document.getElementById('selectedShippingAddress').value,
-                                                payment_option: document.getElementById('paymentOption').value,
-                                                subtotal: document.getElementById('subtotalValue').value,
-                                                couponId: couponId
+                                                });
                                             })
-                                        }).then(response => {
-                                            if (response.ok) {
-                                                return response.json();
-                                            }
-                                            throw new Error('Network response was not ok.');
-                                        }).then(data => {
-                                            if (data.success) {
-                                                window.location.href = '/user/orderSuccessfull';
-                                            } else {
-                                                swal("Error!", data.message, "warning");
-                                            }
-                                        }).catch(error => {
-                                            console.error('Error:', error);
-                                            swal("Error!", "An error occurred while placing the order.", "error");
-                                        });
+                                                .catch(error => {
+                                                    console.error('Error:', error);
+                                                    swal("Error!", "An error occurred while processing the payment.", "error");
+                                                });
+                                        } else if (paymentMethod.value === 'wallet') {
+                                            fetch('/user/placeorder', {
+                                                method: "POST",
+                                                headers: {
+                                                    "Content-Type": "application/json"
+                                                },
+                                                body: JSON.stringify({
+                                                    total: document.getElementById('totalval').value,
+                                                    selected_shipping_address: document.getElementById('selectedShippingAddress').value,
+                                                    payment_option: document.getElementById('paymentOption').value,
+                                                    subtotal: document.getElementById('subtotalValue').value,
+                                                    couponId: couponId
+                                                })
+                                            }).then(response => {
+                                                if (response.ok) {
+                                                    return response.json();
+                                                }
+                                                throw new Error('Network response was not ok.');
+                                            }).then(data => {
+                                                if (data.success) {
+                                                    window.location.href = '/user/orderSuccessfull';
+                                                } else {
+                                                    swal("Error!", data.message, "warning");
+                                                }
+                                            }).catch(error => {
+                                                console.error('Error:', error);
+                                                swal("Error!", "An error occurred while placing the order.", "error");
+                                            });
+                                        }
+
                                     }
+
+
                                 }
                             });
                         </script>

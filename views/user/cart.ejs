@@ -350,7 +350,8 @@
 
             updateCheckedTotals();
 
-            document.getElementById('proceedToCheckoutBtn').addEventListener('click', () => {
+            document.getElementById('proceedToCheckoutBtn').addEventListener('click', async (event) => {
+                event.preventDefault();
                 console.log("Button clicked");
                 const checkedProducts = getCheckedProducts();
 
@@ -358,6 +359,27 @@
                     event.preventDefault();
                     swal("Oops!", "Please select at least one product.", "warning");
                     return;
+                }
+
+                for (const productId of checkedProducts) {
+                    try {
+                        console.log("hello");
+                        const response = await fetch(`/user/stockcheck/${productId}`);
+                        console.log("Response:::",response);
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch product data');
+                        }
+                        const productData = await response.json();
+                        console.log("ProductData",productData);
+                        if (productData.quantity === 0) {
+                            swal("Oops!", `${productData.productname} is out of stock. Please remove it from your cart.`, "warning");
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('Error checking product availability:', error);
+                        swal("Oops!", "An error occurred while checking product availability.", "error");
+                        return;
+                    }
                 }
 
                 document.getElementById('checkedProductsInput').value = JSON.stringify(checkedProducts);

@@ -29,7 +29,7 @@ exports.addtoCart = async (req, res) => {
         const existingProductIndex = cart ? cart.products.findIndex(item => item.productId.equals(productId)) : -1;
 
         if (existingProductIndex !== -1) {
-            return res.status(400).send('Product already in cart');
+            return res.json({ alreadyInCart: true });
         }
         if (!cart) {
             cart = new Cart({ userId });
@@ -44,7 +44,7 @@ exports.addtoCart = async (req, res) => {
         cart.products.push({ productId: productId, quantity: 1, productPrice: productPrice });
         cart.total += productPrice; // Use the determined product price for calculation
         await cart.save();
-        res.redirect('/user/cart');
+        res.json({ success: true });
     } catch (error) {
         console.log("Error Occurred: ", error);
         res.status(500).send('Internal Server Error');

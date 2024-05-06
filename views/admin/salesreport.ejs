@@ -3,6 +3,23 @@
     <div id="content">
         <h1>Sales Report</h1>
 
+        <!-- Filter Section -->
+        <div class="filter-section d-flex justify-content-end">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <%= filterType || 'Select' %>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="filterDropdown">
+                    <a class="dropdown-item<%= filterType === 'day' ? ' active' : '' %>" href="?filter=day">Day</a>
+                    <a class="dropdown-item<%= filterType === 'week' ? ' active' : '' %>" href="?filter=week">Week</a>
+                    <a class="dropdown-item<%= filterType === 'month' ? ' active' : '' %>"
+                        href="?filter=month">Month</a>
+                </div>
+            </div>
+        </div>
+
+
         <% if(order.length> 0) { %>
             <table style="font-size: 14px;">
                 <thead>
@@ -85,21 +102,23 @@
                         <ul class="pagination justify-content-center">
                             <% if (currentPage> 1) { %>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                    <a class="page-link" href="?page=<%= currentPage - 1 %>&filter=<%= filterType %>"
+                                        aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
                                 <% } %>
                                     <% for(let i=1; i <=totalPages; i++) { %>
                                         <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                            <a class="page-link" href="?page=<%= i %>">
+                                            <a class="page-link" href="?page=<%= i %>&filter=<%= filterType %>">
                                                 <%= i %>
                                             </a>
                                         </li>
                                         <% } %>
                                             <% if (currentPage < totalPages) { %>
                                                 <li class="page-item">
-                                                    <a class="page-link" href="?page=<%= currentPage + 1 %>"
+                                                    <a class="page-link"
+                                                        href="?page=<%= currentPage + 1 %>&filter=<%= filterType %>"
                                                         aria-label="Next">
                                                         <span aria-hidden="true">&raquo;</span>
                                                     </a>
@@ -110,3 +129,20 @@
     </div>
 
     <%- include("../layouts/adminFooter") %>
+
+
+        <!-- Frontend Script for applying filter -->
+        <script>
+            const dropdownToggle = document.querySelector('.dropdown-toggle');
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+
+            dropdownToggle.addEventListener('click', function () {
+                dropdownMenu.classList.toggle('show');
+            });
+
+            window.addEventListener('click', function (e) {
+                if (!e.target.matches('.dropdown-toggle') && !e.target.matches('.dropdown-item')) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+        </script>

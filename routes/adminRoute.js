@@ -57,5 +57,4 @@ router.delete('/deletecategoryoffer/:categoryName',offerController.deletecategor
 
 router.get('/salesreport',isAdminLogin,adminController.salesreport);
 
-
 module.exports = router

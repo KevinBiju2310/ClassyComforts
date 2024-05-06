@@ -64,9 +64,10 @@ router.post('/checkout/address', isLoggedIn, orderController.addAddress);
 router.delete('/removeproduct', isLoggedIn, orderController.removeProduct);
 // router.post('/invoice/:id', orderController.downloadInvoice);
 
-router.post('/applycoupon',isLoggedIn, couponController.applyCoupon);
+router.post('/applycoupon', isLoggedIn, couponController.applyCoupon);
 
 router.get('/sort', isLoggedIn, productController.sortproductGet);
+router.get('/stockcheck/:productId', isLoggedIn, productController.stockCheck);
 
 
 // router.get('/ordered', isLoggedIn, orderController.orderPlaced);
