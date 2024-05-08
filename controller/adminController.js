@@ -76,12 +76,50 @@ exports.dashboardGet = async (req, res) => {
             { $match: { createdAt: { $gte: currentMonthStart, $lte: currentMonthEnd } } },
             { $group: { _id: null, monthlyEarning: { $sum: '$totalAmount' } } }
         ]);
+
+        // Calculate top 10 products based on the count of product orders
+        const topProducts = await Order.aggregate([
+            { $match: { orderStatus: 'delivered' } },
+            { $unwind: "$products" }, // Split array of products into separate documents
+            { $group: { _id: "$products.productId", totalOrders: { $sum: 1 } } }, // Group by product ID and count the orders
+            { $sort: { totalOrders: -1 } }, // Sort by totalOrders in descending order
+            { $limit: 10 } // Limit to top 10 products
+        ]);
+
+        // Fetch product details for top products
+        const topProductDetails = await Product.find({ _id: { $in: topProducts.map(p => p._id) } });
+
+        // Combine product details with total orders count
+        const topProductsData = topProducts.map(product => {
+            const productDetail = topProductDetails.find(p => p._id.equals(product._id));
+            return {
+                _id: productDetail._id,
+                productName: productDetail.productname,
+                description: productDetail.description,
+                productImages: productDetail.productImages,
+                totalOrders: product.totalOrders
+            };
+        });
+
+         // Aggregate count of products ordered per category
+         const topCategories = await Order.aggregate([
+            { $match: { orderStatus: 'delivered' } },
+            { $unwind: "$products" }, // Split array of products into separate documents
+            { $lookup: { from: 'products', localField: 'products.productId', foreignField: '_id', as: 'productInfo' } }, // Lookup product details
+            { $unwind: "$productInfo" }, // Unwind the productInfo array
+            { $group: { _id: "$productInfo.category", totalOrders: { $sum: 1 } } }, // Group by category and count orders
+            { $sort: { totalOrders: -1 } }, // Sort by totalOrders in descending order
+            { $limit: 10 } // Limit to top 10 categories
+        ]);
+        console.log(topCategories)
         res.render('dashboard', {
             totalRevenue: totalRevenue.length > 0 ? totalRevenue[0].totalRevenue : 0,
             totalDeliveredOrders,
             totalProducts: totalProducts,
             totalCategories: totalCategories.length,
-            monthlyEarning: monthlyEarning.length > 0 ? monthlyEarning[0].monthlyEarning : 0
+            monthlyEarning: monthlyEarning.length > 0 ? monthlyEarning[0].monthlyEarning : 0,
+            topProducts: topProductsData,
+            topCategories
         });
     } catch (error) {
         console.error("Error rendering dashboard: ", error);
@@ -158,7 +196,7 @@ exports.sortGraph = async (req, res) => {
             // Get orders for the current week, grouped by day
             const currentDate = new Date();
             const startOfWeek = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay()));
-            startOfWeek.setHours(0, 0, 0, 0); 
+            startOfWeek.setHours(0, 0, 0, 0);
             const endOfWeek = new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
             console.log("start", startOfWeek, endOfWeek)
             const orders = await Order.aggregate([

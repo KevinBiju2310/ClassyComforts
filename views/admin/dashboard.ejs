@@ -82,31 +82,56 @@
                     <canvas id="ordersChart" style="width: 100%; height: 500px;"></canvas>
                 </div>
             </div>
+            <!-- Top 10 Products Section -->
             <div class="col-lg-6">
                 <div class="card card-body mb-4">
                     <h6 class="card-title">Top 10 Products</h6>
                     <ul class="list-group">
-
-                        <li class="list-group-item">
-                            Hello - 10
-                        </li>
-
+                        <% topProducts.forEach(product=> { %>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <img src="/uploads/<%= product.productImages[0] %>" alt="<%= product.productName %>"
+                                        class="me-3" style="max-width: 50px;">
+                                    <div>
+                                        <h6 class="mb-0"><strong>
+                                                <%= product.productName %>
+                                            </strong></h6>
+                                        <p class="mb-0 text-muted">
+                                            <%= product.description %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    <%= product.totalOrders %> Orders
+                                </span>
+                            </li>
+                            <% }); %>
                     </ul>
                 </div>
             </div>
             <!-- Top 10 Categories Section -->
             <div class="col-lg-6">
                 <div class="card card-body mb-4">
-                    <h6 class="card-title">Top 10 Categories</h6>
+                    <h6 class="card-title mb-3">Top 10 Categories</h6>
                     <ul class="list-group">
-
-                        <li class="list-group-item">
-                            hey - 5
-                        </li>
-
+                        <% topCategories.forEach(category=> { %>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold">
+                                        <%= category._id %>
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-primary rounded-pill">
+                                        <%= category.totalOrders %> Orders
+                                    </span>
+                                </div>
+                            </li>
+                            <% }); %>
                     </ul>
                 </div>
             </div>
+
 
 
         </div>
