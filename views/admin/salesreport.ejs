@@ -5,6 +5,22 @@
 
         <!-- Filter Section -->
         <div class="filter-section d-flex justify-content-end">
+            <form action="/admin/filtersales" method="GET" class="mr-4">
+                <div class="form-row align-items-center">
+                    <div class="col-auto">
+                        <label for="startDate" class="col-form-label">Start Date:</label>
+                        <input type="date" id="startDate" name="startDate">
+                    </div>
+                    <div class="col-auto">
+                        <label for="endDate" class="col-form-label">End Date:</label>
+                        <input type="date" id="endDate" name="endDate">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">Apply</button>
+                    </div>
+                </div>
+            </form>
+
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -20,7 +36,7 @@
         </div>
 
 
-        <% if(order.length> 0) { %>
+        <% if(order && order.length> 0) { %>
             <table style="font-size: 14px;">
                 <thead>
                     <tr>
@@ -96,7 +112,14 @@
             <% } else { %>
                 <p class="text-center">No Orders Found</p>
                 <% } %>
-
+                    <div>
+                        <div class="pb-3 pt-3 d-flex justify-content-end">
+                            <button id="pdfButton" class="btn btn-secondary print ms-2"><i
+                                    class="icon material-icons md-print"></i> Download PDF</button>
+                            <button class="btn btn-secondary print ms-2"><i
+                                    class="icon material-icons md-print"></i>Download Excel </button>
+                        </div>
+                    </div>
                     <!-- Pagination links -->
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
@@ -145,4 +168,11 @@
                     dropdownMenu.classList.remove('show');
                 }
             });
+        </script>
+
+        <script>
+            document.getElementById('pdfButton').addEventListener('click', () => {
+                window.location.href = '/admin/downloadPDF';
+            });
+
         </script>

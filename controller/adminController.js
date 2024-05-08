@@ -1,8 +1,12 @@
 const { check, validationResult } = require('express-validator')
 const User = require('../modal/userModal')
 const bcrypt = require('bcrypt');
-const Order = require('../modal/orderModel')
-const Product = require('../modal/productModel')
+const Order = require('../modal/orderModel');
+const Product = require('../modal/productModel');
+const moment = require("moment")
+const htmlPdf = require('html-pdf');
+const fs = require('fs');
+const path = require('path')
 const Category = require('../modal/categoryModel')
 
 
@@ -49,12 +53,170 @@ exports.signInPost = [
 
 exports.dashboardGet = async (req, res) => {
     try {
-        await res.render('dashboard');
+        // Calculate total revenue (sum of totalAmount for delivered orders)
+        const totalRevenue = await Order.aggregate([
+            { $match: { orderStatus: 'delivered' } },
+            { $group: { _id: null, totalRevenue: { $sum: '$totalAmount' } } }
+        ]);
+
+        // Calculate total number of delivered orders
+        const totalDeliveredOrders = await Order.countDocuments({ orderStatus: 'delivered' });
+
+        // Calculate total number of products
+        const totalProducts = await Product.countDocuments({ deleted: false });
+
+        const totalCategories = await Product.distinct('category', { deleted: false });
+        console.log(totalCategories.length)
+
+        // Calculate monthly earning of the current month
+        const currentDate = new Date();
+        const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const currentMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        const monthlyEarning = await Order.aggregate([
+            { $match: { createdAt: { $gte: currentMonthStart, $lte: currentMonthEnd } } },
+            { $group: { _id: null, monthlyEarning: { $sum: '$totalAmount' } } }
+        ]);
+        res.render('dashboard', {
+            totalRevenue: totalRevenue.length > 0 ? totalRevenue[0].totalRevenue : 0,
+            totalDeliveredOrders,
+            totalProducts: totalProducts,
+            totalCategories: totalCategories.length,
+            monthlyEarning: monthlyEarning.length > 0 ? monthlyEarning[0].monthlyEarning : 0
+        });
     } catch (error) {
         console.error("Error rendering dashboard: ", error);
-        res.status(500).send('Internet Server Error');
+        res.status(500).send('Internal Server Error');
     }
 }
+
+
+
+exports.sortGraph = async (req, res) => {
+    const interval = req.query.interval;
+    let labels = [];
+    let values = [];
+
+    try {
+        if (interval === 'monthly') {
+            // Get orders for the current year, grouped by month
+            const orders = await Order.aggregate([
+                {
+                    $match: {
+                        orderStatus: 'delivered',
+                        createdAt: {
+                            $gte: new Date(new Date().getFullYear(), 0, 1),
+                            $lt: new Date(new Date().getFullYear() + 1, 0, 1)
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: { $month: '$createdAt' },
+                        count: { $sum: 1 }
+                    }
+                },
+                { $sort: { _id: 1 } }
+            ]);
+
+            // Populate labels and values arrays
+            labels = Array.from({ length: 12 }, (_, i) => moment(new Date(null, i)).format('MMM'));
+            values = Array.from({ length: 12 }, (_, i) => 0);
+            orders.forEach(order => {
+                const month = order._id - 1;
+                values[month] = order.count;
+            });
+        } else if (interval === 'yearly') {
+            // Get orders for the next 5 years, grouped by year
+            const currentYear = new Date().getFullYear();
+            const orders = await Order.aggregate([
+                {
+                    $match: {
+                        orderStatus: 'delivered',
+                        createdAt: {
+                            $gte: new Date(currentYear, 0, 1),
+                            $lt: new Date(currentYear + 5, 0, 1)
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: { $year: '$createdAt' },
+                        count: { $sum: 1 }
+                    }
+                },
+                { $sort: { _id: 1 } }
+            ]);
+
+            // Populate labels and values arrays
+            labels = Array.from({ length: 5 }, (_, i) => (currentYear + i).toString());
+            values = Array.from({ length: 5 }, () => 0);
+            orders.forEach(order => {
+                const year = order._id - currentYear;
+                values[year] = order.count;
+            });
+        } else if (interval === 'weekly') {
+            // Get orders for the current week, grouped by day
+            const currentDate = new Date();
+            const startOfWeek = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay()));
+            startOfWeek.setHours(0, 0, 0, 0); 
+            const endOfWeek = new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
+            console.log("start", startOfWeek, endOfWeek)
+            const orders = await Order.aggregate([
+                {
+                    $match: {
+                        orderStatus: 'delivered',
+                        createdAt: {
+                            $gte: startOfWeek,
+                            $lte: endOfWeek
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: { $dayOfWeek: '$createdAt' },
+                        count: { $sum: 1 }
+                    }
+                },
+                { $sort: { _id: 1 } }
+            ]);
+
+            // Populate labels and values arrays
+            labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            values = Array.from({ length: 7 }, () => 0);
+            orders.forEach(order => {
+                const dayIndex = order._id - 1;
+                values[dayIndex] = order.count;
+            });
+        }
+
+        res.json({ labels, values });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 exports.userlistGet = async (req, res) => {
     try {
@@ -260,3 +422,6 @@ exports.salesreport = async (req, res) => {
 }
 
 
+exports.downloadPDF = async (req, res) => {
+
+}

@@ -1,7 +1,177 @@
 <%- include("../layouts/adminHeader") %>
-
     <div id="content">
-        <h1>Welcome to Dashboard</h1>
-    </div>
+        <h1>Dashboard</h1>
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="card card-body mb-4">
+                    <article class="icontext d-flex align-items-start">
+                        <span class="icon icon-3x me-3 mt-3 rounded-circle bg-primary p-3">
+                            <i class="fas fa-money-bill-alt text-white"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1 card-title text-dark">Revenue</h6>
+                            <span class="fw-bold fs-4 text-dark">₹<%= totalRevenue %></span>
+                            <span class="text-sm text-muted d-block">Shipping fees are not included</span>
+                        </div>
+                    </article>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card card-body mb-4">
+                    <article class="icontext d-flex align-items-start">
+                        <span class="icon icon-3x me-3 mt-3 rounded-circle bg-success p-3">
+                            <i class="fas fa-shopping-cart text-white"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1 card-title text-dark">Orders</h6>
+                            <span class="fw-bold fs-4 text-dark">
+                                <%= totalDeliveredOrders %>
+                            </span>
+                            <span class="text-sm text-muted d-block">Excluding orders in transit</span>
+                        </div>
+                    </article>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card card-body mb-4">
+                    <article class="icontext d-flex align-items-start">
+                        <span class="icon icon-3x me-3 mt-3 rounded-circle bg-warning p-3">
+                            <i class="fas fa-qrcode text-white"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1 card-title text-dark">Products</h6>
+                            <span class="fw-bold fs-4 text-dark">
+                                <%= totalProducts %>
+                            </span>
+                            <span class="text-sm text-muted d-block">In <%= totalCategories %> Categories</span>
+                        </div>
+                    </article>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card card-body mb-4">
+                    <article class="icontext d-flex align-items-start">
+                        <span class="icon icon-3x me-3 mt-3 rounded-circle bg-info p-3">
+                            <i class="fas fa-chart-line text-white"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1 card-title text-dark">Monthly Earning</h6>
+                            <span class="fw-bold fs-4 text-dark">₹<%= monthlyEarning %></span>
+                            <span class="text-sm text-muted d-block">Based on your local time.</span>
+                        </div>
+                    </article>
+                </div>
+            </div>
+            <div class="col-lg-8 offset-lg-2">
+                <div class="card card-body mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 card-title text-dark fs-5">Sales Graph</h6>
+                        <!-- Dropdown menu for selecting interval -->
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="intervalDropdown"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Select
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="intervalDropdown">
+                                <li><a class="dropdown-item" href="#" data-interval="monthly">Monthly</a></li>
+                                <li><a class="dropdown-item" href="#" data-interval="yearly">Yearly</a></li>
+                                <li><a class="dropdown-item" href="#" data-interval="weekly">Weekly</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <canvas id="ordersChart" style="width: 100%; height: 500px;"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card card-body mb-4">
+                    <h6 class="card-title">Top 10 Products</h6>
+                    <ul class="list-group">
 
-<%- include("../layouts/adminFooter") %>
+                        <li class="list-group-item">
+                            Hello - 10
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+            <!-- Top 10 Categories Section -->
+            <div class="col-lg-6">
+                <div class="card card-body mb-4">
+                    <h6 class="card-title">Top 10 Categories</h6>
+                    <ul class="list-group">
+
+                        <li class="list-group-item">
+                            hey - 5
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+    <%- include("../layouts/adminFooter") %>
+
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            // Get the canvas element
+            const ordersChartCanvas = document.getElementById('ordersChart');
+
+            // Chart configuration
+            const chartConfig = {
+                type: 'bar',
+                data: {
+                    labels: [], // Labels will be dynamically filled based on selected interval
+                    datasets: [{
+                        label: 'Orders',
+                        data: [], // Data will be dynamically filled based on selected interval
+                        fill: false,
+                        borderColor: 'rgb(75, 200, 192)', // Line color
+                        backgroundColor: 'rgb(46, 118, 219)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            };
+
+            // Initialize Chart.js
+            const ordersChart = new Chart(ordersChartCanvas, chartConfig);
+
+            // Function to update chart data based on interval
+            function updateChartData(interval) {
+                fetch(`/admin/ordersgraph?interval=${interval}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Extract labels and data from the response
+                        const { labels, values } = data;
+
+                        // Update chart data and labels
+                        ordersChart.data.labels = labels;
+                        ordersChart.data.datasets[0].data = values;
+
+                        // Update chart
+                        ordersChart.update();
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            }
+
+            // Event listener for dropdown item clicks
+            const intervalDropdownItems = document.querySelectorAll('.dropdown-item');
+            intervalDropdownItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const interval = item.getAttribute('data-interval');
+                    updateChartData(interval);
+                    // Update dropdown button text
+                    document.getElementById('intervalDropdown').innerText = item.innerText;
+                });
+            });
+        </script>
