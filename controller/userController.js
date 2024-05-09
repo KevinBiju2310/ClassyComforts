@@ -225,16 +225,16 @@ exports.signinPost = [
     },
 ];
 
-exports.logoutuser = (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.error('Error destroying session:', err);
-            res.status(500).send('Internal Server Error');
-        } else {
-            res.redirect('/user/home');
-        }
-    });
-};
+exports.logoutuser = async (req, res) => {
+    try {
+
+        req.session.user = null
+        res.redirect('/user/home')
+
+    } catch (error) {
+        console.log(error.message);
+    }
+}
 
 
 exports.googleSignIn = passport.authenticate('google', {

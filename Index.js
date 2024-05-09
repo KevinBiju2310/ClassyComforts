@@ -9,6 +9,7 @@ const userRoute = require('./routes/userRoute');
 const adminRoute = require('./routes/adminRoute');
 const bodyparser = require('body-parser');
 const app = express();
+const nocache = require('nocache');
 require('./passportSetup')
 require('dotenv').config();
 
@@ -32,6 +33,7 @@ app.use(bodyparser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.set('view engine', 'ejs');
+
 app.set('views', [path.join(__dirname, 'views/admin'), path.join(__dirname, 'views/user')]);
 
 app.use(passport.initialize());
@@ -44,6 +46,7 @@ app.use('/user/*', (req, res) => {
   res.redirect('/user/pagenotfound')
 })
 
+app.use(nocache());
 
 app.listen(5000, () => {
   console.log('Server is running');

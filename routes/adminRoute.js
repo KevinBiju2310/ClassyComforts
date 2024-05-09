@@ -59,4 +59,9 @@ router.delete('/deletecategoryoffer/:categoryName', offerController.deletecatego
 router.get('/salesreport', isAdminLogin, adminController.salesreport);
 // router.get('/filtersales', isAdminLogin, adminController.filtersales);
 router.get('/downloadPDF', isAdminLogin, adminController.downloadPDF);
+
+router.get('/logout',adminController.logoutadmin);
+
+
+
 module.exports = router

@@ -101,8 +101,8 @@ exports.dashboardGet = async (req, res) => {
             };
         });
 
-         // Aggregate count of products ordered per category
-         const topCategories = await Order.aggregate([
+        // Aggregate count of products ordered per category
+        const topCategories = await Order.aggregate([
             { $match: { orderStatus: 'delivered' } },
             { $unwind: "$products" }, // Split array of products into separate documents
             { $lookup: { from: 'products', localField: 'products.productId', foreignField: '_id', as: 'productInfo' } }, // Lookup product details
@@ -233,22 +233,6 @@ exports.sortGraph = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -462,4 +446,14 @@ exports.salesreport = async (req, res) => {
 
 exports.downloadPDF = async (req, res) => {
 
+}
+
+
+exports.logoutadmin = async (req, res) => {
+    try {
+        req.session.adminId = null;
+        res.redirect('/admin/login')
+    } catch (error) {
+        console.log("Error Occured: ", error);
+    }
 }
