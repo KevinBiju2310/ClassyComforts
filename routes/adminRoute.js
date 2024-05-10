@@ -12,7 +12,7 @@ router.get('/login', adminController.signInGet)
 router.post('/login', adminController.signInPost)
 
 router.get('/dashboard', isAdminLogin, adminController.dashboardGet);
-router.get('/ordersgraph',isAdminLogin,adminController.sortGraph);
+router.get('/ordersgraph', isAdminLogin, adminController.sortGraph);
 
 router.get('/userlist', isAdminLogin, adminController.userlistGet)
 router.post('/toggleUserBlock/:id', adminController.toggleUserBlock);
@@ -60,7 +60,7 @@ router.get('/salesreport', isAdminLogin, adminController.salesreport);
 // router.get('/filtersales', isAdminLogin, adminController.filtersales);
 router.get('/downloadPDF', isAdminLogin, adminController.downloadPDF);
 
-router.get('/logout',adminController.logoutadmin);
+router.get('/logout', adminController.logoutadmin);
 
 
 

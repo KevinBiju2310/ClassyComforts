@@ -309,14 +309,39 @@
         //     }
         // });
         document.getElementById('downloadInvoiceBtn').addEventListener('click', function () {
-            const invoiceSection = document.getElementById('invoiceSection');
-            const options = {
-                filename: 'invoice.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'A4', orientation: 'portrait' }
-            };
-            html2pdf().from(invoiceSection).set(options).save();
+            // Send a request to the server to generate the invoice
+            fetch('/user/generate-invoice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    orderId: '<%= order._id %>' // Pass the order ID to identify the invoice
+                })
+            })
+                .then(response => {
+                    // Check if the response is successful
+                    if (response.ok) {
+                        // Get the filename from the response headers
+                        const filename = response.headers.get('Content-Disposition').split(';')[1].split('=')[1].trim();
+                        // Convert the response to blob
+                        return response.blob().then(blob => {
+                            // Create a temporary link element to download the file
+                            const link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(blob);
+                            link.download = filename;
+                            // Trigger a click event to download the file
+                            link.click();
+                        });
+                    } else {
+                        // Handle the error if the response is not successful
+                        console.error('Failed to generate invoice');
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    console.error('Network error:', error);
+                });
         });
 
 

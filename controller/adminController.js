@@ -400,6 +400,7 @@ exports.salesreport = async (req, res) => {
             endDate = new Date();
             endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // End of current week (Saturday)
             endDate.setHours(23, 59, 59, 999);
+            console.log(startDate, endDate)
         } else if (filterType === 'month') {
             startDate = new Date();
             startDate.setDate(1); // Start of current month
@@ -408,23 +409,31 @@ exports.salesreport = async (req, res) => {
             endDate.setMonth(endDate.getMonth() + 1); // End of current month
             endDate.setDate(0);
             endDate.setHours(23, 59, 59, 999);
+        } else if (filterType === 'custom') {
+            startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+            startDate.setHours(0, 0, 0, 0);
+            endDate = req.query.endDate ? new Date(req.query.endDate) : null;
+            endDate.setHours(23, 59, 59, 999);
         }
 
         // Query total orders based on date range
-        totalOrders = await Order.countDocuments({
-            orderStatus: 'delivered',
-            updatedAt: { $gte: startDate, $lte: endDate }
-        });
+        const query = {
+            orderStatus: 'delivered'
+        };
+
+        if (startDate && endDate) {
+            query.updatedAt = { $gte: startDate, $lte: endDate };
+        }
+
+        // Query total orders based on date range
+        totalOrders = await Order.countDocuments(query);
 
         // Calculate total pages and skip
         totalPages = Math.ceil(totalOrders / perPage);
         skip = (page - 1) * perPage;
 
         // Query orders based on date range with pagination
-        const order = await Order.find({
-            orderStatus: 'delivered',
-            updatedAt: { $gte: startDate, $lte: endDate }
-        })
+        const order = await Order.find(query)
             .populate('userId')
             .populate('products.productId')
             .sort({ createdAt: -1 })
@@ -436,7 +445,9 @@ exports.salesreport = async (req, res) => {
             order,
             currentPage: page,
             totalPages,
-            filterType // Pass filter type to the view for display
+            filterType,
+            startDate: startDate ? startDate.toISOString().slice(0, 10) : null,
+            endDate: endDate ? endDate.toISOString().slice(0, 10) : null
         });
     } catch (error) {
         console.log("Error Happened: ", error);

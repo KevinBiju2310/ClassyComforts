@@ -43,6 +43,7 @@ router.post('/changepassword', isLoggedIn, userProfileController.changepassword)
 router.post('/accountdetails', userProfileController.changedetails);
 
 router.get('/orderdetails/:id', isLoggedIn, orderController.orderDetails);
+router.post('/generate-invoice', orderController.generateInvoice);
 router.post('/cancelOrder', orderController.cancelOrder);
 
 router.get('/cart', isLoggedIn, cartController.cartPage);
@@ -68,7 +69,6 @@ router.post('/applycoupon', isLoggedIn, couponController.applyCoupon);
 
 router.get('/sort', isLoggedIn, productController.sortproductGet);
 router.get('/stockcheck/:productId', isLoggedIn, productController.stockCheck);
-
 
 // router.get('/ordered', isLoggedIn, orderController.orderPlaced);
 router.post('/placeorder', isLoggedIn, orderController.orderPlaced);

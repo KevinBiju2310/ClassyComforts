@@ -6,7 +6,8 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Wallet = require("../modal/walletModel");
 const Coupon = require('../modal/couponModel');
-
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
 
 
 const razorpayInstance = new Razorpay({
@@ -22,6 +23,7 @@ exports.orderconfirm = (req, res) => {
 
     }
 }
+
 
 
 const checkedProducts = [];
@@ -413,6 +415,99 @@ exports.orderDetails = async (req, res) => {
         console.log("Error", err);
         res.status(500).send('Internal server error');
     }
+};
+
+
+
+exports.generateInvoice = async (req, res) => {
+    try {
+        const orderId = req.body.orderId; // Get the order ID from the request body
+        console.log(orderId);
+        // Fetch the order details from the database (replace this with your actual method to fetch order details)
+        const order = await Order.findById(orderId).populate('products.productId');
+        console.log(order);
+        // Generate the invoice PDF
+        const invoiceFilename = await generateInvoicePDF(order);
+
+        // Send the generated invoice file as a response
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${invoiceFilename}`);
+        fs.createReadStream(invoiceFilename).pipe(res);
+    } catch (error) {
+        // Handle errors
+        console.error('Error generating invoice:', error);
+        res.status(500).send('Error generating invoice');
+    }
+}
+
+
+const generateInvoicePDF = (order) => {
+    return new Promise((resolve, reject) => {
+        try {
+            // Create a new PDF document with A4 size
+            const doc = new PDFDocument({ size: 'A4' });
+
+            // Pipe the PDF document to a writable stream
+            const stream = doc.pipe(fs.createWriteStream(`invoice_${order._id}.pdf`));
+
+            // Add a border to the page
+            doc.rect(10, 10, doc.page.width, doc.page.height).stroke();
+
+            // Add content to the PDF document
+            doc.fontSize(12);
+
+            // Draw the header in one line with grey background
+            doc.fillColor('#808080') // Grey color
+                .text('Product Name', 50, 50, { width: 300, })
+                .text('Quantity',)
+                .text('Price',);
+
+            // Set font back to regular and color to black
+            doc.fillColor('#000') // Black color
+                .font('Helvetica');
+
+            // Draw table rows
+            let yPosition = 70; // Adjust the y position accordingly
+            order.products.forEach((product) => {
+                doc.text(product.productId.productname, 50, yPosition)
+                    .text(product.quantity.toString(), { align: 'right' })
+                    .text(`$${product.productPrice.toFixed(2)}`, { align: 'right' });
+                yPosition += 15; // Move to the next row
+            });
+
+            // Add total amount to the invoice
+            doc.text(`Total Amount: $${order.totalAmount.toFixed(2)}`, { align: 'right' });
+
+            // Add coupon details if applied
+            if (order.couponPercentage !== 0) {
+                doc.text(`Coupon Applied: ${order.couponPercentage}% Discount`, { align: 'right' });
+            }
+
+            // Add delivery address
+            doc.moveDown()
+                .text('Delivery Address:', { align: 'left' })
+                .text('---------------------', { align: 'left' });
+
+            order.address.forEach((addr) => {
+                doc.text(addr.name, { align: 'left' })
+                    .text(addr.address, { align: 'left' })
+                    .text(`${addr.city}, ${addr.state} ${addr.pincode}`, { align: 'left' })
+                    .text(addr.district, { align: 'left' })
+                    .text('---------------------', { align: 'left' });
+            });
+
+            // End the document
+            doc.end();
+
+            // Resolve the promise with the filename when the PDF generation is complete
+            stream.on('finish', () => {
+                resolve(`invoice_${order._id}.pdf`);
+            });
+        } catch (error) {
+            // Reject the promise with the error if an error occurs
+            reject(error);
+        }
+    });
 };
 
 

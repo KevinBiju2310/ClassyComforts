@@ -5,7 +5,7 @@
 
         <!-- Filter Section -->
         <div class="filter-section d-flex justify-content-end">
-            <form action="/admin/filtersales" method="GET" class="mr-4">
+            <form class="mr-4" id="filterForm">
                 <div class="form-row align-items-center">
                     <div class="col-auto">
                         <label for="startDate" class="col-form-label">Start Date:</label>
@@ -31,6 +31,8 @@
                     <a class="dropdown-item<%= filterType === 'week' ? ' active' : '' %>" href="?filter=week">Week</a>
                     <a class="dropdown-item<%= filterType === 'month' ? ' active' : '' %>"
                         href="?filter=month">Month</a>
+                    <a class="dropdown-item<%= filterType === 'custom' ? ' active' : '' %>"
+                        href="?filter=custom">Custom</a>
                 </div>
             </div>
         </div>
@@ -123,32 +125,33 @@
                     <!-- Pagination links -->
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
-                            <% if (currentPage> 1) { %>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<%= currentPage - 1 %>&filter=<%= filterType %>"
-                                        aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
-                                </li>
-                                <% } %>
-                                    <% for(let i=1; i <=totalPages; i++) { %>
-                                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                            <a class="page-link" href="?page=<%= i %>&filter=<%= filterType %>">
-                                                <%= i %>
-                                            </a>
-                                        </li>
-                                        <% } %>
-                                            <% if (currentPage < totalPages) { %>
-                                                <li class="page-item">
-                                                    <a class="page-link"
-                                                        href="?page=<%= currentPage + 1 %>&filter=<%= filterType %>"
-                                                        aria-label="Next">
-                                                        <span aria-hidden="true">&raquo;</span>
-                                                    </a>
-                                                </li>
-                                                <% } %>
+                            <% if (currentPage > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage - 1 %>&filter=<%= filterType %><% if (filterType === 'custom') { %>&startDate=<%= startDate %>&endDate=<%= endDate %><% } %>"
+                                    aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <% } %>
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>&filter=<%= filterType %><% if (filterType === 'custom') { %>&startDate=<%= startDate %>&endDate=<%= endDate %><% } %>">
+                                    <%= i %>
+                                </a>
+                            </li>
+                            <% } %>
+                            <% if (currentPage < totalPages) { %>
+                            <li class="page-item">
+                                <a class="page-link"
+                                    href="?page=<%= currentPage + 1 %>&filter=<%= filterType %><% if (filterType === 'custom') { %>&startDate=<%= startDate %>&endDate=<%= endDate %><% } %>"
+                                    aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <% } %>
                         </ul>
                     </nav>
+
     </div>
 
     <%- include("../layouts/adminFooter") %>
@@ -171,8 +174,14 @@
         </script>
 
         <script>
-            document.getElementById('pdfButton').addEventListener('click', () => {
-                window.location.href = '/admin/downloadPDF';
-            });
+            // Frontend Script for applying filter
+            document.getElementById('filterForm').addEventListener('submit', function (event) {
+                event.preventDefault(); // Prevent default form submission
 
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+
+                // Redirect to the filtered URL
+                window.location.href = `?filter=custom&startDate=${startDate}&endDate=${endDate}`;
+            });
         </script>
