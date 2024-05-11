@@ -38,7 +38,6 @@ router.post('/deleteimage', productController.deleteimage)
 router.get('/orders', isAdminLogin, adminController.orderGet)
 router.post('/orders/:orderId/status', adminController.updateOrderStatus);
 
-
 router.get('/coupon', isAdminLogin, couponController.couponPage);
 router.post('/addcoupon', isAdminLogin, couponController.addCoupon);
 router.put('/updatecoupon/:id', isAdminLogin, couponController.updateCoupon);
@@ -55,10 +54,8 @@ router.post('/addcategoryoffer', offerController.addcategoryOffer);
 router.post('/updatecategoryoffer', offerController.updatecategoryOffer);
 router.delete('/deletecategoryoffer/:categoryName', offerController.deletecategoryOffer);
 
-
 router.get('/salesreport', isAdminLogin, adminController.salesreport);
-// router.get('/filtersales', isAdminLogin, adminController.filtersales);
-router.get('/downloadPDF', isAdminLogin, adminController.downloadPDF);
+router.get('/generatepdf', isAdminLogin, adminController.downloadPDF);
 
 router.get('/logout', adminController.logoutadmin);
 

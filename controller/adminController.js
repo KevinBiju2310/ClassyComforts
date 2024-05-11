@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const Order = require('../modal/orderModel');
 const Product = require('../modal/productModel');
 const moment = require("moment")
-const htmlPdf = require('html-pdf');
+const PDFDocument = require('pdfkit-table');
 const fs = require('fs');
 const path = require('path')
 const Category = require('../modal/categoryModel')
@@ -456,7 +456,103 @@ exports.salesreport = async (req, res) => {
 
 
 exports.downloadPDF = async (req, res) => {
+    try {
+        // Get filter type from query parameters
+        const filterType = req.query.filter || 'day'; // Default to 'day' if no filter specified
+        console.log(filterType)
+        // Initialize variables for pagination
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 5;
+        let totalOrders, totalPages, skip;
 
+        // Calculate date range based on filter type
+        let startDate, endDate;
+        if (filterType === 'day') {
+            startDate = new Date(); // Today's date
+            startDate.setHours(0, 0, 0, 0); // Set time to the beginning of the day
+            endDate = new Date(); // Today's date
+            endDate.setHours(23, 59, 59, 999); // Set time to the end of the day
+        } else if (filterType === 'week') {
+            startDate = new Date();
+            startDate.setDate(startDate.getDate() - startDate.getDay()); // Start of current week (Sunday)
+            startDate.setHours(0, 0, 0, 0);
+            endDate = new Date();
+            endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // End of current week (Saturday)
+            endDate.setHours(23, 59, 59, 999);
+        } else if (filterType === 'month') {
+            startDate = new Date();
+            startDate.setDate(1); // Start of current month
+            startDate.setHours(0, 0, 0, 0);
+            endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + 1); // End of current month
+            endDate.setDate(0);
+            endDate.setHours(23, 59, 59, 999);
+        } else if (filterType === 'custom') {
+            startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+            startDate.setHours(0, 0, 0, 0);
+            endDate = req.query.endDate ? new Date(req.query.endDate) : null;
+            endDate.setHours(23, 59, 59, 999);
+        }
+
+        // Query total orders based on date range
+        const query = {
+            orderStatus: 'delivered'
+        };
+
+        if (startDate && endDate) {
+            query.updatedAt = { $gte: startDate, $lte: endDate };
+        }
+
+        // Query total orders based on date range
+        totalOrders = await Order.countDocuments(query);
+
+        // Calculate total pages and skip
+        totalPages = Math.ceil(totalOrders / perPage);
+        skip = (page - 1) * perPage;
+
+        // Query orders based on date range with pagination
+        const order = await Order.find(query)
+            .populate('userId')
+            .populate('products.productId')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(perPage);
+
+        // Create a new PDF document
+        const doc = new PDFDocument();
+        const filename = 'sales_report.pdf';
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        doc.pipe(res);
+
+        // Write content to the PDF
+        doc.fontSize(16).text('Sales Report', { align: 'center' }).moveDown();
+        doc.fontSize(12).text(`Filter Type: ${filterType}`).moveDown();
+
+        // Add order data as a table
+        doc.font('Helvetica-Bold').text('Order Details').moveDown();
+        console.log(order)
+
+        doc.font('Helvetica').fontSize(10).lineGap(8);
+        doc.font('Helvetica').table({
+            headers: ['Customer Name', 'Product Name', 'Payment Method', 'Quantity', 'Price', 'Discount', 'Total Amount'],
+            rows: order.map(o => [
+                o.userId.name,
+                o.products.map(p => p.productId.productname).join('\n'),
+                o.paymentMethod,
+                o.products.map(p => p.quantity).join('\n'),
+                o.products.map(p => `$${p.productPrice.toFixed(2)}`).join('\n'),
+                `$${o.couponAmount.toFixed(2)}`,
+                `$${o.totalAmount.toFixed(2)}`
+            ]),
+            
+        });
+        // End the document
+        doc.end();
+
+    } catch (error) {
+        console.log("Error Happened: ", error);
+    }
 }
 
 
