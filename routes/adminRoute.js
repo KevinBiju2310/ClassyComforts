@@ -16,7 +16,7 @@ router.get('/ordersgraph', isAdminLogin, adminController.sortGraph);
 
 router.get('/userlist', isAdminLogin, adminController.userlistGet)
 router.post('/toggleUserBlock/:id', adminController.toggleUserBlock);
-
+router.get('/userlist/search',adminController.searchUser);
 // Block and unblock users
 // router.post('/blockUser/:id', adminController.blockUser);
 // router.post('/unblockUser/:id', adminController.unblockUser);
@@ -37,6 +37,7 @@ router.post('/deleteimage', productController.deleteimage)
 
 router.get('/orders', isAdminLogin, adminController.orderGet)
 router.post('/orders/:orderId/status', adminController.updateOrderStatus);
+router.get('/orders/search', isAdminLogin, adminController.searchOrder);
 
 router.get('/coupon', isAdminLogin, couponController.couponPage);
 router.post('/addcoupon', isAdminLogin, couponController.addCoupon);
@@ -56,6 +57,7 @@ router.delete('/deletecategoryoffer/:categoryName', offerController.deletecatego
 
 router.get('/salesreport', isAdminLogin, adminController.salesreport);
 router.get('/generatepdf', isAdminLogin, adminController.downloadPDF);
+router.get('/generateexcel',isAdminLogin,adminController.downloadExcel);
 
 router.get('/logout', adminController.logoutadmin);
 

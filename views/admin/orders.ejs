@@ -4,7 +4,7 @@
         <h1>Orders</h1>
         <div class="d-flex justify-content-end align-items-center mt-2">
             <input type="text" id="searchBar" placeholder="Search..." class="form-control w-auto mr-2">
-            <button class="btn btn-primary mb-3" onclick="searchUsers()">Search</button>
+            <button class="btn btn-primary mb-3" onclick="searchOrders()">Search</button>
         </div>
 
         <table>
@@ -96,11 +96,11 @@
                         <div class="form-group">
                             <label for="statusSelect">Select Status:</label>
                             <select class="form-control" id="statusSelect">
-                                    <option value="pending">Pending</option>
-                                    <option value="shipped">Shipped</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="cancelled">Cancelled</option>
-                                    <option value="returned">Returned</option>
+                                <option value="pending">Pending</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="returned">Returned</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Update Status</button>
@@ -147,5 +147,60 @@
                     .catch(error => {
                         console.error('Error:', error);
                     });
+            }
+        </script>
+
+        <script>
+            function searchOrders() {
+                const searchTerm = document.getElementById('searchBar').value.trim().toLowerCase();
+
+                // Update URL with the search term
+                const url = new URL(window.location.href);
+                url.searchParams.set('term', searchTerm);
+                window.history.pushState({ path: url.href }, '', url.href);
+
+                // Make fetch request to search orders
+                fetch(`/admin/orders/search?term=${searchTerm}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to search orders');
+                    }
+                }).then(data => {
+                    updateTable(data);
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+
+
+
+            function updateTable(data) {
+                const tbody = document.querySelector('tbody');
+                tbody.innerHTML = '';
+
+                // Iterate through the search results and populate the table
+                data.forEach(order => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                <td>${order.userId.name}</td>
+                <td>${new Date(order.createdAt).toDateString()}</td>
+                <td>
+                    ${order.products.map(product => product.productId.productname).join(', ')}
+                </td>
+                <td>${order.orderStatus}</td>
+                <td>${order.paymentMethod}</td>
+                <td>$${order.totalAmount.toFixed(2)}</td>
+                <td>
+                    <button type="button" class="btn btn-danger" onclick="openModal('${order._id}')">Change Status</button>
+                </td>
+            `;
+                    tbody.appendChild(tr);
+                });
             }
         </script>

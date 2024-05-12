@@ -118,7 +118,7 @@
                         <div class="pb-3 pt-3 d-flex justify-content-end">
                             <button id="pdfButton" class="btn btn-secondary print ms-2"><i
                                     class="icon material-icons md-print"></i> Download PDF</button>
-                            <button class="btn btn-secondary print ms-2"><i
+                            <button id="excelButton" class="btn btn-secondary print ms-2"><i
                                     class="icon material-icons md-print"></i>Download Excel </button>
                         </div>
                     </div>
@@ -199,6 +199,21 @@
 
                 // Construct the URL with query parameters
                 const url = `/admin/generatepdf?filter=${filterType}&startDate=${startDate}&endDate=${endDate}&page=${page}`;
+
+                // Redirect to the URL
+                window.location.href = url;
+            });
+
+            document.getElementById('excelButton').addEventListener('click', function () {
+                // Extract filter type, start date, end date, and current page from the URL query parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const filterType = urlParams.get('filter') || 'day';
+                const startDate = urlParams.get('startDate') || '';
+                const endDate = urlParams.get('endDate') || '';
+                const page = urlParams.get('page') || 1;
+
+                // Construct the URL with query parameters
+                const url = `/admin/generateexcel?filter=${filterType}&startDate=${startDate}&endDate=${endDate}&page=${page}`;
 
                 // Redirect to the URL
                 window.location.href = url;

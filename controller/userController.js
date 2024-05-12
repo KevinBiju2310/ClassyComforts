@@ -170,8 +170,24 @@ exports.verifyOTP = async (req, res) => {
             await userWallet.save();
             if (referredby) {
                 userWallet.amount += 500;
+                userWallet.transaction.push({
+                    date: new Date(),
+                    paymentMethod: 'referral',
+                    amount:500,
+                    paymentStatus: 'credit'
+                })
                 await userWallet.save();
-                await Wallet.updateOne({ userId: referredby }, { $inc: { amount: 1000 } });
+                const referredbyWallet = await Wallet.findOne({ userId: referredby });
+                if(referredbyWallet){
+                    referredbyWallet.amount += 1000;
+                    referredbyWallet.transaction.push({
+                        date: new Date(),
+                        paymentMethod:'referral',
+                        amount:1000,
+                        paymentStatus: 'credit'
+                    })
+                    await referredbyWallet.save();
+                }
             }
             req.session.user = user;
             res.redirect('/user/home');
@@ -183,6 +199,9 @@ exports.verifyOTP = async (req, res) => {
         res.render('otppage', { errors: 'Invalid OTP' });
     }
 };
+
+
+
 
 exports.signinGet = async (req, res) => {
     try {

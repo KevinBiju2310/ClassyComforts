@@ -5,6 +5,7 @@ const Order = require('../modal/orderModel');
 const Product = require('../modal/productModel');
 const moment = require("moment")
 const PDFDocument = require('pdfkit-table');
+const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path')
 const Category = require('../modal/categoryModel')
@@ -111,7 +112,6 @@ exports.dashboardGet = async (req, res) => {
             { $sort: { totalOrders: -1 } }, // Sort by totalOrders in descending order
             { $limit: 10 } // Limit to top 10 categories
         ]);
-        console.log(topCategories)
         res.render('dashboard', {
             totalRevenue: totalRevenue.length > 0 ? totalRevenue[0].totalRevenue : 0,
             totalDeliveredOrders,
@@ -236,10 +236,6 @@ exports.sortGraph = async (req, res) => {
 
 
 
-
-
-
-
 exports.userlistGet = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -254,6 +250,33 @@ exports.userlistGet = async (req, res) => {
         res.status(500).send('Internet Server Error');
     }
 }
+
+
+exports.searchUser = async (req, res) => {
+    try {
+        const searchTerm = req.query.term;
+        console.log(searchTerm)
+        // Construct regex to perform case-insensitive search
+        const searchRegex = new RegExp(searchTerm, 'i');
+        console.log(searchRegex)
+        // Perform search on name and email fields
+        const users = await User.find({
+            $or: [
+                { name: { $regex: searchRegex } },
+                { email: { $regex: searchRegex } }
+            ]
+        });
+        console.log(users);
+        res.json({ users });
+    } catch (error) {
+        console.error('Error searching users:', error);
+        res.status(500).json({ error: 'Failed to search users' });
+    }
+};
+
+
+
+
 
 exports.toggleUserBlock = async (req, res) => {
     const userId = req.params.id;
@@ -373,6 +396,36 @@ exports.updateOrderStatus = async (req, res) => {
         res.status(500).json({ error: 'Failed to update order status' });
     }
 };
+
+
+
+exports.searchOrder = async (req, res) => {
+    try {
+        const searchTerm = req.query.term;
+
+        const populatedOrders = await Order.find({})
+            .populate('userId')
+            .populate('products.productId')
+            .exec();
+
+        const orders = populatedOrders.filter(order => {
+            return (
+                order.userId.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                order.products.some(product => product.productId.productname.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                order.orderStatus.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                order.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        });
+        res.json(orders);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to search orders' });
+    }
+};
+
+
+
+
 
 
 //Sales Report
@@ -545,7 +598,7 @@ exports.downloadPDF = async (req, res) => {
                 `$${o.couponAmount.toFixed(2)}`,
                 `$${o.totalAmount.toFixed(2)}`
             ]),
-            
+
         });
         // End the document
         doc.end();
@@ -554,6 +607,93 @@ exports.downloadPDF = async (req, res) => {
         console.log("Error Happened: ", error);
     }
 }
+
+
+
+
+
+
+exports.downloadExcel = async (req, res) => {
+    try {
+        const filterType = req.query.filter || 'day';
+        console.log(filterType)
+
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 5;
+        let totalOrders, totalPages, skip;
+
+        // Calculate date range based on filter type
+        let startDate, endDate;
+        if (filterType === 'day') {
+            startDate = new Date(); // Today's date
+            startDate.setHours(0, 0, 0, 0); // Set time to the beginning of the day
+            endDate = new Date(); // Today's date
+            endDate.setHours(23, 59, 59, 999); // Set time to the end of the day
+        } else if (filterType === 'week') {
+            startDate = new Date();
+            startDate.setDate(startDate.getDate() - startDate.getDay()); // Start of current week (Sunday)
+            startDate.setHours(0, 0, 0, 0);
+            endDate = new Date();
+            endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // End of current week (Saturday)
+            endDate.setHours(23, 59, 59, 999);
+        } else if (filterType === 'month') {
+            startDate = new Date();
+            startDate.setDate(1); // Start of current month
+            startDate.setHours(0, 0, 0, 0);
+            endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + 1); // End of current month
+            endDate.setDate(0);
+            endDate.setHours(23, 59, 59, 999);
+        } else if (filterType === 'custom') {
+            startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+            startDate.setHours(0, 0, 0, 0);
+            endDate = req.query.endDate ? new Date(req.query.endDate) : null;
+            endDate.setHours(23, 59, 59, 999);
+        }
+
+        // Query total orders based on date range
+        const query = {
+            orderStatus: 'delivered'
+        };
+
+        if (startDate && endDate) {
+            query.updatedAt = { $gte: startDate, $lte: endDate };
+        }
+
+        // Query total orders based on date range
+        totalOrders = await Order.countDocuments(query);
+
+        // Calculate total pages and skip
+        totalPages = Math.ceil(totalOrders / perPage);
+        skip = (page - 1) * perPage;
+
+        // Query orders based on date range with pagination
+        const orders = await Order.find(query)
+            .populate('userId')
+            .populate('products.productId')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(perPage);
+
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sales Report');
+
+        worksheet.addRow(['Customer Name', 'Product Name', 'Payment Method', 'Quantity', 'Price', 'Discount', 'Total Amount']);
+
+        // Save workbook to a file or stream
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="sales_report.xlsx"');
+        await workbook.xlsx.write(res)
+    } catch (error) {
+        console.log("Excel Download Failed: ", error);
+    }
+}
+
+
+
+
+
 
 
 exports.logoutadmin = async (req, res) => {

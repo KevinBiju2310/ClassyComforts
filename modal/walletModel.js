@@ -17,7 +17,7 @@ const walletSchema = new mongoose.Schema({
     },
     paymentMethod: {
       type: String,
-      enum: ['razorpay', 'wallet']
+      enum: ['razorpay', 'wallet', 'referral']
     },
     amount: {
       type: Number,

@@ -76,14 +76,15 @@
                                             <div class="product-price primary-color float-left">
                                                 <% if (product.mainprice !==0 && product.mainprice < product.price) { %>
                                                     <ins><span class="text-brand">$<%= product.mainprice.toFixed(2) %>
-                                                        </span></ins> <!-- Displaying main price -->
+                                                        </span></ins>
                                                     <ins><span class="old-price font-md ml-15">$<%=
                                                                 product.price.toFixed(2) %></span></ins>
-                                                    <!-- Displaying original price as old price -->
+                                                    <span class="discount ml-5"
+                                                        style="color: green; font-size: 20px; font-weight: bolder;">(<%=
+                                                            product.discount.toFixed(0) %>% Offer)</span>
                                                     <% } else { %>
                                                         <ins><span class="text-brand">$<%= product.price.toFixed(2) %>
-                                                            </span></ins> <!-- Displaying original price -->
-                                                        <!-- If mainprice is zero, no need to display old price -->
+                                                            </span></ins>
                                                         <% } %>
                                             </div>
                                         </div>
@@ -103,25 +104,6 @@
                                                 </li>
                                             </ul>
                                         </div>
-                                        <!-- <div class="attr-detail attr-color mb-15">
-                                            <strong class="mr-10">Color</strong>
-                                            <ul class="list-filter color-filter">
-                                                <li><a href="#" data-color="Red"><span
-                                                            class="product-color-red"></span></a></li>
-                                                <li><a href="#" data-color="Yellow"><span
-                                                            class="product-color-yellow"></span></a></li>
-                                                <li class="active"><a href="#" data-color="White"><span
-                                                            class="product-color-white"></span></a></li>
-                                                <li><a href="#" data-color="Orange"><span
-                                                            class="product-color-orange"></span></a></li>
-                                                <li><a href="#" data-color="Cyan"><span
-                                                            class="product-color-cyan"></span></a></li>
-                                                <li><a href="#" data-color="Green"><span
-                                                            class="product-color-green"></span></a></li>
-                                                <li><a href="#" data-color="Purple"><span
-                                                            class="product-color-purple"></span></a></li>
-                                            </ul>
-                                        </div> -->
                                         <div class="bt-1 border-color-1 mt-30 mb-30"></div>
                                         <div class="detail-extralink">
                                             <div class="detail-qty border radius">
@@ -131,10 +113,14 @@
                                             </div>
                                             <div class="product-extra-link2">
                                                 <button type="submit" class="button button-add-to-cart">Buy Now</button>
-                                                <a aria-label="Add To Wishlist" class="action-btn hover-up"
-                                                    href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
-                                                <a aria-label="Add To Cart" class="action-btn hover-up"
-                                                    href="shop-cart.html"><i class="fi-rs-shopping-bag-add"></i></a>
+                                                <a aria-label="Add To Wishlist"
+                                                    class="action-btn hover-up add-to-wishlist" href="#"
+                                                    data-product-id="<%= product._id %>">
+                                                    <i class="fi-rs-heart"></i>
+                                                </a>
+                                                <a aria-label="Add To Cart" class="action-btn hover-up add-to-cart"
+                                                    href="#" data-product-id="<%= product._id %>">
+                                                    <i class="fi-rs-shopping-bag-add"></i></a>
                                             </div>
                                         </div>
                                         <ul class="product-meta font-xs color-grey mt-50">
@@ -152,25 +138,6 @@
                             </div>
                             <div class="row">
                                 <div class="col-lg-10 m-auto entry-main-content">
-                                    <!-- <h2 class="section-title style-1 mb-30">Description</h2> -->
-                                    <!-- <div class="description mb-50">
-                                        <p>Uninhibited carnally hired played in whimpered dear gorilla koala depending
-                                            and much yikes off far quetzal goodness and from for grimaced goodness
-                                            unaccountably and meadowlark near unblushingly crucial scallop
-                                            tightly neurotic hungrily some and dear furiously this apart.</p>
-                                        <p>Spluttered narrowly yikes left moth in yikes bowed this that grizzly much
-                                            hello on spoon-fed that alas rethought much decently richly and wow against
-                                            the frequent fluidly at formidable acceptably flapped
-                                            besides and much circa far over the bucolically hey precarious goldfinch
-                                            mastodon goodness gnashed a jellyfish and one however because.
-                                        </p>
-                                        <p>Laconic overheard dear woodchuck wow this outrageously taut beaver hey hello
-                                            far meadowlark imitatively egregiously hugged that yikes minimally unanimous
-                                            pouted flirtatiously as beaver beheld above forward
-                                            energetic across this jeepers beneficently cockily less a the raucously that
-                                            magic upheld far so the this where crud then below after jeez enchanting
-                                            drunkenly more much wow callously irrespective limpet.</p>
-                                    </div> -->
                                     <h3 class="section-title style-1 mb-30">Additional info</h3>
                                     <table class="font-md mb-30">
                                         <tbody>
@@ -207,60 +174,6 @@
                                                     </p>
                                                 </td>
                                             </tr>
-                                            <!-- <tr class="weight-wo-wheels">
-                                                <th>Weight (w/o wheels)</th>
-                                                <td>
-                                                    <p>20 LBS</p>
-                                                </td>
-                                            </tr>
-                                            <tr class="weight-capacity">
-                                                <th>Weight Capacity</th>
-                                                <td>
-                                                    <p>60 LBS</p>
-                                                </td>
-                                            </tr>
-                                            <tr class="width">
-                                                <th>Width</th>
-                                                <td>
-                                                    <p>24″</p>
-                                                </td>
-                                            </tr>
-                                            <tr class="handle-height-ground-to-handle">
-                                                <th>Handle height (ground to handle)</th>
-                                                <td>
-                                                    <p>37-45″</p>
-                                                </td>
-                                            </tr>
-                                            <tr class="wheels">
-                                                <th>Wheels</th>
-                                                <td>
-                                                    <p>12″ air / wide track slick tread</p>
-                                                </td>
-                                            </tr>
-                                            <tr class="seat-back-height">
-                                                <th>Seat back height</th>
-                                                <td>
-                                                    <p>21.5″</p>
-                                                </td>
-                                            </tr>
-                                            <tr class="head-room-inside-canopy">
-                                                <th>Head room (inside canopy)</th>
-                                                <td>
-                                                    <p>25″</p>
-                                                </td>
-                                            </tr>
-                                            <tr class="pa_color">
-                                                <th>Color</th>
-                                                <td>
-                                                    <p>Black, Blue, Red, White</p>
-                                                </td>
-                                            </tr>
-                                            <tr class="pa_size">
-                                                <th>Size</th>
-                                                <td>
-                                                    <p>M, S</p>
-                                                </td>
-                                            </tr> -->
                                         </tbody>
                                     </table>
 
@@ -471,7 +384,9 @@
                                                                 </span>
                                                             </div>
                                                             <div class="product-price">
-                                                                <% if (relatedProduct.mainprice !==0 && relatedProduct.mainprice < relatedProduct.price) { %>
+                                                                <% if (relatedProduct.mainprice !==0 &&
+                                                                    relatedProduct.mainprice < relatedProduct.price) {
+                                                                    %>
                                                                     <span>$<%= relatedProduct.mainprice.toFixed(2) %>
                                                                     </span>
                                                                     <span class="old-price">$<%=
@@ -509,3 +424,101 @@
         </section>
     </main>
     <%- include("../layouts/userFooter") %>
+
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const addToWishlistButtons = document.querySelectorAll(".add-to-wishlist");
+                const addToCartButtons = document.querySelectorAll(".add-to-cart");
+
+                addToWishlistButtons.forEach(button => {
+                    button.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        const productId = button.getAttribute("data-product-id");
+
+                        fetch("/user/addtowishlist", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ productId: productId })
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error("Network response was not ok");
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.alreadyInWishlist) {
+                                    Swal.fire({
+                                        icon: 'info',
+                                        title: 'Already in Wishlist!',
+                                        text: 'This product is already in your wishlist.'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Added to Wishlist!',
+                                        text: 'This product has been added to your wishlist.'
+                                    })
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Something went wrong! Please try again.'
+                                });
+                            });
+                    });
+                });
+
+                addToCartButtons.forEach(button => {
+                    button.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        const productId = button.getAttribute("data-product-id");
+
+                        fetch("/user/addtocart", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ productId: productId })
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error("Network response was not ok");
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.alreadyInCart) {
+                                    Swal.fire({
+                                        icon: 'info',
+                                        title: 'Already in Cart!',
+                                        text: 'This product is already in your Cart.'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Added to Cart!',
+                                        text: 'This product has been added to your Cart.'
+                                    })
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Something went wrong! Please try again.'
+                                });
+                            });
+                    });
+                });
+            });
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

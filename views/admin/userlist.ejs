@@ -38,7 +38,7 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="userTableBody">
                 <% users.forEach(user=> { %>
                     <tr>
                         <td>
@@ -127,9 +127,74 @@
             }
 
             function searchUsers() {
-                // Add logic for searching users
-                console.log('Searching users...');
+                const searchTerm = document.getElementById('searchBar').value.trim().toLowerCase();
+                console.log(searchTerm)
+                // Update URL with the search term
+                const url = new URL(window.location.href);
+                url.searchParams.set('term', searchTerm);
+                window.history.pushState({ path: url.href }, '', url.href);
+
+                // Make fetch request to search for users
+                fetch(`/admin/userlist/search?term=${searchTerm}`)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Failed to search users');
+                        }
+                    })
+                    .then(data => {
+                        console.log(data)
+                        // Call function to update UI with search results
+                        displayUsers(data.users);
+                    })
+                    .catch(error => {
+                        console.error('Error searching users:', error);
+                    });
             }
+
+
+            function displayUsers(users) {
+                const userTableBody = document.getElementById('userTableBody');
+                userTableBody.innerHTML = '';
+
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+            <td>${user.phone}</td>
+            <td>
+                <button type="button" class="btn ${user.isBlocked ? 'btn-success' : 'btn-danger'}" 
+                    onclick="showConfirmationModal('${user._id}', ${user.isBlocked})">
+                    ${user.isBlocked ? 'Unblock' : 'Block'}
+                </button>
+            </td>
+        `;
+                    userTableBody.appendChild(row);
+                });
+            }
+
+            // function displayPagination(totalPages, currentPage) {
+            //     const paginationLinks = document.getElementById('paginationLinks');
+            //     paginationLinks.innerHTML = '';
+
+            //     for (let i = 1; i <= totalPages; i++) {
+            //         const li = document.createElement('li');
+            //         li.classList.add('page-item');
+            //         if (i === currentPage) {
+            //             li.classList.add('active');
+            //         }
+            //         const a = document.createElement('a');
+            //         a.classList.add('page-link');
+            //         a.href = `?page=${i}`;
+            //         a.textContent = i;
+            //         li.appendChild(a);
+            //         paginationLinks.appendChild(li);
+            //     }
+            // }
+
+
 
             document.getElementById('confirmButton').addEventListener('click', toggleUserBlock);
         </script>

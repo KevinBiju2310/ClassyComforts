@@ -43,14 +43,24 @@ exports.productsGet = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const perPage = 15;
         let query = { deleted: false };
+
+        // Filter by category
         if (req.query.category && req.query.category !== "All") {
             query.category = req.query.category;
         }
+
+        // Search by product name
+        if (req.query.search) {
+            query.productname = { $regex: new RegExp(req.query.search, "i") };
+        }
+
         const totalProducts = await Product.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / perPage);
         const skip = (page - 1) * perPage;
+
         const products = await Product.find(query).skip(skip).limit(perPage);
         const category = await Category.find({ deleted: false });
+
         res.render('products', { products, category, totalPages, currentPage: page });
     } catch (error) {
         console.log("Error Occurred: ", error);
@@ -293,6 +303,27 @@ exports.singleproductGet = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 }
+
+
+
+exports.searchProduct = async (req, res) => {
+    try {
+        const searchQuery = req.query.query;
+        console.log(searchQuery)
+        const regex = new RegExp(searchQuery, 'i');
+        const products = await Product.find({ productname: regex, deleted: false });
+        console.log(products)
+        if (products.length === 0) {
+            return res.status(404).json({ message: "No products found" });
+        }
+
+        res.json(products);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 
 
 exports.sortproductGet = async (req, res) => {

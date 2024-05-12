@@ -33,7 +33,8 @@ router.get('/resetpassword/:id/:token', userController.resetPasswordGet);
 router.post('/resetpassword/:id/:token', userController.resetPasswordPost);
 
 router.get('/shop', userController.shoppageGet);
-router.get('/singleproduct/:id', isLoggedIn, productController.singleproductGet);
+router.get('/singleproduct/:id', productController.singleproductGet);
+router.get('/search',productController.searchProduct);
 
 router.get('/accountdetails', isLoggedIn, userProfileController.profileGet);
 router.post('/address', userProfileController.addAddress);

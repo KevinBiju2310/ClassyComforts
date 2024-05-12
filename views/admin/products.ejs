@@ -20,24 +20,24 @@
 
             <div class="card mb-4 mt-3">
                 <header class="card-header">
-                    <div class="row gx-3">
-                        <div class="col-lg-4 col-md-6 me-auto">
-                            <input type="text" placeholder="Search..." class="form-control">
-                        </div>
-                        <div class="col-lg-2 col-6 col-md-3">
-                            <form id="filterForm" method="get" action="/admin/products">
+                    <form id="filterForm" method="get" action="/admin/products">
+                        <div class="row gx-3">
+                            <div class="col-lg-4 col-md-6 me-auto">
+                                <input type="text" name="search" placeholder="Search..." class="form-control">
+                            </div>
+                            <div class="col-lg-2 col-6 col-md-3">
                                 <select id="categorySelect" class="form-select" name="category"
                                     onchange="this.form.submit()">
-                                    <option><a href="/admin/products">All</a></option>
+                                    <option value="All">All</option>
                                     <% category.forEach(category=> { %>
                                         <option value="<%= category.name %>">
                                             <%= category.name %>
                                         </option>
                                         <% }) %>
                                 </select>
-                            </form>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </header> <!-- card-header end// -->
                 <div class="card-body grid-view">
                     <div class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5">
