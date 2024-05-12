@@ -6,7 +6,7 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Wallet = require("../modal/walletModel");
 const Coupon = require('../modal/couponModel');
-const PDFDocument = require('pdfkit');
+const PDFDocument = require('pdfkit-table');
 const fs = require('fs');
 
 
@@ -426,13 +426,46 @@ exports.generateInvoice = async (req, res) => {
         // Fetch the order details from the database (replace this with your actual method to fetch order details)
         const order = await Order.findById(orderId).populate('products.productId');
         console.log(order);
-        // Generate the invoice PDF
-        const invoiceFilename = await generateInvoicePDF(order);
 
-        // Send the generated invoice file as a response
+        const doc = new PDFDocument();
+        const filename = 'Invoice.pdf';
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=${invoiceFilename}`);
-        fs.createReadStream(invoiceFilename).pipe(res);
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        doc.pipe(res);
+
+        // Header
+        doc.fontSize(20).text('Invoice', { align: 'center' }).moveDown();
+
+        // Order details
+        doc.fontSize(12).text(`Order ID: ${order._id}`).moveDown();
+        doc.fontSize(12).text(`Order Date: ${order.createdAt}`).moveDown();
+
+        // Table headers
+        const tableHeaders = ['Product Name', 'Payment Method', 'Quantity', 'Price', 'Discount', 'Total Amount'];
+        const tableRows = [];
+
+        // Table rows with order details
+        order.products.forEach(product => {
+            const { productName, paymentMethod } = product.productId;
+            const { quantity, productPrice, discount } = product;
+            const totalAmount = (quantity * productPrice) - discount;
+            tableRows.push([productName, paymentMethod, quantity, productPrice, discount, totalAmount]);
+        });
+
+        // Draw table
+        doc.table({
+            headers: tableHeaders,
+            rows: tableRows
+        });
+
+        // Total amount
+        const totalAmount = order.products.reduce((total, product) => {
+            return total + ((product.quantity * product.productId.productPrice) - product.discount);
+        }, 0);
+        doc.moveDown().fontSize(12).text(`Total Amount: ${totalAmount}`).moveDown();
+
+        doc.end();
+
     } catch (error) {
         // Handle errors
         console.error('Error generating invoice:', error);

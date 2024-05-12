@@ -675,12 +675,33 @@ exports.downloadExcel = async (req, res) => {
             .skip(skip)
             .limit(perPage);
 
-
+        console.log(orders)
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sales Report');
 
-        worksheet.addRow(['Customer Name', 'Product Name', 'Payment Method', 'Quantity', 'Price', 'Discount', 'Total Amount']);
+        const header = worksheet.addRow(['Customer Name', 'Product Name', 'Payment Method', 'Quantity', 'Price', 'Discount', 'Total Amount']);
+        header.font = { bold: true };
+        header.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFF00' }
+        }
 
+        worksheet.getColumn(1).width = 20; // Customer Name
+        worksheet.getColumn(2).width = 30; // Product Name
+        worksheet.getColumn(3).width = 25; // Payment Method
+        worksheet.getColumn(4).width = 10; // Quantity
+        worksheet.getColumn(5).width = 10; // Price
+        worksheet.getColumn(6).width = 10; // Discount
+        worksheet.getColumn(7).width = 15; // Total Amount
+
+        orders.forEach(order => {
+            order.products.forEach(product => {
+                const { userId, paymentMethod, totalAmount, couponAmount } = order;
+                const { productId, quantity, productPrice } = product;
+                worksheet.addRow([userId.name, productId.productname, paymentMethod, quantity, productPrice, couponAmount, totalAmount]);
+            });
+        });
         // Save workbook to a file or stream
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename="sales_report.xlsx"');
