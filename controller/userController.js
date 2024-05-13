@@ -173,17 +173,17 @@ exports.verifyOTP = async (req, res) => {
                 userWallet.transaction.push({
                     date: new Date(),
                     paymentMethod: 'referral',
-                    amount:500,
+                    amount: 500,
                     paymentStatus: 'credit'
                 })
                 await userWallet.save();
                 const referredbyWallet = await Wallet.findOne({ userId: referredby });
-                if(referredbyWallet){
+                if (referredbyWallet) {
                     referredbyWallet.amount += 1000;
                     referredbyWallet.transaction.push({
                         date: new Date(),
-                        paymentMethod:'referral',
-                        amount:1000,
+                        paymentMethod: 'referral',
+                        amount: 1000,
                         paymentStatus: 'credit'
                     })
                     await referredbyWallet.save();
@@ -199,6 +199,39 @@ exports.verifyOTP = async (req, res) => {
         res.render('otppage', { errors: 'Invalid OTP' });
     }
 };
+
+
+exports.resendOTP = async (req, res) => {
+    const newUser = req.session.user;
+    try {
+        if (newUser) {
+            const newOTP = generateOTP();
+            req.session.user.otp = newOTP;
+            const mailOptions = {
+                from: process.env.EMAIL_ID,
+                to: req.session.user.email,
+                subject: 'OTP for Signup',
+                text: `Your OTP for signup is: ${newOTP}`,
+            };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Error sending email:', error);
+                    res.status(500).json({ message: 'Error sending OTP email' });
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    // Respond with the new OTP
+                    res.status(200).json({ message: 'OTP resent successfully', newOTP });
+                }
+            });
+            console.log(newOTP)
+        } else {
+            res.status(400).send('No user found in session');
+        }
+    } catch (error) {
+        console.log("Error Occured: ", error);
+    }
+}
+
 
 
 
@@ -295,7 +328,8 @@ exports.forgotPasswordPost = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.send("User not registered");
+            // Send JSON response for user not registered
+            return res.status(400).json({ success: false, message: 'User not registered' });
         }
 
         const secret = process.env.JWT_SECRET + user.password;
@@ -311,10 +345,13 @@ exports.forgotPasswordPost = async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        return res.send('Password reset link sent to email');
+
+        // Send JSON response for successful password reset link sent
+        return res.status(200).json({ success: true, message: 'Password reset link sent to email' });
     } catch (error) {
         console.error(error.message);
-        return res.send(error.message);
+        // Send JSON response for any other errors
+        return res.status(500).json({ success: false, message: 'An error occurred. Please try again later.' });
     }
 };
 
@@ -354,7 +391,7 @@ exports.resetPasswordPost = async (req, res) => {
         const user = await User.findById(id);
 
         if (!user) {
-            return res.send('Invalid ID');
+            return res.status(400).json({ success: false, message: 'Invalid ID' });
         }
 
         const secret = process.env.JWT_SECRET + user.password;
@@ -362,10 +399,10 @@ exports.resetPasswordPost = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         await User.updateOne({ _id: user._id }, { password: hashedPassword });
-        return res.send('Password updated successfully.');
+        return res.status(200).json({ success: true, message: 'Password updated successfully' });
     } catch (error) {
         console.error(error.message);
-        return res.send(error.message);
+        return res.status(500).json({ success: false, message: 'An error occurred. Please try again later.' });
     }
 };
 

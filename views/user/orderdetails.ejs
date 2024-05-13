@@ -182,7 +182,8 @@
                             <% } %>
                                 <button id="cancelOrderBtn" class="btn btn-danger" data-toggle="modal"
                                     data-target="#cancelOrderModal">Cancel Order</button>
-                                <button id="downloadInvoiceBtn" class="btn btn-primary">Download
+                                <button id="downloadInvoiceBtn" class="btn btn-primary"
+                                    onclick="downloadInvoice()">Download
                                     Invoice</button>
         </div>
     </main>
@@ -269,80 +270,16 @@
             }
         });
 
+        function downloadInvoice() {
+            // Get the order ID from wherever it's stored (e.g., a variable)
+            const orderId = '<%= order._id %>'; // Replace '<%= order._id %>' with the actual order ID
 
-        // document.getElementById('downloadInvoiceBtn').addEventListener('click', async () => {
-        //     // Get the order ID
-        //     const orderId = '<%= order._id %>';
+            // Construct the URL with the order ID as a query parameter
+            const url = `/user/generate-invoice?orderId=${orderId}`;
 
-        //     try {
-        //         // Fetch the invoice PDF using a POST request
-        //         const response = await fetch(`/user/invoice/${orderId}`, {
-        //             method: 'POST',
-        //             headers: {
-        //                 'Content-Type': 'application/json'
-        //             }
-        //         });
-
-        //         if (!response.ok) {
-        //             console.error('Failed to download invoice');
-        //             return;
-        //         }
-
-        //         // Convert the response to a blob
-        //         const blob = await response.blob();
-
-        //         // Create a temporary URL for the blob
-        //         const url = window.URL.createObjectURL(blob);
-
-        //         // Create a link element to trigger the download
-        //         const a = document.createElement('a');
-        //         a.href = url;
-        //         a.download = `invoice_${orderId}.pdf`;
-
-        //         // Trigger the click event on the link
-        //         a.click();
-
-        //         // Release the object URL
-        //         window.URL.revokeObjectURL(url);
-        //     } catch (error) {
-        //         console.error('Error occurred while downloading invoice:', error);
-        //     }
-        // });
-        document.getElementById('downloadInvoiceBtn').addEventListener('click', function () {
-            // Send a request to the server to generate the invoice
-            fetch('/user/generate-invoice', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    orderId: '<%= order._id %>' // Pass the order ID to identify the invoice
-                })
-            })
-                .then(response => {
-                    // Check if the response is successful
-                    if (response.ok) {
-                        // Get the filename from the response headers
-                        const filename = response.headers.get('Content-Disposition').split(';')[1].split('=')[1].trim();
-                        // Convert the response to blob
-                        return response.blob().then(blob => {
-                            // Create a temporary link element to download the file
-                            const link = document.createElement('a');
-                            link.href = window.URL.createObjectURL(blob);
-                            link.download = filename;
-                            // Trigger a click event to download the file
-                            link.click();
-                        });
-                    } else {
-                        // Handle the error if the response is not successful
-                        console.error('Failed to generate invoice');
-                    }
-                })
-                .catch(error => {
-                    // Handle any network errors
-                    console.error('Network error:', error);
-                });
-        });
+            // Redirect to the generated URL
+            window.location.href = url;
+        }
 
 
 

@@ -421,57 +421,111 @@ exports.orderDetails = async (req, res) => {
 
 exports.generateInvoice = async (req, res) => {
     try {
-        const orderId = req.body.orderId; // Get the order ID from the request body
+        const orderId = req.query.orderId;
         console.log(orderId);
-        // Fetch the order details from the database (replace this with your actual method to fetch order details)
         const order = await Order.findById(orderId).populate('products.productId');
         console.log(order);
 
-        const doc = new PDFDocument();
+        const doc = new PDFDocument({ size: 'A4', margins: { top: 30, bottom: 30, left: 30, right: 30 } });
         const filename = 'Invoice.pdf';
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         doc.pipe(res);
+        // Company Name and Address
+        doc.fillColor('#333333')
+            .fontSize(18)
+            .text('ClassyComforts', { align: 'left' })
+            .moveDown()
+        // Invoice Header
+        doc.moveUp(2)
+            .fillColor('#999999')
+            .fontSize(16)
+            .text('COMMERCIAL INVOICE', { align: 'right' });
 
-        // Header
-        doc.fontSize(20).text('Invoice', { align: 'center' }).moveDown();
+        // Invoice Details
+        const currentDate = new Date();
+        doc.fillColor('#333333')
+            .fontSize(10)
+            .moveDown()
+            .text(`DATE: ${currentDate.toLocaleDateString('en-IN')}`, { align: 'left' })
+            .moveDown()
+            .text(`ORDER DATE: ${order.createdAt.toLocaleDateString('en-IN')}`)
+            .text(`INVOICE NUMBER: ${orderId}`, { align: 'right' })
+            .moveDown()
 
-        // Order details
-        doc.fontSize(12).text(`Order ID: ${order._id}`).moveDown();
-        doc.fontSize(12).text(`Order Date: ${order.createdAt}`).moveDown();
-
-        // Table headers
-        const tableHeaders = ['Product Name', 'Payment Method', 'Quantity', 'Price', 'Discount', 'Total Amount'];
-        const tableRows = [];
-
-        // Table rows with order details
-        order.products.forEach(product => {
-            const { productName, paymentMethod } = product.productId;
-            const { quantity, productPrice, discount } = product;
-            const totalAmount = (quantity * productPrice) - discount;
-            tableRows.push([productName, paymentMethod, quantity, productPrice, discount, totalAmount]);
+        // Loop through each address in the order
+        order.address.forEach((address, index) => {
+            doc.text(`Delivered To: ${address.name}`, { align: 'right' })
+                .text(`${address.address}`, { align: 'right' })
+                .text(`${address.city}, ${address.state} ${address.pincode}`, { align: 'right' })
+                .text(`${address.district}`, { align: 'right' })
+                .moveDown();
         });
 
-        // Draw table
-        doc.table({
-            headers: tableHeaders,
-            rows: tableRows
+        doc.font('Helvetica').fontSize(10).lineGap(8);
+        const tableData = order.products.map((product, index) => {
+            return [
+                index + 1, // Sr. No
+                product.productId.productname, // Product Name
+                `$${product.productPrice.toFixed(2)}`, // Price
+                product.quantity, // Quantity
+                `$${(product.productPrice * product.quantity).toFixed(2)}` // Total
+            ];
         });
 
-        // Total amount
-        const totalAmount = order.products.reduce((total, product) => {
-            return total + ((product.quantity * product.productId.productPrice) - product.discount);
-        }, 0);
-        doc.moveDown().fontSize(12).text(`Total Amount: ${totalAmount}`).moveDown();
+        doc.moveDown()
+        doc.moveDown()
+        doc.font('Helvetica').fontSize(10).lineGap(8);
+        doc.font('Helvetica').table({
+            headers: ['Sr.No', 'ProductName', 'Price', 'Quantity', 'Total'],
+            rows: tableData,
+            columnWidths: { 0: 50, 1: 50, 2: 150, 3: 50, 4: 50, 5: 50 },
+        });
+
+
+        const couponAmount = order.couponAmount;
+        const grandTotal = order.totalAmount;
+
+        // Create table data for additional table
+        const additionalTableData = [
+            ['Coupon Amount', `$${couponAmount.toFixed(2)}`],
+            ['Grand Total', `$${grandTotal.toFixed(2)}`]
+        ];
+
+        // Draw the additional table
+        doc.moveDown();
+        doc.font('Helvetica').fontSize(10).lineGap(8);
+        doc.font('Helvetica').table({
+            headers: ['',''],
+            rows: additionalTableData,
+            columnWidths: { 0: 150, 1: 150 },
+        });
+
+        doc.rect(10, 10, doc.page.width - 20, doc.page.height - 20).stroke();
+        // Footer
+        const footerText = 'Thank you for your business, we appreciate your custom!';
+        doc.fillColor('#333333')
+            .fontSize(10)
+            .text(footerText, { align: 'center' });
+        doc.moveDown()
+        doc.moveDown()
+
+            const imagePath = './public/assets/imgs/theme/project-logo.png'; // Provide the path to your image
+            if (fs.existsSync(imagePath)) {
+                doc.image(imagePath, {
+                    fit: [doc.page.width - 500, doc.page.height - 500], // Adjust image size as needed
+                    align: 'center',
+                });
+            }
+
 
         doc.end();
-
     } catch (error) {
-        // Handle errors
         console.error('Error generating invoice:', error);
         res.status(500).send('Error generating invoice');
     }
-}
+};
+
 
 
 

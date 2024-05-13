@@ -26,6 +26,7 @@ router.use('/auth/logout', userController.logout);
 
 router.get('/verifyotp', userController.verifyOTPGet)
 router.post('/verifyotp', userController.verifyOTP)
+router.post('/resendotp',userController.resendOTP);
 
 router.get('/forgotpassword', userController.forgotPasswordGet);
 router.post('/forgotpassword', userController.forgotPasswordPost);
@@ -44,7 +45,7 @@ router.post('/changepassword', isLoggedIn, userProfileController.changepassword)
 router.post('/accountdetails', userProfileController.changedetails);
 
 router.get('/orderdetails/:id', isLoggedIn, orderController.orderDetails);
-router.post('/generate-invoice', orderController.generateInvoice);
+router.get('/generate-invoice', orderController.generateInvoice);
 router.post('/cancelOrder', orderController.cancelOrder);
 
 router.get('/cart', isLoggedIn, cartController.cartPage);

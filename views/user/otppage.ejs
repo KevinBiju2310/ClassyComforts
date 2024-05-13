@@ -38,8 +38,9 @@
                                             <div class="login_footer form-group">
                                                 <label class="form-check-label" for="exampleCheckbox1"><span>Timer :
                                                         <span id="otpTimer"></span></span></label>
-                                                <a class="text-muted" href="#" onclick="resendOTP()" type="">Resend
-                                                    OTP</a>
+                                                <a id="resendOTP" class="text-muted" href="#"
+                                                    style="display: none;">Resend OTP</a>
+
                                             </div>
                                             <div class="form-group">
                                                 <button type="submit" class="btn btn-fill-out btn-block hover-up ml-160"
@@ -55,6 +56,7 @@
             </div>
         </section>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let otpTimer;
         let timeLeft = 60;
@@ -66,7 +68,11 @@
                     updateTimerDisplay();
                 } else {
                     clearInterval(otpTimer);
-                    alert('OTP expired. Please request a new OTP.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'OTP Expired',
+                        text: 'Please request a new OTP.'
+                    });
                 }
             }, 1000);
         }
@@ -75,11 +81,59 @@
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             document.getElementById('otpTimer').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            if (timeLeft === 0) {
+                document.getElementById('resendOTP').style.display = 'inline';
+            } else {
+                document.getElementById('resendOTP').style.display = 'none';
+            }
         }
 
         window.onload = function () {
             startTimer();
         };
+
+
+
+        document.getElementById('resendOTP').addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent the default action of the link
+
+            fetch('/user/resendotp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'OTP Resent Successfully',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        return response.json();
+                    }
+                    throw new Error('Failed to resend OTP');
+                })
+                .then(data => {
+                    // Display the message from the server
+                    // If newOTP is available in the response, you can use it to update the UI or take further actions
+                    if (data.newOTP) {
+                        timeLeft = 60;
+                        startTimer(); // Restart the timer
+                    }
+                })
+                .catch(error => {
+                    console.error('Error resending OTP:', error.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to resend OTP'
+                    });
+                });
+        });
+
     </script>
     <!-- Vendor JS-->
     <script src="assets/js/vendor/modernizr-3.6.0.min.js"></script>
