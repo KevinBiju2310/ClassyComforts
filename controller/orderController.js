@@ -208,7 +208,8 @@ exports.orderPlaced = async (req, res) => {
                 paymentMethod: paymentMethod,
                 totalAmount: totalValue,
                 couponPercentage,
-                couponAmount
+                couponAmount,
+                couponId: couponId
             });
             await order.save();
 
@@ -249,7 +250,8 @@ exports.orderPlaced = async (req, res) => {
                 paymentMethod: paymentMethod,
                 totalAmount: totalValue,
                 couponPercentage,
-                couponAmount
+                couponAmount,
+                couponId: couponId
             });
             await order.save();
 
@@ -300,7 +302,8 @@ exports.orderPlaced = async (req, res) => {
                 totalAmount: totalValue,
                 paymentStatus: "success",
                 couponPercentage,
-                couponAmount
+                couponAmount,
+                couponId: couponId
             });
             await order.save();
             for (const checkedProduct of checkedProducts) {
@@ -496,7 +499,7 @@ exports.generateInvoice = async (req, res) => {
         doc.moveDown();
         doc.font('Helvetica').fontSize(10).lineGap(8);
         doc.font('Helvetica').table({
-            headers: ['',''],
+            headers: ['', ''],
             rows: additionalTableData,
             columnWidths: { 0: 150, 1: 150 },
         });
@@ -510,13 +513,13 @@ exports.generateInvoice = async (req, res) => {
         doc.moveDown()
         doc.moveDown()
 
-            const imagePath = './public/assets/imgs/theme/project-logo.png'; // Provide the path to your image
-            if (fs.existsSync(imagePath)) {
-                doc.image(imagePath, {
-                    fit: [doc.page.width - 500, doc.page.height - 500], // Adjust image size as needed
-                    align: 'center',
-                });
-            }
+        const imagePath = './public/assets/imgs/theme/project-logo.png'; // Provide the path to your image
+        if (fs.existsSync(imagePath)) {
+            doc.image(imagePath, {
+                fit: [doc.page.width - 500, doc.page.height - 500], // Adjust image size as needed
+                align: 'center',
+            });
+        }
 
 
         doc.end();
@@ -617,8 +620,9 @@ exports.cancelOrder = async (req, res) => {
 
 
 exports.removeProduct = async (req, res) => {
-    const { productId, orderId } = req.body;
-    console.log(productId, orderId)
+    const { productId, orderId } = req.params;
+    console.log(productId, orderId);
+    let appliedCoupon;
     try {
         // Fetch the order from the database
         const order = await Order.findById(orderId);
@@ -637,9 +641,34 @@ exports.removeProduct = async (req, res) => {
         const productToRemove = order.products[productIndex];
         const { productPrice, quantity } = productToRemove;
 
-        order.totalAmount -= productPrice * quantity;
+        // Calculate the new total amount after removing the product
+        let newTotalAmount = order.totalAmount - productPrice * quantity;
+        console.log("NT:", newTotalAmount)
+        if (order.couponPercentage !== 0) {
+            appliedCoupon = await Coupon.findById(order.couponId);
+            if (!appliedCoupon) {
+                return res.status(404).json({ error: 'Coupon not found' });
+            }
+
+            let newProductPrice = order.products.reduce((acc, val) => {
+                if (val.productId.toString() !== productId) {
+                    acc += val.productPrice;
+                }
+                return acc;
+            }, 0);
+            console.log("NPP:", newProductPrice)
+            if (newProductPrice >= appliedCoupon.minimumamount) {
+                newTotalAmount = newProductPrice * (1 - order.couponPercentage / 100);
+            } else {
+                order.couponPercentage = 0;
+                newTotalAmount = newProductPrice;
+            }
+        }
+
+        order.totalAmount = newTotalAmount;
         order.products.splice(productIndex, 1);
 
+        console.log("final", order);
         await order.save();
 
         const product = await Product.findById(productId);
@@ -647,8 +676,23 @@ exports.removeProduct = async (req, res) => {
             return res.status(404).json({ error: 'Product not found' });
         }
 
-        product.quantity += quantity;
+        if (order.paymentStatus !== 'cod') {
+            const userWallet = await Wallet.findOne({ userId: order.userId });
+            if (!userWallet) {
+                return res.status(404).json({ error: 'Wallet not found for user' });
+            }
 
+            userWallet.amount += productPrice;
+            userWallet.transaction.push({
+                date: new Date(),
+                paymentMethod: order.paymentMethod,
+                amount: productPrice,
+                paymentStatus: 'refund'
+            });
+            await userWallet.save();
+        }
+
+        product.quantity += quantity;
         await product.save();
 
         res.status(200).json({ message: 'Product removed from order and quantity updated', order });
@@ -656,6 +700,6 @@ exports.removeProduct = async (req, res) => {
         console.error('Error removing product from order:', error);
         res.status(500).json({ error: 'Failed to remove product from order' });
     }
-}
+};
 
 

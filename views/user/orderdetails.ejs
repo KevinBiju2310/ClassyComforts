@@ -144,7 +144,7 @@
                                                     <% } %>
                                                         <tr>
                                                             <th>Grand Total</th>
-                                                            <td>$<%= order.totalAmount.toFixed(2) %>
+                                                            <td id="totalAmount">$<%= order.totalAmount.toFixed(2) %>
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -294,31 +294,39 @@
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Yes, remove it!'
             }).then(async (result) => {
+                console.log(result)
                 if (result.isConfirmed) {
                     try {
                         console.log("hello")
-                        const response = await fetch(`/user/removeproduct`, {
+                        const response = await fetch(`/user/removeproduct/${productId}/${orderId}`, {
                             method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ productId, orderId })
                         });
-
+                        console.log(response)
                         if (response.ok) {
                             // Remove the row from the table
                             document.getElementById(`orderRow_${index}`).remove();
 
                             // Optionally update the total amount in frontend
                             const totalAmountCell = document.getElementById('totalAmount');
-                            const newTotalAmount = parseFloat(totalAmountCell.textContent.replace('$', '')) - parseFloat(document.getElementById(`productTotal_${index}`).textContent.replace('$', ''));
-                            totalAmountCell.textContent = `$${newTotalAmount.toFixed(2)}`;
-
+                            console.log(totalAmountCell)
+                            if (totalAmountCell) {
+                                const productTotalCell = document.getElementById(`productTotal_${index}`);
+                                if (productTotalCell) {
+                                    const newTotalAmount = parseFloat(totalAmountCell.innerHTML.replace('$', '')) - parseFloat(productTotalCell.innerHTML.replace('$', ''));
+                                    totalAmountCell.innerHTML = `$${newTotalAmount.toFixed(2)}`;
+                                }
+                            } else {
+                                console.error('Total amount cell not found');
+                            }
                             Swal.fire(
                                 'Removed!',
                                 'The product has been removed from your order.',
                                 'success'
-                            );
+                            ).then(() => {
+                                // Reload the page after the user clicks "OK"
+                                location.reload();
+                            });
+
                         } else {
                             console.error('Failed to remove product');
                             Swal.fire(
@@ -444,6 +452,7 @@
         });
 
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

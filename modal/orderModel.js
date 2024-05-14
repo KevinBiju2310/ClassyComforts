@@ -56,7 +56,7 @@ const orderSchema = new mongoose.Schema({
             type: String,
             enum: ['home', 'work'],
             required: true
-        }
+        },
     }],
     paymentMethod: {
         type: String,
@@ -90,6 +90,10 @@ const orderSchema = new mongoose.Schema({
     couponAmount: {
         type: Number,
         default: 0
+    },
+    couponId: {
+        type: Schema.Types.ObjectId,
+        ref: 'coupon',
     }
 },
     {

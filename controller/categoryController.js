@@ -18,6 +18,11 @@ exports.addcategoryPost = async (req, res) => {
             name,
             status
         });
+        const existingCategory = await Category.findOne({ name, deleted: false });
+
+        if (existingCategory) {
+            return res.status(400).json({ message: 'Category already exists' });
+        }
         await newCategory.save();
         res.redirect('/admin/category')
     } catch (error) {

@@ -64,7 +64,7 @@ router.get('/checkout', isLoggedIn, orderController.checkoutPageGet)
 router.post('/checkout', isLoggedIn, orderController.checkoutPage);
 router.post('/checkout/editaddress/:addressId', isLoggedIn, orderController.editAddress);
 router.post('/checkout/address', isLoggedIn, orderController.addAddress);
-router.delete('/removeproduct', isLoggedIn, orderController.removeProduct);
+router.delete('/removeproduct/:productId/:orderId', isLoggedIn, orderController.removeProduct);
 // router.post('/invoice/:id', orderController.downloadInvoice);
 
 router.post('/applycoupon', isLoggedIn, couponController.applyCoupon);

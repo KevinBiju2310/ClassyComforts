@@ -56,11 +56,12 @@
                 </div>
                 <div class="modal-body">
                     <!-- Add Category Form -->
-                    <form method="post" action="/admin/addcategory">
+                    <form method="post" action="/admin/addcategory" id="addCategoryForm">
                         <div class="form-group">
                             <label for="addCategoryName">Category Name</label>
                             <input type="text" class="form-control" id="addCategoryName"
                                 placeholder="Enter category name" name="name" required>
+                            <small id="categoryNameError" class="text-danger"></small>
                         </div>
                         <div class="form-group">
                             <label>Status</label><br>
@@ -99,7 +100,7 @@
                         <div class="form-group">
                             <label for="editCategoryName">Category Name</label>
                             <input type="text" class="form-control" id="editCategoryName"
-                                placeholder="Enter category name" name="name" required>
+                                placeholder="Enter category name" name="name">
                         </div>
                         <div class="form-group">
                             <label>Status</label><br>
@@ -154,8 +155,54 @@
         }
 
         function addCategory() {
-            $('#addCategoryModal').modal('hide');
+            event.preventDefault();
+            // Reset error messages
+            document.getElementById('categoryNameError').innerText = '';
+
+            // Get form values
+            const categoryName = document.getElementById('addCategoryName').value.trim();
+
+            // Validate category name
+            if (categoryName === '') {
+                document.getElementById('categoryNameError').innerText = 'Category name is required.';
+                return;
+            }
+
+            // Send a POST request to the server to add the category
+            fetch('/admin/addcategory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: categoryName,
+                    status: document.querySelector('input[name="status"]:checked').value
+                })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // If the category was successfully added, redirect to the admin category page
+                        window.location.href = '/admin/category';
+                    } else {
+                        // If the category already exists or other errors, display the error message
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data && data.message === 'Category already exists') {
+                        // Display the error message within the categoryNameError div
+                        document.getElementById('categoryNameError').innerText = data.message;
+                    } else {
+                        // Handle other error cases
+                        console.error('Error:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         }
+
+
 
         function editCategory() {
             const form = $('#editCategoryForm');
