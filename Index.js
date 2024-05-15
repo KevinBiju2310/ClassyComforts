@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
-mongoose.connect("mongodb://localhost:27017/classyComforts");
+mongoose.connect("mongodb+srv://classyComforts:classyComforts1234@clustercc.7oa4bdn.mongodb.net/")
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch(err => console.error('MongoDB connection error:', err));
 const express = require('express');
 const path = require('path');
 const ejs = require('ejs');
