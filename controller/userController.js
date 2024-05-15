@@ -8,7 +8,6 @@ const passport = require('passport')
 const nodemailer = require('nodemailer')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
-require('../passportSetup')
 
 const emailConfig = {
     service: 'gmail',
@@ -287,29 +286,6 @@ exports.logoutuser = async (req, res) => {
         console.log(error.message);
     }
 }
-
-
-exports.googleSignIn = passport.authenticate('google', {
-    scope: ['profile'],
-});
-
-exports.googleSignInCallback = passport.authenticate('google', {
-    successRedirect: '/user/auth/protected',
-    failureRedirect: '/user/auth/google/failure',
-});
-
-exports.googleSignInFailure = (req, res) => {
-    res.send('Something went wrong with Google Sign-In!');
-};
-
-exports.protectedRoute = (req, res) => {
-    res.redirect('/user/home');
-};
-
-exports.logout = (req, res) => {
-    req.logout();
-    res.send('See you again!');
-};
 
 
 

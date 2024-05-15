@@ -12,7 +12,6 @@ const adminRoute = require('./routes/adminRoute');
 const bodyparser = require('body-parser');
 const app = express();
 const nocache = require('nocache');
-require('./passportSetup')
 require('dotenv').config();
 
 app.use(
