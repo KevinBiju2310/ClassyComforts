@@ -32,6 +32,7 @@ router.post('/addproduct', productController.addproductPost)
 router.get('/updateproduct/:id', isAdminLogin, productController.updateproductGet)
 router.post('/updateproduct/:id', productController.updateproductPost)
 router.post('/deleteproduct/:id', productController.deleteproductPost);
+router.get('/search',productController.searchProduct);
 
 router.post('/deleteimage', productController.deleteimage)
 

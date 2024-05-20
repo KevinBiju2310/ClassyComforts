@@ -217,7 +217,6 @@
                                                                         <th>Payment Method</th>
                                                                         <th>Amount</th>
                                                                         <th>Payment status</th>
-
                                                                     </tr>
                                                                 </thead>
 
@@ -227,7 +226,9 @@
                                                                             { %>
                                                                             <tr>
                                                                                 <td>
-                                                                                    <%= transaction.date %>
+                                                                                    <%= new
+                                                                                        Date(transaction.date).toLocaleDateString('en-IN')
+                                                                                        %>
                                                                                 </td>
                                                                                 <td>
                                                                                     <%= transaction.paymentMethod %>

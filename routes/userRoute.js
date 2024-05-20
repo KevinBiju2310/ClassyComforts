@@ -29,7 +29,7 @@ router.post('/resetpassword/:id/:token', userController.resetPasswordPost);
 
 router.get('/shop', userController.shoppageGet);
 router.get('/singleproduct/:id', productController.singleproductGet);
-router.get('/search',productController.searchProduct);
+router.get('/filter',productController.filterProducts)
 
 router.get('/accountdetails', isLoggedIn, userProfileController.profileGet);
 router.post('/address', userProfileController.addAddress);
@@ -63,7 +63,6 @@ router.delete('/removeproduct/:productId/:orderId', isLoggedIn, orderController.
 
 router.post('/applycoupon', isLoggedIn, couponController.applyCoupon);
 
-router.get('/sort', isLoggedIn, productController.sortproductGet);
 router.get('/stockcheck/:productId', isLoggedIn, productController.stockCheck);
 
 // router.get('/ordered', isLoggedIn, orderController.orderPlaced);

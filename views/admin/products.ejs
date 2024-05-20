@@ -23,7 +23,8 @@
                     <form id="filterForm" method="get" action="/admin/products">
                         <div class="row gx-3">
                             <div class="col-lg-4 col-md-6 me-auto">
-                                <input type="text" name="search" placeholder="Search..." class="form-control">
+                                <input type="text" name="search" id="searchInput" placeholder="Search..."
+                                    class="form-control">
                             </div>
                             <div class="col-lg-2 col-6 col-md-3">
                                 <select id="categorySelect" class="form-select" name="category"
@@ -169,7 +170,6 @@
     <%- include("../layouts/adminFooter") %>
 
         <script>
-
             document.addEventListener("DOMContentLoaded", function () {
                 const deleteButtons = document.querySelectorAll('.delete-btn');
                 deleteButtons.forEach(button => {
@@ -220,4 +220,118 @@
                 listBtn.addEventListener('click', switchToListView);
             });
 
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const searchInput = document.getElementById('searchInput');
+
+                searchInput.addEventListener('input', function () {
+                    const searchQuery = searchInput.value.trim();
+                    fetch(`/admin/search?query=${searchQuery}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            updateProductList(data);
+                        })
+                        .catch(error => console.error('Error:', error));
+                });
+
+                function updateProductList(products) {
+                    const gridView = document.querySelector('.grid-view .row');
+                    const listView = document.querySelector('.list-view');
+                    gridView.innerHTML = '';
+                    listView.innerHTML = '';
+
+                    if (products.length === 0) {
+                        console.log(products.length)
+                        const noProductsHtml = `
+                        <div class="col">
+                            <div class="alert alert-warning" role="alert">
+                                No products found.
+                            </div>
+                        </div>`;
+                        gridView.insertAdjacentHTML('beforeend', noProductsHtml);
+                        listView.insertAdjacentHTML('beforeend', noProductsHtml);
+                    } else {
+                        products.forEach(product => {
+                            const productGridHtml = `
+                            <div class="col" data-product-id="${product._id}">
+                                <div class="card card-product-grid">
+                                    <a href="#" class="img-wrap">
+                                        <img src="/uploads/${product.productImages[0]}" alt="Product Image">
+                                    </a>
+                                    <div class="info-wrap">
+                                        <a href="#" class="title text-truncate">${product.productname}</a>
+                                        <div class="price mb-2">$${product.price}</div>
+                                        <a href="/admin/updateproduct/${product._id}" class="btn btn-sm font-sm rounded btn-brand">
+                                            <i class="material-icons md-edit"></i> Edit
+                                        </a>
+                                        <form id="deleteForm_${product._id}" action="/admin/deleteproduct/${product._id}" method="post" style="display: inline;">
+                                            <button type="button" class="btn btn-sm font-sm btn-light rounded delete-btn" data-product-id="${product._id}">
+                                                <i class="material-icons md-delete_forever"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>`;
+
+                            const productListHtml = `
+                            <article class="itemlist">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-4 col-sm-4 col-8 flex-grow-1 col-name">
+                                        <a class="itemside" href="#">
+                                            <div class="left">
+                                                <img src="/uploads/${product.productImages[0]}" class="img-sm img-thumbnail" alt="Item" style="max-width: 250px;">
+                                            </div>
+                                            <div class="info">
+                                                <h6 class="mb-0">${product.productname}</h6>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="col-lg-2 col-sm-2 col-4 col-price"><span>$${product.price}</span></div>
+                                    <div class="col-lg-2 col-sm-2 col-4 col-status">
+                                        <span class="badge rounded-pill alert-success">${product.category}</span>
+                                    </div>
+                                    <div class="col-lg-2 col-sm-2 col-4 col-action text-end">
+                                        <a href="/admin/updateproduct/${product._id}" class="btn btn-sm font-sm rounded btn-brand">
+                                            <i class="material-icons md-edit"></i> Edit
+                                        </a>
+                                        <form id="deleteForm_${product._id}" action="/admin/deleteproduct/${product._id}" method="post" style="display: inline;">
+                                            <button type="button" class="btn btn-sm font-sm btn-light rounded delete-btn" data-product-id="${product._id}">
+                                                <i class="material-icons md-delete_forever"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </article>`;
+
+                            gridView.insertAdjacentHTML('beforeend', productGridHtml);
+                            listView.insertAdjacentHTML('beforeend', productListHtml);
+                        });
+                    }
+                    attachDeleteEventHandlers();
+                }
+                function attachDeleteEventHandlers() {
+                    const deleteButtons = document.querySelectorAll('.delete-btn');
+                    deleteButtons.forEach(button => {
+                        button.addEventListener('click', function (event) {
+                            const productId = event.currentTarget.getAttribute('data-product-id');
+                            const modal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
+                            modal.show();
+
+                            const confirmDeleteButton = document.getElementById('confirmDelete');
+                            confirmDeleteButton.onclick = function () {
+                                const form = document.getElementById(`deleteForm_${productId}`);
+                                if (form) {
+                                    form.submit();
+                                    const card = document.querySelector(`.col[data-product-id="${productId}"]`);
+                                    if (card && card.parentElement) {
+                                        card.parentElement.removeChild(card);
+                                    }
+                                }
+                                modal.hide();
+                            };
+                        });
+                    });
+                }
+            });
         </script>

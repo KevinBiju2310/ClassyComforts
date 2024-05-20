@@ -44,12 +44,10 @@ exports.productsGet = async (req, res) => {
         const perPage = 15;
         let query = { deleted: false };
 
-        // Filter by category
         if (req.query.category && req.query.category !== "All") {
             query.category = req.query.category;
         }
 
-        // Search by product name
         if (req.query.search) {
             query.productname = { $regex: new RegExp(req.query.search, "i") };
         }
@@ -57,11 +55,10 @@ exports.productsGet = async (req, res) => {
         const totalProducts = await Product.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / perPage);
         const skip = (page - 1) * perPage;
-
         const products = await Product.find(query).skip(skip).limit(perPage);
         const category = await Category.find({ deleted: false });
 
-        res.render('products', { products, category, totalPages, currentPage: page });
+        res.render('products', { products, category, totalPages, currentPage: page, layout: false });
     } catch (error) {
         console.log("Error Occurred: ", error);
         res.status(500).send("Internal Server Error");
@@ -312,10 +309,6 @@ exports.searchProduct = async (req, res) => {
         console.log(searchQuery)
         const regex = new RegExp(searchQuery, 'i');
         const products = await Product.find({ productname: regex, deleted: false });
-        console.log(products)
-        if (products.length === 0) {
-            return res.status(404).json({ message: "No products found" });
-        }
 
         res.json(products);
     } catch (error) {
@@ -326,24 +319,37 @@ exports.searchProduct = async (req, res) => {
 
 
 
-exports.sortproductGet = async (req, res) => {
-    console.log("Heelooooss ")
-    const sortBy = req.query.sortBy;
-    let sortOption = {};
-    console.log(sortBy)
-    if (sortBy === 'lowToHigh') {
-        sortOption = { price: 1 }
-    } else if (sortBy === 'highToLow') {
-        sortOption = { price: -1 }
-    } else if (sortBy === 'atoz') {
-        sortOption = { productname: 1 }
-    } else if (sortBy === 'ztoa') {
-        sortOption = { productname: -1 }
+exports.filterProducts = async (req, res) => {
+    const { search, sort, category } = req.query;
+    let query = { deleted: false };
+
+    if (search) {
+        query.productname = { $regex: search, $options: 'i' }; // Case-insensitive search
     }
+
+    if (category && category !== "all") {
+        query.category = category;
+    }
+
+    let sortOption = {};
+    if (sort === 'lowToHigh') {
+        sortOption.price = 1; // ascending
+    } else if (sort === 'highToLow') {
+        sortOption.price = -1; // descending
+    } else if (sort === 'atoz') {
+        sortOption.productname = 1; // alphabetical
+    } else if (sort === 'ztoa') {
+        sortOption.productname = -1; // reverse alphabetical
+    } else if (sort === 'releasedate') {
+        sortOption.releaseDate = -1; // newest first
+    }
+
     try {
-        const sortedProducts = await Product.find({ deleted: { $ne: true } }).sort(sortOption);
-        res.json(sortedProducts)
+        const products = await Product.find(query).sort(sortOption).exec();
+        res.json({ products });
     } catch (error) {
-        console.log("Error", error);
+        console.error('Error fetching products:', error);
+        res.status(500).send('Internal Server Error');
     }
 }
+

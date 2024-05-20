@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-mongoose.connect("mongodb+srv://classyComforts:classyComforts1234@clustercc.7oa4bdn.mongodb.net/")
+mongoose.connect("mongodb://localhost:27017/classyComforts")
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.error('MongoDB connection error:', err));
 const express = require('express');

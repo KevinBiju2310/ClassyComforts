@@ -33,7 +33,7 @@
         <div class="page-header breadcrumb-wrap">
             <div class="container">
                 <div class="breadcrumb">
-                    <a href="index.html" rel="nofollow">Home</a>
+                    <a href="/user/home" rel="nofollow">Home</a>
                     <span></span> Shop
                 </div>
             </div>
@@ -158,19 +158,22 @@
                         <!--Filter by Category-->
                         <div class="widget-category mb-30">
                             <h5 class="section-title style-1 mb-30 wow fadeIn animated">Category</h5>
-                            <ul class="categories">
-                                <li><a href="/user/shop">All products</a></li>
+                            <ul class="categories" id="categoryList">
+                                <li><a href="#" data-category="all">All products</a></li>
                                 <% category.forEach(category=> { %>
-                                    <li><a href="/user/shop?category=<%= category.name %>">
+                                    <li>
+                                        <a href="#" data-category="<%= category.name %>">
                                             <%= category.name %>
                                                 <% if(category.discount !==0) { %>
-                                                    - <span class="discount" style="color: green;font-weight: bold;">
+                                                    - <span class="discount" style="color: green; font-weight: bold;">
                                                         <%= category.discount %>% Offer
                                                     </span>
                                                     <% } %>
-                                        </a></li>
-                                    <% }); %>
+                                        </a>
+                                    </li>
+                                    <% }) %>
                             </ul>
+
                         </div>
                         <div class="banner-img wow fadeIn mb-45 animated d-lg-block d-none">
                             <img src="/assets/imgs/banner/banner-11.jpg" alt="">
@@ -182,28 +185,18 @@
     </main>
     <script>
 
-        document.getElementById('sortByDropdown').addEventListener('change', function () {
-            var selectedOption = this.value;
-            console.log(selectedOption)
-            fetch('/user/sort?sortBy=' + selectedOption)
-                .then(response => response.json())
-                .then(data => {
-                    // Update product display section with sorted data
-                    renderProducts(data);
-                })
-                .catch(error => console.error('Error:', error));
-        });
-
         const renderProducts = (products) => {
             const productGrid = document.getElementById('productGrid');
             // Clear previous products
             productGrid.innerHTML = '';
 
             if (products.length === 0) {
-                const noProductsMessage = document.createElement('div');
-                noProductsMessage.classList.add('col-lg-4', 'col-md-4', 'col-12', 'col-sm-6');
-                noProductsMessage.innerHTML = 'No products found';
-                productGrid.appendChild(noProductsMessage);
+                productGrid.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-warning" role="alert">
+                        No products found.
+                    </div>
+                </div>`;
             } else {
                 products.forEach(product => {
                     const productCard = document.createElement('div');
@@ -356,22 +349,42 @@
                 });
             });
         });
-
+    </script>
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const searchInput = document.getElementById('search');
+            const searchInput = document.getElementById("search");
+            const sortByDropdown = document.getElementById("sortByDropdown");
+            const categoryList = document.getElementById("categoryList");
+            let selectedCategory = "all";
 
-            searchInput.addEventListener('input', function () {
-                const searchQuery = searchInput.value.trim();
-                fetch(`/user/search?query=${searchQuery}`)
+            const handleSearchAndSort = () => {
+                const query = searchInput.value.trim();
+                const sortBy = sortByDropdown.value;
+
+                fetch(`/user/filter?search=${encodeURIComponent(query)}&sort=${encodeURIComponent(sortBy)}&category=${encodeURIComponent(selectedCategory)}`)
                     .then(response => response.json())
                     .then(data => {
-                        renderProducts(data);
+                        renderProducts(data.products);
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error fetching products:', error);
+                    });
+            };
+
+            searchInput.addEventListener("input", handleSearchAndSort);
+            sortByDropdown.addEventListener("change", handleSearchAndSort);
+
+            categoryList.addEventListener("click", (e) => {
+                if (e.target.tagName === "A") {
+                    e.preventDefault();
+                    selectedCategory = e.target.getAttribute("data-category");
+                    handleSearchAndSort();
+                }
             });
         });
 
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 

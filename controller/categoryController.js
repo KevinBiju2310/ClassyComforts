@@ -3,13 +3,29 @@ const Category = require('../modal/categoryModel')
 
 exports.categoryGet = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 7;
+        const skip = (page - 1) * limit;
+
         const category = await Category.find({ deleted: false })
-        res.render('category', { category })
+            .skip(skip)
+            .limit(limit);
+
+        const totalCategories = await Category.countDocuments({ deleted: false });
+        const totalPages = Math.ceil(totalCategories / limit);
+
+        res.render('category', {
+            category,
+            currentPage: page,
+            totalPages,
+            limit
+        });
     } catch (error) {
-        console.error("Error rendering Cateory: ", error);
-        res.status(500).send('Internet Server Error');
+        console.error("Error rendering Category: ", error);
+        res.status(500).send('Internal Server Error');
     }
 }
+
 
 exports.addcategoryPost = async (req, res) => {
     try {

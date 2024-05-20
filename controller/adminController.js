@@ -571,8 +571,18 @@ exports.downloadPDF = async (req, res) => {
             .skip(skip)
             .limit(perPage);
 
+        let overallSalesCount = 0;
+        let overallDiscountTotal = 0;
+        let overallTotalAmount = 0;
+
+        order.forEach(order => {
+            overallSalesCount += 1;
+            overallDiscountTotal += order.couponAmount;
+            overallTotalAmount += order.totalAmount;
+        });
+
         // Create a new PDF document
-        const doc = new PDFDocument();
+        const doc = new PDFDocument({ margin: 30 });
         const filename = 'sales_report.pdf';
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
@@ -600,6 +610,11 @@ exports.downloadPDF = async (req, res) => {
             ]),
 
         });
+
+        doc.fontSize(8).text(`Sales Count: ${overallSalesCount}`, { align: 'right' })
+        doc.fontSize(8).text(`Discount Total: $${overallDiscountTotal.toFixed(2)}`, { align: 'right' });
+        doc.fontSize(8).text(`Total Amount: $${overallTotalAmount.toFixed(2)}`, { align: 'right' });
+
         // End the document
         doc.end();
 
@@ -675,6 +690,17 @@ exports.downloadExcel = async (req, res) => {
             .skip(skip)
             .limit(perPage);
 
+
+        let overallSalesCount = 0;
+        let overallDiscountTotal = 0;
+        let overallTotalAmount = 0;
+
+        orders.forEach(order => {
+            overallSalesCount += 1;
+            overallDiscountTotal += order.couponAmount;
+            overallTotalAmount += order.totalAmount;
+        });
+
         console.log(orders)
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sales Report');
@@ -692,8 +718,8 @@ exports.downloadExcel = async (req, res) => {
         worksheet.getColumn(3).width = 25; // Payment Method
         worksheet.getColumn(4).width = 10; // Quantity
         worksheet.getColumn(5).width = 10; // Price
-        worksheet.getColumn(6).width = 10; // Discount
-        worksheet.getColumn(7).width = 15; // Total Amount
+        worksheet.getColumn(6).width = 20; // Discount
+        worksheet.getColumn(7).width = 22; // Total Amount
 
         orders.forEach(order => {
             order.products.forEach(product => {
@@ -702,6 +728,24 @@ exports.downloadExcel = async (req, res) => {
                 worksheet.addRow([userId.name, productId.productname, paymentMethod, quantity, productPrice, couponAmount, totalAmount]);
             });
         });
+
+
+        const summaryRow = worksheet.addRow([
+            `Sales Count: ${overallSalesCount}`,
+            '',
+            '',
+            '',
+            '',
+            `Discount Total: $${overallDiscountTotal.toFixed(2)}`,
+            `Total Amount: $${overallTotalAmount.toFixed(2)}`
+        ]);
+
+        summaryRow.font = { bold: true };
+        summaryRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFDDDDDD' }
+        };
         // Save workbook to a file or stream
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename="sales_report.xlsx"');
