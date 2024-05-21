@@ -29,6 +29,16 @@
         .small-checkbox {
             transform: scale(0.4);
         }
+
+        .old-price {
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .discount-percentage {
+            color: #28a745;
+            font-weight: bold;
+        }
     </style>
     <main class="main">
         <div class="page-header breadcrumb-wrap">
@@ -78,9 +88,18 @@
                                                 <td class="price" data-title="Price">
                                                     <% if (product.productId.mainprice !==0 &&
                                                         product.productId.mainprice < product.productId.price) { %>
-                                                        <span>$<%= product.productId.mainprice.toFixed(2) %></span>
+                                                        <span class="old-price" style="text-decoration: line-through;">$
+                                                            <%= product.productId.price.toFixed(2) %>
+                                                        </span>
+                                                        <span class="new-price">$<%=
+                                                                product.productId.mainprice.toFixed(2) %></span>
+                                                        <br>
+                                                        <span class="discount-percentage">
+                                                            <%= product.productId.discount %>% off
+                                                        </span>
                                                         <% } else { %>
-                                                            <span>$<%= product.productId.price.toFixed(2) %></span>
+                                                            <span class="price">$<%= product.productId.price.toFixed(2)
+                                                                    %></span>
                                                             <% } %>
                                                 </td>
                                                 <td class="text-center" data-title="Stock">
@@ -365,12 +384,12 @@
                     try {
                         console.log("hello");
                         const response = await fetch(`/user/stockcheck/${productId}`);
-                        console.log("Response:::",response);
+                        console.log("Response:::", response);
                         if (!response.ok) {
                             throw new Error('Failed to fetch product data');
                         }
                         const productData = await response.json();
-                        console.log("ProductData",productData);
+                        console.log("ProductData", productData);
                         if (productData.quantity === 0) {
                             swal("Oops!", `${productData.productname} is out of stock. Please remove it from your cart.`, "warning");
                             return;
