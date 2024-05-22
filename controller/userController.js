@@ -311,7 +311,7 @@ exports.forgotPasswordPost = async (req, res) => {
         const secret = process.env.JWT_SECRET + user.password;
         const payload = { email: user.email, id: user.id };
         const token = jwt.sign(payload, secret, { expiresIn: '15m' });
-        const link = `http://localhost:5000/user/resetpassword/${user.id}/${token}`;
+        const link = `classycomfort.shop/user/resetpassword/${user.id}/${token}`;
         console.log(link)
         const mailOptions = {
             from: process.env.EMAIL_ID,
