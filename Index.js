@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
-mongoose.connect("mongodb+srv://classyComforts:classyComforts1234@clustercc.7oa4bdn.mongodb.net/")
+require('dotenv').config();
+mongoose.connect(process.env.MONGODB_URL)
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.error('MongoDB connection error:', err));
 const express = require('express');
@@ -12,7 +13,6 @@ const adminRoute = require('./routes/adminRoute');
 const bodyparser = require('body-parser');
 const app = express();
 const nocache = require('nocache');
-require('dotenv').config();
 
 app.use(
   session({
