@@ -406,19 +406,29 @@ exports.retrypayment = async (req, res) => {
 exports.orderDetails = async (req, res) => {
     try {
         const orderId = req.params.id;
+        const userId = req.session.user._id; // Extract user ID from session
 
+        // Fetch the order along with product details
         const order = await Order.findById(orderId).populate('products.productId');
 
+        // Check if order exists
         if (!order) {
             return res.status(404).send('Order not found');
         }
 
+        // Check if the order belongs to the user
+        if (order.userId.toString() !== userId.toString()) {
+            return res.status(403).send('You are not authorized to view this order');
+        }
+
+        // Render the order details page
         res.render('orderdetails', { order });
     } catch (err) {
         console.log("Error", err);
         res.status(500).send('Internal server error');
     }
 };
+
 
 
 
