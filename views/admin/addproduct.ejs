@@ -1,288 +1,354 @@
 <%- include("../layouts/adminHeader") %>
 
-    <div id="content">
-        <div class="container py-3">
-            <form id="productForm" action="/admin/addproduct" method="post" enctype="multipart/form-data">
-                <h1 class="h3">Product Creation</h1>
-                <hr>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="productName" class="form-label">Product Name</label>
-                        <input type="text" class="form-control" id="productname" name="productname"
-                            placeholder="Enter product name here">
-                        <div id="productNameError" class="error-message"></div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" rows="3" name="description"
-                            placeholder="Type description here"></textarea>
-                        <div id="descriptionError" class="error-message"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <select class="form-select" id="category" name="category">
-                            <% category.forEach(category=> { %>
-                                <option value="<%= category.name %>">
-                                    <%= category.name %>
-                                </option>
-                                <% }) %>
-                        </select>
-                        <div id="categoryError" class="error-message"></div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="regularPrice" class="form-label">Regular Price</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₹</span>
-                            <input type="number" class="form-control" id="regularPrice" name="price"
-                                aria-label="Regular price">
-                            <div id="priceError" class="error-message"></div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="quantity" class="form-label">Remaining Products</label>
-                        <div class="input-group">
-                            <input type="number" class="form-control" id="remainingProducts" name="quantity"
-                                placeholder="Enter number of remaining products">
-                            <div id="quantityError" class="error-message"></div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="quantity" class="form-label">Color</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="color" name="color"
-                                placeholder="Enter Color">
-                            <div id="colorError" class="error-message"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label for="productGallery" class="form-label">Product Gallery (multiple images can be
-                            uploaded)</label>
-                        <input type="file" class="form-control" id="productGallery" name="productImages" multiple>
-                    </div>
-                    <div id="imageError" class="error-message"></div>
-                </div>
-                <div class="row mb-3" id="imagePreviewsContainer">
-                    <!-- Image previews will be appended here -->
-                </div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="length" class="form-label">Length</label>
-                        <input type="number" class="form-control" id="length" name="length"
-                            placeholder="Enter the Length">
-                        <div id="lengthError" class="error-message"></div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="width" class="form-label">Width</label>
-                        <input type="number" class="form-control" id="width" name="width" placeholder="Enter the Width">
-                        <div id="widthError" class="error-message"></div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="height" class="form-label">Height</label>
-                        <input type="number" class="form-control" id="height" name="height"
-                            placeholder="Enter the Height">
-                        <div id="heightError" class="error-message"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="material" class="form-label">Material</label>
-                        <input type="text" class="form-control" id="material" name="material"
-                            placeholder="Enter the Material">
-                        <div id="materialError" class="error-message"></div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="shape" class="form-label">Shape</label>
-                        <input type="text" class="form-control" id="shape" name="shape" placeholder="Enter the Shape">
-                        <div id="shapeError" class="error-message"></div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="weight" class="form-label">Weight</label>
-                        <input type="number" class="form-control" id="weight" name="weight"
-                            placeholder="Enter the Weight">
-                        <div id="weightError" class="error-message"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary ms-auto" id="createProduct"
-                            onclick="validateProduct()">Create Product</button>
-                        <button type="reset" class="btn btn-outline-secondary ms-2">Reset</button>
-                    </div>
-                </div>
-            </form>
+<div id="content">
+  <div class="container py-3">
+    <form
+      id="productForm"
+      action="/admin/addproduct"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <h1 class="h3">Product Creation</h1>
+      <hr />
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="productName" class="form-label">Product Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="productname"
+            name="productname"
+            placeholder="Enter product name here"
+          />
+          <div id="productNameError" class="error-message"></div>
         </div>
-    </div>
+        <div class="col-md-6 mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea
+            class="form-control"
+            id="description"
+            rows="3"
+            name="description"
+            placeholder="Type description here"
+          ></textarea>
+          <div id="descriptionError" class="error-message"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="category" class="form-label">Category</label>
+          <select class="form-select" id="category" name="category">
+            <% category.forEach(category=> { %>
+            <option value="<%= category.name %>"><%= category.name %></option>
+            <% }) %>
+          </select>
+          <div id="categoryError" class="error-message"></div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="regularPrice" class="form-label">Regular Price</label>
+          <div class="input-group">
+            <span class="input-group-text">₹</span>
+            <input
+              type="number"
+              class="form-control"
+              id="regularPrice"
+              name="price"
+              aria-label="Regular price"
+            />
+            <div id="priceError" class="error-message"></div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="quantity" class="form-label">Remaining Products</label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control"
+              id="remainingProducts"
+              name="quantity"
+              placeholder="Enter number of remaining products"
+            />
+            <div id="quantityError" class="error-message"></div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="quantity" class="form-label">Color</label>
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              id="color"
+              name="color"
+              placeholder="Enter Color"
+            />
+            <div id="colorError" class="error-message"></div>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <label for="productGallery" class="form-label"
+            >Product Gallery (multiple images can be uploaded)</label
+          >
+          <input
+            type="file"
+            class="form-control"
+            id="productGallery"
+            name="productImages"
+            multiple
+          />
+        </div>
+        <div id="imageError" class="error-message"></div>
+      </div>
+      <div class="row mb-3" id="imagePreviewsContainer">
+        <!-- Image previews will be appended here -->
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="length" class="form-label">Length</label>
+          <input
+            type="number"
+            class="form-control"
+            id="length"
+            name="length"
+            placeholder="Enter the Length"
+          />
+          <div id="lengthError" class="error-message"></div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="width" class="form-label">Width</label>
+          <input
+            type="number"
+            class="form-control"
+            id="width"
+            name="width"
+            placeholder="Enter the Width"
+          />
+          <div id="widthError" class="error-message"></div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="height" class="form-label">Height</label>
+          <input
+            type="number"
+            class="form-control"
+            id="height"
+            name="height"
+            placeholder="Enter the Height"
+          />
+          <div id="heightError" class="error-message"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="material" class="form-label">Material</label>
+          <input
+            type="text"
+            class="form-control"
+            id="material"
+            name="material"
+            placeholder="Enter the Material"
+          />
+          <div id="materialError" class="error-message"></div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="shape" class="form-label">Shape</label>
+          <input
+            type="text"
+            class="form-control"
+            id="shape"
+            name="shape"
+            placeholder="Enter the Shape"
+          />
+          <div id="shapeError" class="error-message"></div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="weight" class="form-label">Weight</label>
+          <input
+            type="number"
+            class="form-control"
+            id="weight"
+            name="weight"
+            placeholder="Enter the Weight"
+          />
+          <div id="weightError" class="error-message"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 d-flex justify-content-end">
+          <button
+            type="submit"
+            class="btn btn-primary ms-auto"
+            id="createProduct"
+            onclick="validateProduct()"
+          >
+            Create Product
+          </button>
+          <button type="reset" class="btn btn-outline-secondary ms-2">
+            Reset
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 
-    <script>
+<script>
+  function validateProduct() {
+    event.preventDefault();
+    var name = document.getElementById("productname").value.trim();
+    var description = document.getElementById("description").value.trim();
+    var category = document.getElementById("category").value.trim();
+    var price = document.getElementById("regularPrice").value.trim();
+    var quantity = document.getElementById("remainingProducts").value.trim();
+    var image = document.getElementById("productGallery").value.trim();
+    var length = document.getElementById("length").value.trim();
+    var width = document.getElementById("width").value.trim();
+    var height = document.getElementById("height").value.trim();
+    var shape = document.getElementById("shape").value.trim();
+    var material = document.getElementById("material").value.trim();
+    var weight = document.getElementById("weight").value.trim();
+    var color = document.getElementById("color").value.trim();
+    var valid = true;
 
-        function validateProduct() {
-            event.preventDefault()
-            var name = document.getElementById("productname").value.trim();
-            var description = document.getElementById("description").value.trim();
-            var category = document.getElementById("category").value.trim();
-            var price = document.getElementById("regularPrice").value.trim();
-            var quantity = document.getElementById("remainingProducts").value.trim();
-            var image = document.getElementById("productGallery").value.trim();
-            var length = document.getElementById("length").value.trim();
-            var width = document.getElementById("width").value.trim();
-            var height = document.getElementById("height").value.trim();
-            var shape = document.getElementById("shape").value.trim();
-            var material = document.getElementById("material").value.trim();
-            var weight = document.getElementById("weight").value.trim();
-            var color = document.getElementById("color").value.trim();
-            var valid = true;
+    // Name validation
+    if (!name) {
+      document.getElementById("productNameError").innerText =
+        "Product name is required";
+      document.getElementById("productNameError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("productNameError").innerText = "";
+    }
 
-            // Name validation
-            if (!name) {
-                document.getElementById("productNameError").innerText =
-                    "Product name is required";
-                document.getElementById("productNameError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("productNameError").innerText = "";
-            }
+    if (!description) {
+      document.getElementById("descriptionError").innerText =
+        "Description is required";
+      document.getElementById("descriptionError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("descriptionError").innerText = "";
+    }
 
-            if (!description) {
-                document.getElementById("descriptionError").innerText =
-                    "Description is required";
-                document.getElementById("descriptionError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("descriptionError").innerText = "";
-            }
+    if (!category) {
+      document.getElementById("categoryError").innerText =
+        "Category is required";
+      document.getElementById("categoryError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("categoryError").innerText = "";
+    }
 
-            if (!category) {
-                document.getElementById("categoryError").innerText =
-                    "Category is required";
-                document.getElementById("categoryError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("categoryError").innerText = "";
-            }
+    if (!price) {
+      document.getElementById("priceError").innerText = "Price is required";
+      document.getElementById("priceError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("priceError").innerText = "";
+    }
 
-            if (!price) {
-                document.getElementById("priceError").innerText =
-                    "Price is required";
-                document.getElementById("priceError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("priceError").innerText = "";
-            }
+    if (!quantity) {
+      document.getElementById("quantityError").innerText =
+        "Quantity is required";
+      document.getElementById("quantityError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("quantityError").innerText = "";
+    }
 
-            if (!quantity) {
-                document.getElementById("quantityError").innerText =
-                    "Quantity is required";
-                document.getElementById("quantityError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("quantityError").innerText = "";
-            }
+    if (!image) {
+      document.getElementById("imageError").innerText = "Image is required";
+      document.getElementById("imageError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("imageError").innerText = "";
+    }
 
-            if (!image) {
-                document.getElementById("imageError").innerText =
-                    "Image is required";
-                document.getElementById("imageError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("imageError").innerText = "";
-            }
+    if (!length) {
+      document.getElementById("lengthError").innerText = "Length is required";
+      document.getElementById("lengthError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("lengthError").innerText = "";
+    }
 
-            if (!length) {
-                document.getElementById("lengthError").innerText =
-                    "Length is required";
-                document.getElementById("lengthError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("lengthError").innerText = "";
-            }
+    if (!width) {
+      document.getElementById("widthError").innerText = "Width is required";
+      document.getElementById("widthError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("widthError").innerText = "";
+    }
 
-            if (!width) {
-                document.getElementById("widthError").innerText =
-                    "Width is required";
-                document.getElementById("widthError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("widthError").innerText = "";
-            }
+    if (!height) {
+      document.getElementById("heightError").innerText = "Height is required";
+      document.getElementById("heightError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("heightError").innerText = "";
+    }
 
-            if (!height) {
-                document.getElementById("heightError").innerText =
-                    "Height is required";
-                document.getElementById("heightError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("heightError").innerText = "";
-            }
+    if (!material) {
+      document.getElementById("materialError").innerText =
+        "Material is required";
+      document.getElementById("materialError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("materialError").innerText = "";
+    }
 
-            if (!material) {
-                document.getElementById("materialError").innerText =
-                    "Material is required";
-                document.getElementById("materialError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("materialError").innerText = "";
-            }
+    if (!shape) {
+      document.getElementById("shapeError").innerText = "Shape is required";
+      document.getElementById("shapeError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("shapeError").innerText = "";
+    }
 
-            if (!shape) {
-                document.getElementById("shapeError").innerText =
-                    "Shape is required";
-                document.getElementById("shapeError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("shapeError").innerText = "";
-            }
+    if (!weight) {
+      document.getElementById("weightError").innerText = "Weight is required";
+      document.getElementById("weightError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("weightError").innerText = "";
+    }
 
-            if (!weight) {
-                document.getElementById("weightError").innerText =
-                    "Weight is required";
-                document.getElementById("weightError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("weightError").innerText = "";
-            }
+    if (!color) {
+      document.getElementById("colorError").innerText = "Color is required";
+      document.getElementById("colorError").style.color = "red";
+      valid = false;
+    } else {
+      document.getElementById("colorError").innerText = "";
+    }
 
-            if (!color) {
-                document.getElementById("colorError").innerText =
-                    "Color is required";
-                document.getElementById("colorError").style.color = "red";
-                valid = false;
-            } else {
-                document.getElementById("colorError").innerText = "";
-            }
+    if (valid) {
+      document.getElementById("productForm").submit();
+    }
+  }
 
-            if (valid) {
-                document.getElementById("productForm").submit();
-            }
+  document
+    .getElementById("productGallery")
+    .addEventListener("change", function (event) {
+      const imagePreviewsContainer = document.getElementById(
+        "imagePreviewsContainer"
+      );
+      imagePreviewsContainer.innerHTML = ""; // Clear existing previews
+
+      const files = event.target.files;
+      if (files) {
+        for (let i = 0; i < files.length; i++) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.alt = "Product Image";
+            img.style.maxWidth = "200px";
+            img.style.maxHeight = "200px";
+            imagePreviewsContainer.appendChild(img);
+          };
+          reader.readAsDataURL(files[i]);
         }
+      }
+    });
+</script>
 
-
-        document.getElementById('productGallery').addEventListener('change', function (event) {
-            const imagePreviewsContainer = document.getElementById('imagePreviewsContainer');
-            imagePreviewsContainer.innerHTML = ''; // Clear existing previews
-
-            const files = event.target.files;
-            if (files) {
-                for (let i = 0; i < files.length; i++) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.alt = 'Product Image';
-                        img.style.maxWidth = '200px';
-                        img.style.maxHeight = '200px';
-                        imagePreviewsContainer.appendChild(img);
-                    }
-                    reader.readAsDataURL(files[i]);
-                }
-            }
-        });
-
-
-
-    </script>
-
-    <%- include("../layouts/adminFooter") %>
+<%- include("../layouts/adminFooter") %>

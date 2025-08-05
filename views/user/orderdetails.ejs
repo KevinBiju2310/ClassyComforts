@@ -1,461 +1,522 @@
 <%- include("../layouts/userHeader") %>
 
-    <style>
-        .table td,
-        .table th {
-            text-align: center;
-            vertical-align: middle;
-            width: 12.5%;
-        }
+<style>
+  .table td,
+  .table th {
+    text-align: center;
+    vertical-align: middle;
+    width: 12.5%;
+  }
 
-        .delivery-table {
-            width: 50%;
-            /* Adjust the width as needed */
-            margin: 0 auto;
-            /* Center the table horizontally */
-            border-collapse: collapse;
-            border: 1px solid #ddd;
-        }
+  .delivery-table {
+    width: 50%;
+    /* Adjust the width as needed */
+    margin: 0 auto;
+    /* Center the table horizontally */
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+  }
 
-        .delivery-table th,
-        .delivery-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-            /* Center the content horizontally */
-        }
+  .delivery-table th,
+  .delivery-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    /* Center the content horizontally */
+  }
 
-        .delivery-table th {
-            background-color: #f2f2f2;
-        }
+  .delivery-table th {
+    background-color: #f2f2f2;
+  }
 
-        .button-container {
-            text-align: center;
-            margin-top: 20px;
-        }
+  .button-container {
+    text-align: center;
+    margin-top: 20px;
+  }
 
-        .button-container button {
-            margin: 0 10px;
-        }
-    </style>
+  .button-container button {
+    margin: 0 10px;
+  }
+</style>
 
-    <main class="main">
-        <div class="page-header breadcrumb-wrap">
-            <div class="container">
-                <div class="breadcrumb">
-                    <a href="index.html" rel="nofollow">Home</a>
-                    <span></span> Pages
-                    <span></span> orderDetails
-                </div>
-            </div>
-        </div>
-        <section class="pt-70 pb-70" id="invoiceSection">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12 m-auto"> <!-- Adjusted the column width -->
-                        <div class="row">
-                            <div class="col-md-12"> <!-- Adjusted the column width -->
-                                <div class="tab-content dashboard-content">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">Your Orders</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="table-responsive">
-                                                <table class="table table-bordered table-striped ">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Order Date</th>
-                                                            <th>Image</th>
-                                                            <th>Product Name</th>
-                                                            <th>Order Status</th>
-                                                            <th>Payment Method</th>
-                                                            <th>Payment Status</th>
-                                                            <th>Price</th>
-                                                            <th>Quantity</th>
-                                                            <th>Total</th>
-                                                            <% if (order.products.length> 1) { %>
-                                                                <!-- Check if there are more than one product -->
-                                                                <th>Action</th>
-                                                                <!-- Added a new column for the action button if more than one product -->
-                                                                <% } %>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <% order.products.forEach((product, index)=> { %>
-                                                            <tr id="orderRow_<%= index %>">
-                                                                <td>
-                                                                    <%= order.createdAt.toLocaleDateString('en-IN') %>
-                                                                </td>
-                                                                <td>
-                                                                    <img src="/uploads/<%= product.productId.productImages[0] %>"
-                                                                        alt="<%= product.productId.productname %>"
-                                                                        style="max-width: 100px;">
-                                                                </td>
-                                                                <td>
-                                                                    <%= product.productId.productname %>
-                                                                </td>
-                                                                <td id="orderStatus_<%= index %>">
-                                                                    <!-- Unique identifier added -->
-                                                                    <%= order.orderStatus %>
-                                                                </td>
-                                                                <td>
-                                                                    <%= order.paymentMethod %>
-                                                                </td>
-                                                                <td id="paymentstatus">
-                                                                    <%= order.paymentStatus %>
-                                                                </td>
-                                                                <td>$<%= product.productPrice.toFixed(2) %>
-                                                                </td>
-                                                                <td>
-                                                                    <%= product.quantity %>
-                                                                </td>
-                                                                <td>$<%= (product.productPrice *
-                                                                        product.quantity).toFixed(2) %>
-                                                                </td>
-                                                                <% if (order.products.length> 1) { %>
-                                                                    <td>
-                                                                        <button type="button"
-                                                                            class="btn btn-danger btn-remove"
-                                                                            onclick="handleRemoveButtonClick('<%= product.productId._id %>', '<%= order._id %>', '<%= index %>')">
-                                                                            Remove
-                                                                        </button>
-                                                                    </td>
-                                                                    <% } %>
-                                                            </tr>
-                                                            <% }); %>
-
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4">
-
-                                        <table class="delivery-table">
-                                            <tbody>
-                                                <% if (order.couponPercentage !==0) { %>
-                                                    <tr>
-                                                        <th>Coupon Applied</th>
-                                                        <td>
-                                                            <%= order.couponPercentage %>% Discount
-                                                        </td>
-                                                    </tr>
-                                                    <% } %>
-                                                        <tr>
-                                                            <th>Grand Total</th>
-                                                            <td id="totalAmount">$<%= order.totalAmount.toFixed(2) %>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>Delivery Address</th>
-                                                            <td>
-                                                                <% order.address.forEach(addr=> { %>
-                                                                    <address>
-                                                                        <%= addr.name %><br>
-                                                                            <%= addr.address %><br>
-                                                                                <%= addr.city %>, <%= addr.state %>
-                                                                                        <%= addr.pincode %><br>
-                                                                                            <%= addr.district %>
-                                                                    </address>
-                                                                    <% }); %>
-                                                            </td>
-                                                        </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <div class="button-container mb-15">
-            <% if (order.paymentMethod==='razorpay' ) { %>
-                <% if (order.paymentStatus==='failure' ) { %>
-                    <button id="retryPaymentBtn" class="btn btn-primary">Retry Payment</button>
-                    <% } else if (order.paymentStatus==='pending' ) { %>
-                        <button id="retryPaymentBtn" class="btn btn-primary">Pay Now</button>
-                        <% } %>
-                            <% } %>
-                                <button id="cancelOrderBtn" class="btn btn-danger" data-toggle="modal"
-                                    data-target="#cancelOrderModal">Cancel Order</button>
-                                <button id="downloadInvoiceBtn" class="btn btn-primary"
-                                    onclick="downloadInvoice()">Download
-                                    Invoice</button>
-        </div>
-    </main>
-
-
-    <!-- Modal -->
-    <div class="modal fade" id="cancelOrderModal" tabindex="-1" role="dialog" aria-labelledby="cancelOrderModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cancelOrderModalLabel">Cancel Order</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="cancelOrderForm">
-                        <div class="form-group">
-                            <label for="cancelReason">Reason for cancellation:</label>
-                            <input type="text" class="form-control" id="cancelReason" name="cancelReason" required>
-                            <input type="hidden" id="orderId" name="orderId">
-                            <input type="hidden" id="paymentMethod" name="paymentMethod"
-                                value="<%= order.paymentMethod %>"> <!-- Add hidden input for paymentMethod -->
-                            <input type="hidden" id="paymentStatus" name="paymentStatus"
-                                value="<%= order.paymentStatus %>"> <!-- Add hidden input for paymentStatus -->
-                        </div>
-                        <button type="submit" class="btn btn-primary">Confirm</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+<main class="main">
+  <div class="page-header breadcrumb-wrap">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html" rel="nofollow">Home</a>
+        <span></span> Pages <span></span> orderDetails
+      </div>
     </div>
+  </div>
+  <section class="pt-70 pb-70" id="invoiceSection">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 m-auto">
+          <!-- Adjusted the column width -->
+          <div class="row">
+            <div class="col-md-12">
+              <!-- Adjusted the column width -->
+              <div class="tab-content dashboard-content">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">Your Orders</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-bordered table-striped">
+                        <thead>
+                          <tr>
+                            <th>Order Date</th>
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>Order Status</th>
+                            <th>Payment Method</th>
+                            <th>Payment Status</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <% if (order.products.length> 1) { %>
+                            <!-- Check if there are more than one product -->
+                            <th>Action</th>
+                            <!-- Added a new column for the action button if more than one product -->
+                            <% } %>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% order.products.forEach((product, index)=> { %>
+                          <tr id="orderRow_<%= index %>">
+                            <td>
+                              <%= order.createdAt.toLocaleDateString('en-IN') %>
+                            </td>
+                            <td>
+                              <img
+                                src="/uploads/<%= product.productId.productImages[0] %>"
+                                alt="<%= product.productId.productname %>"
+                                style="max-width: 100px"
+                              />
+                            </td>
+                            <td><%= product.productId.productname %></td>
+                            <td id="orderStatus_<%= index %>">
+                              <!-- Unique identifier added -->
+                              <%= order.orderStatus %>
+                            </td>
+                            <td><%= order.paymentMethod %></td>
+                            <td id="paymentstatus">
+                              <%= order.paymentStatus %>
+                            </td>
+                            <td>$<%= product.productPrice.toFixed(2) %></td>
+                            <td><%= product.quantity %></td>
+                            <td>
+                              $<%= (product.productPrice *
+                              product.quantity).toFixed(2) %>
+                            </td>
+                            <% if (order.products.length> 1) { %>
+                            <td>
+                              <button
+                                type="button"
+                                class="btn btn-danger btn-remove"
+                                onclick="handleRemoveButtonClick('<%= product.productId._id %>', '<%= order._id %>', '<%= index %>')"
+                              >
+                                Remove
+                              </button>
+                            </td>
+                            <% } %>
+                          </tr>
+                          <% }); %>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <table class="delivery-table">
+                    <tbody>
+                      <% if (order.couponPercentage !==0) { %>
+                      <tr>
+                        <th>Coupon Applied</th>
+                        <td><%= order.couponPercentage %>% Discount</td>
+                      </tr>
+                      <% } %>
+                      <tr>
+                        <th>Grand Total</th>
+                        <td id="totalAmount">
+                          $<%= order.totalAmount.toFixed(2) %>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Delivery Address</th>
+                        <td>
+                          <% order.address.forEach(addr=> { %>
+                          <address>
+                            <%= addr.name %><br />
+                            <%= addr.address %><br />
+                            <%= addr.city %>, <%= addr.state %> <%= addr.pincode
+                            %><br />
+                            <%= addr.district %>
+                          </address>
+                          <% }); %>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="button-container mb-15">
+    <% if (order.paymentMethod==='razorpay' ) { %> <% if
+    (order.paymentStatus==='failure' ) { %>
+    <button id="retryPaymentBtn" class="btn btn-primary">Retry Payment</button>
+    <% } else if (order.paymentStatus==='pending' ) { %>
+    <button id="retryPaymentBtn" class="btn btn-primary">Pay Now</button>
+    <% } %> <% } %>
+    <button
+      id="cancelOrderBtn"
+      class="btn btn-danger"
+      data-toggle="modal"
+      data-target="#cancelOrderModal"
+    >
+      Cancel Order
+    </button>
+    <button
+      id="downloadInvoiceBtn"
+      class="btn btn-primary"
+      onclick="downloadInvoice()"
+    >
+      Download Invoice
+    </button>
+  </div>
+</main>
 
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="cancelOrderModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="cancelOrderModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cancelOrderModalLabel">Cancel Order</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="cancelOrderForm">
+          <div class="form-group">
+            <label for="cancelReason">Reason for cancellation:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="cancelReason"
+              name="cancelReason"
+              required
+            />
+            <input type="hidden" id="orderId" name="orderId" />
+            <input
+              type="hidden"
+              id="paymentMethod"
+              name="paymentMethod"
+              value="<%= order.paymentMethod %>"
+            />
+            <!-- Add hidden input for paymentMethod -->
+            <input
+              type="hidden"
+              id="paymentStatus"
+              name="paymentStatus"
+              value="<%= order.paymentStatus %>"
+            />
+            <!-- Add hidden input for paymentStatus -->
+          </div>
+          <button type="submit" class="btn btn-primary">Confirm</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <script>
-        // Add this at the end of the script block
-        document.addEventListener("DOMContentLoaded", function () {
-            const orderStatus = "<%= order.orderStatus %>";
-            if (orderStatus === "cancelled") {
-                document.getElementById('cancelOrderBtn').disabled = true;
-                document.getElementById('downloadInvoiceBtn').disabled = true;
-            } else if (orderStatus === "shipped" || orderStatus === "delivered") {
-                document.getElementById('cancelOrderBtn').disabled = true;
-            }
+<script>
+  // Add this at the end of the script block
+  document.addEventListener("DOMContentLoaded", function () {
+    const orderStatus = "<%= order.orderStatus %>";
+    if (orderStatus === "cancelled") {
+      document.getElementById("cancelOrderBtn").disabled = true;
+      document.getElementById("downloadInvoiceBtn").disabled = true;
+    } else if (orderStatus === "shipped" || orderStatus === "delivered") {
+      document.getElementById("cancelOrderBtn").disabled = true;
+    }
+  });
+
+  document
+    .getElementById("cancelOrderBtn")
+    .addEventListener("click", function () {
+      $("#cancelOrderModal").modal("show");
+      document.getElementById("orderId").value = "<%= order._id %>";
+    });
+
+  document
+    .getElementById("cancelOrderForm")
+    .addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const cancelReason = document.getElementById("cancelReason").value;
+      const orderId = document.getElementById("orderId").value;
+      const paymentMethod = document.getElementById("paymentMethod").value;
+      const paymentStatus = document.getElementById("paymentStatus").value;
+      try {
+        const response = await fetch("/user/cancelOrder", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderId,
+            cancelReason,
+            paymentMethod,
+            paymentStatus,
+          }),
         });
 
-        document.getElementById('cancelOrderBtn').addEventListener('click', function () {
-            $('#cancelOrderModal').modal('show');
-            document.getElementById('orderId').value = "<%= order._id %>";
-        });
-
-        document.getElementById('cancelOrderForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const cancelReason = document.getElementById('cancelReason').value;
-            const orderId = document.getElementById('orderId').value;
-            const paymentMethod = document.getElementById('paymentMethod').value;
-            const paymentStatus = document.getElementById('paymentStatus').value;
-            try {
-                const response = await fetch('/user/cancelOrder', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ orderId, cancelReason, paymentMethod, paymentStatus })
-                });
-
-                if (response.ok) {
-                    $('#cancelOrderModal').modal('hide');
-                    // Update order status to "Cancelled" in frontend
-                    order.products.forEach((product, index) => {
-                        document.getElementById(`orderStatus_${index}`).innerText = 'cancelled';
-                    });
-                    // Disable cancel order and download invoice buttons
-                    document.getElementById('cancelOrderBtn').disabled = true;
-                    document.getElementById('downloadInvoiceBtn').disabled = true;
-                    // Store flag in local storage
-                    localStorage.setItem(`cancelled_${orderId}`, true);
-                } else {
-                    console.error('Failed to cancel order');
-                }
-            } catch (error) {
-                console.error('Error occurred:', error);
-            }
-        });
-
-        function downloadInvoice() {
-            // Get the order ID from wherever it's stored (e.g., a variable)
-            const orderId = '<%= order._id %>'; // Replace '<%= order._id %>' with the actual order ID
-
-            // Construct the URL with the order ID as a query parameter
-            const url = `/user/generate-invoice?orderId=${orderId}`;
-
-            // Redirect to the generated URL
-            window.location.href = url;
+        if (response.ok) {
+          $("#cancelOrderModal").modal("hide");
+          // Update order status to "Cancelled" in frontend
+          order.products.forEach((product, index) => {
+            document.getElementById(`orderStatus_${index}`).innerText =
+              "cancelled";
+          });
+          // Disable cancel order and download invoice buttons
+          document.getElementById("cancelOrderBtn").disabled = true;
+          document.getElementById("downloadInvoiceBtn").disabled = true;
+          // Store flag in local storage
+          localStorage.setItem(`cancelled_${orderId}`, true);
+        } else {
+          console.error("Failed to cancel order");
         }
+      } catch (error) {
+        console.error("Error occurred:", error);
+      }
+    });
 
+  function downloadInvoice() {
+    // Get the order ID from wherever it's stored (e.g., a variable)
+    const orderId = "<%= order._id %>"; // Replace '<%= order._id %>' with the actual order ID
 
+    // Construct the URL with the order ID as a query parameter
+    const url = `/user/generate-invoice?orderId=${orderId}`;
 
-        function handleRemoveButtonClick(productId, orderId, index) {
-            console.log(productId, orderId, index)
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'You are about to remove this product from your order',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, remove it!'
-            }).then(async (result) => {
-                console.log(result)
-                if (result.isConfirmed) {
-                    try {
-                        console.log("hello")
-                        const response = await fetch(`/user/removeproduct/${productId}/${orderId}`, {
-                            method: 'DELETE',
-                        });
-                        console.log(response)
-                        if (response.ok) {
-                            // Remove the row from the table
-                            document.getElementById(`orderRow_${index}`).remove();
+    // Redirect to the generated URL
+    window.location.href = url;
+  }
 
-                            // Optionally update the total amount in frontend
-                            const totalAmountCell = document.getElementById('totalAmount');
-                            console.log(totalAmountCell)
-                            if (totalAmountCell) {
-                                const productTotalCell = document.getElementById(`productTotal_${index}`);
-                                if (productTotalCell) {
-                                    const newTotalAmount = parseFloat(totalAmountCell.innerHTML.replace('$', '')) - parseFloat(productTotalCell.innerHTML.replace('$', ''));
-                                    totalAmountCell.innerHTML = `$${newTotalAmount.toFixed(2)}`;
-                                }
-                            } else {
-                                console.error('Total amount cell not found');
-                            }
-                            Swal.fire(
-                                'Removed!',
-                                'The product has been removed from your order.',
-                                'success'
-                            ).then(() => {
-                                // Reload the page after the user clicks "OK"
-                                location.reload();
-                            });
+  function handleRemoveButtonClick(productId, orderId, index) {
+    console.log(productId, orderId, index);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You are about to remove this product from your order",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, remove it!",
+    }).then(async (result) => {
+      console.log(result);
+      if (result.isConfirmed) {
+        try {
+          console.log("hello");
+          const response = await fetch(
+            `/user/removeproduct/${productId}/${orderId}`,
+            {
+              method: "DELETE",
+            }
+          );
+          console.log(response);
+          if (response.ok) {
+            // Remove the row from the table
+            document.getElementById(`orderRow_${index}`).remove();
 
-                        } else {
-                            console.error('Failed to remove product');
-                            Swal.fire(
-                                'Error!',
-                                'Failed to remove the product. Please try again later.',
-                                'error'
-                            );
-                        }
-                    } catch (error) {
-                        console.error('Error occurred:', error);
-                        Swal.fire(
-                            'Error!',
-                            'An unexpected error occurred. Please try again later.',
-                            'error'
-                        );
-                    }
-                }
+            // Optionally update the total amount in frontend
+            const totalAmountCell = document.getElementById("totalAmount");
+            console.log(totalAmountCell);
+            if (totalAmountCell) {
+              const productTotalCell = document.getElementById(
+                `productTotal_${index}`
+              );
+              if (productTotalCell) {
+                const newTotalAmount =
+                  parseFloat(totalAmountCell.innerHTML.replace("$", "")) -
+                  parseFloat(productTotalCell.innerHTML.replace("$", ""));
+                totalAmountCell.innerHTML = `$${newTotalAmount.toFixed(2)}`;
+              }
+            } else {
+              console.error("Total amount cell not found");
+            }
+            Swal.fire(
+              "Removed!",
+              "The product has been removed from your order.",
+              "success"
+            ).then(() => {
+              // Reload the page after the user clicks "OK"
+              location.reload();
             });
+          } else {
+            console.error("Failed to remove product");
+            Swal.fire(
+              "Error!",
+              "Failed to remove the product. Please try again later.",
+              "error"
+            );
+          }
+        } catch (error) {
+          console.error("Error occurred:", error);
+          Swal.fire(
+            "Error!",
+            "An unexpected error occurred. Please try again later.",
+            "error"
+          );
         }
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const retrypaymentBtn = document.getElementById('retryPaymentBtn');
+      }
+    });
+  }
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const retrypaymentBtn = document.getElementById("retryPaymentBtn");
 
-            if (retrypaymentBtn) {
-                retrypaymentBtn.addEventListener('click', async () => {
-                    try {
-                        const orderId = '<%= order._id %>';
+    if (retrypaymentBtn) {
+      retrypaymentBtn.addEventListener("click", async () => {
+        try {
+          const orderId = "<%= order._id %>";
 
-                        const response = await fetch('/user/retrypayment', {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                orderId: orderId
-                            })
-                        });
+          const response = await fetch("/user/retrypayment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              orderId: orderId,
+            }),
+          });
 
-                        if (response.ok) {
-                            const data = await response.json();
+          if (response.ok) {
+            const data = await response.json();
 
-                            // Initialize Razorpay payment
-                            var options = {
-                                key: "rzp_test_69SqlycyrhIrA0",
-                                amount: data.amount,
-                                currency: "INR",
-                                name: "ClassyComforts",
-                                description: "Purchase Description",
-                                order_id: data.orderId,
-                                handler: function (response) {
-                                    // Handle successful payment
-                                    fetch('/user/updatepayment', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                        body: JSON.stringify({
-                                            razorpay_order_id: response.razorpay_order_id,
-                                            razorpay_payment_id: response.razorpay_payment_id,
-                                            razorpay_signature: response.razorpay_signature,
-                                            orderID: data.orderID,
-                                        }),
-                                    }).then(response => response.json())
-                                        .then(data => {
-                                            console.log(data.message);
-                                            swal('Payment Success', 'Payment is Successfull', 'success');
-                                            const paymentStatusElement = document.getElementById('paymentstatus');
-                                            const paymentButton = document.getElementById('retryPaymentBtn');
-                                            paymentStatusElement.textContent = 'success';
-                                            paymentButton.style.display = 'none';
-                                        })
-                                        .catch(error => {
-                                            console.error('Error:', error);
-                                            swal('Error!', 'An error occurred while verifying the payment.', 'error');
-                                        });
-                                },
-                                "theme": {
-                                    "color": "#3399cc"
-                                }
-                            };
-                            var razorpayInstance = new Razorpay(options);
-                            razorpayInstance.open();
+            // Initialize Razorpay payment
+            var options = {
+              key: "rzp_test_69SqlycyrhIrA0",
+              amount: data.amount,
+              currency: "INR",
+              name: "ClassyComforts",
+              description: "Purchase Description",
+              order_id: data.orderId,
+              handler: function (response) {
+                // Handle successful payment
+                fetch("/user/updatepayment", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    orderID: data.orderID,
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    console.log(data.message);
+                    swal(
+                      "Payment Success",
+                      "Payment is Successfull",
+                      "success"
+                    );
+                    const paymentStatusElement =
+                      document.getElementById("paymentstatus");
+                    const paymentButton =
+                      document.getElementById("retryPaymentBtn");
+                    paymentStatusElement.textContent = "success";
+                    paymentButton.style.display = "none";
+                  })
+                  .catch((error) => {
+                    console.error("Error:", error);
+                    swal(
+                      "Error!",
+                      "An error occurred while verifying the payment.",
+                      "error"
+                    );
+                  });
+              },
+              theme: {
+                color: "#3399cc",
+              },
+            };
+            var razorpayInstance = new Razorpay(options);
+            razorpayInstance.open();
 
-                            // Handle payment failure
-                            razorpayInstance.on('payment.failed', function (response) {
-                                console.log(response);
-                                swal('Payment Failed', 'Your payment was not successful. Please try again.', 'error');
-                                // Send the necessary data to the server for payment verification
-                                fetch('/user/updatepayment', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        razorpay_order_id: response.error.metadata.order_id,
-                                        razorpay_payment_id: response.error.metadata.payment_id,
-                                        razorpay_signature: response.error.signature,
-                                        orderID: data.orderID,
-                                    }),
-                                })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        console.log(data.message);
-                                    })
-                                    .catch(error => {
-                                        console.error('Error:', error);
-                                        swal('Error!', 'An error occurred while verifying the payment failure.', 'error');
-                                    });
-                            });
-                        } else {
-                            console.error('Failed to fetch retrypayment endpoint');
-                            // Show SweetAlert for failure
-                            swal('Error!', 'Failed to fetch retrypayment endpoint', 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error occurred:', error);
-                        // Show SweetAlert for failure
-                        swal('Error!', 'An error occurred while retrying payment.', 'error');
-                    }
+            // Handle payment failure
+            razorpayInstance.on("payment.failed", function (response) {
+              console.log(response);
+              swal(
+                "Payment Failed",
+                "Your payment was not successful. Please try again.",
+                "error"
+              );
+              // Send the necessary data to the server for payment verification
+              fetch("/user/updatepayment", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  razorpay_order_id: response.error.metadata.order_id,
+                  razorpay_payment_id: response.error.metadata.payment_id,
+                  razorpay_signature: response.error.signature,
+                  orderID: data.orderID,
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  console.log(data.message);
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                  swal(
+                    "Error!",
+                    "An error occurred while verifying the payment failure.",
+                    "error"
+                  );
                 });
-            }
-        });
+            });
+          } else {
+            console.error("Failed to fetch retrypayment endpoint");
+            // Show SweetAlert for failure
+            swal("Error!", "Failed to fetch retrypayment endpoint", "error");
+          }
+        } catch (error) {
+          console.error("Error occurred:", error);
+          // Show SweetAlert for failure
+          swal("Error!", "An error occurred while retrying payment.", "error");
+        }
+      });
+    }
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
-    <%- include("../layouts/userFooter") %>
+<%- include("../layouts/userFooter") %>

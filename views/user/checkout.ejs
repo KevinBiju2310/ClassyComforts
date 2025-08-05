@@ -1,664 +1,951 @@
 <%- include("../layouts/userHeader") %>
 
-    <style>
-        .custom-radio-input {
-            width: 16px;
-            height: 16px;
-        }
-    </style>
+<style>
+  .custom-radio-input {
+    width: 16px;
+    height: 16px;
+  }
+</style>
 
-    <main class="main">
-        <div class="page-header breadcrumb-wrap">
-            <div class="container">
-                <div class="breadcrumb">
-                    <a href="index.html" rel="nofollow">Home</a>
-                    <span></span> Shop
-                    <span></span> Checkout
-                </div>
-            </div>
+<main class="main">
+  <div class="page-header breadcrumb-wrap">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html" rel="nofollow">Home</a>
+        <span></span> Shop <span></span> Checkout
+      </div>
+    </div>
+  </div>
+  <section class="mt-50 mb-50">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="divider mt-50 mb-50"></div>
         </div>
-        <section class="mt-50 mb-50">
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-25">
+            <h4>Billing Details</h4>
+          </div>
+          <form id="checkoutForm" method="post">
             <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="divider mt-50 mb-50"></div>
+              <div class="row">
+                <% addresses.forEach(address=> { %> <%
+                address.items.forEach(item=> { %>
+                <div class="col-lg-6">
+                  <div class="card mb-3">
+                    <div class="card-header">
+                      <label class="mb-0 ml-8" for="<%= item._id %>"
+                        >Shipping Address</label
+                      >
+                      <input
+                        type="radio"
+                        id="<%= item._id %>"
+                        name="shipping_address"
+                        value="<%= item._id %>"
+                        class="custom-radio-input"
+                      />
                     </div>
+                    <div class="card-body" id="card-body">
+                      <address>
+                        <%= item.address %><br />
+                        <%= item.city %>, <%= item.state %> <%= item.pincode %>
+                        <br />
+                        Phone: <%= item.phone %>
+                      </address>
+                      <p><%= item.district %></p>
+                      <div class="d-flex justify-content">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-primary mr-2"
+                          data-bs-toggle="modal"
+                          data-bs-target="#editAddressModal-<%= item._id %>"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-25">
-                            <h4>Billing Details</h4>
-                        </div>
-                        <form id="checkoutForm" method="post">
-                            <div class="container">
-                                <div class="row">
-                                    <% addresses.forEach(address=> { %>
-                                        <% address.items.forEach(item=> { %>
-                                            <div class="col-lg-6">
-                                                <div class="card mb-3">
-                                                    <div class="card-header">
-                                                        <label class="mb-0 ml-8" for="<%= item._id %>">Shipping
-                                                            Address</label>
-                                                        <input type="radio" id="<%= item._id %>" name="shipping_address"
-                                                            value="<%= item._id %>" class="custom-radio-input">
-                                                    </div>
-                                                    <div class="card-body" id="card-body">
-
-                                                        <address>
-                                                            <%= item.address %><br>
-                                                                <%= item.city %>, <%= item.state %>
-                                                                        <%= item.pincode %> <br>
-                                                                            Phone: <%= item.phone %>
-                                                        </address>
-                                                        <p>
-                                                            <%= item.district %>
-                                                        </p>
-                                                        <div class="d-flex justify-content">
-                                                            <button type="button" class="btn btn-sm btn-primary mr-2"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#editAddressModal-<%= item._id %>">
-                                                                Edit
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <% }) %>
-                                                <% }) %>
-                                </div>
-                            </div>
-                        </form>
-                        <div class="ship_detail">
-                            <div class="form-group">
-                                <div class="chek-form">
-                                    <div class="custome-checkbox">
-                                        <input class="form-check-input" type="checkbox" name="checkbox"
-                                            id="differentaddress">
-                                        <label class="form-check-label label_info" data-bs-toggle="collapse"
-                                            data-target="#collapseAddress" href="#collapseAddress"
-                                            aria-controls="collapseAddress" for="differentaddress"><span>Ship to a
-                                                different address?</span></label>
-                                    </div>
-                                </div>
-                            </div>
-                            <form action="/user/checkout/address" method="post">
-                                <div id="collapseAddress" class="different_address collapse in">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" name="name" id="inputName"
-                                            placeholder="Name" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <input type="number" class="form-control" name="phone" id="inputMobile"
-                                            placeholder="Phone" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <textarea class="form-control" id="inputAddress" rows="3" name="address"
-                                            placeholder="Address" required></textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="inputDistrict" name="district"
-                                            placeholder="District" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="inputState" name="state"
-                                            placeholder="State" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="inputCity" name="city"
-                                            placeholder="City" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <input type="number" class="form-control" id="inputPincode" name="pincode"
-                                            placeholder="Pincode" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>Address Type</label>
-                                        <div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="addressType"
-                                                    id="workAddress" value="work">
-                                                <label class="form-check-label" for="workAddress">Work</label>
-                                            </div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="addressType"
-                                                    id="homeAddress" value="home">
-                                                <label class="form-check-label" for="homeAddress">Home</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="mb-20 mt-50">
-                            <h5>Additional information</h5>
-                        </div>
-                        <div class="form-group mb-30">
-                            <textarea rows="5" placeholder="Order notes"></textarea>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="order_review">
-                            <div class="mb-20">
-                                <h4>Your Orders</h4>
-                            </div>
-                            <div class="table-responsive order_table text-center">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th colspan="2">Product</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% if (checkedProducts && checkedProducts.length> 0) { %>
-                                            <% let subtotal=0; %>
-                                                <% checkedProducts.forEach(product=> { %>
-                                                    <% const productPrice=product.productId.mainprice !==0 &&
-                                                        product.productId.mainprice < product.productId.price ?
-                                                        product.productId.mainprice : product.productId.price; const
-                                                        productSubtotal=product.quantity * productPrice; subtotal
-                                                        +=productSubtotal; %>
-                                                        <tr>
-                                                            <td class="image product-thumbnail">
-                                                                <% if (product.productId &&
-                                                                    product.productId.productImages.length> 0) { %>
-                                                                    <img src="/uploads/<%= product.productId.productImages[0] %>"
-                                                                        alt="<%= product.productId.productname %>">
-                                                                    <% } %>
-                                                            </td>
-                                                            <td>
-                                                                <h5>
-                                                                    <a
-                                                                        href="<%= product.productId ? '/products/' + product.productId._id : '#' %>">
-                                                                        <%= product.productId ?
-                                                                            product.productId.productname
-                                                                            : 'Product Not Found' %>
-                                                                    </a>
-                                                                </h5>
-                                                                <span class="product-qty">x <%= product.quantity %>
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                $<%= productSubtotal.toFixed(2) %>
-                                                            </td>
-                                                        </tr>
-                                                        <% }); %>
-                                                            <tr>
-                                                                <th colspan="2">SubTotal</th>
-                                                                <td class="product-subtotal">$<%= subtotal.toFixed(2) %>
-                                                                </td>
-                                                            </tr>
-
-                                                            <tr id="couponRow" style="display: none;">
-                                                                <th colspan="2">Coupon Discount</th>
-                                                                <td id="couponDiscountAmount">-$0.00</td>
-                                                            </tr>
-                                                            <!-- Add shipping charges if applicable -->
-                                                            <tr>
-                                                                <th colspan="2">Shipping</th>
-                                                                <td><em>Free Shipping</em></td>
-                                                            </tr>
-                                                            <!-- Calculate total -->
-                                                            <tr id="totalRow">
-                                                                <th colspan="2">Total</th>
-                                                                <td class="product-subtotal"><span
-                                                                        class="font-xl text-brand fw-900">$<%=
-                                                                            subtotal.toFixed(2) %></span></td>
-                                                            </tr>
-                                                            <% } else { %>
-                                                                <tr>
-                                                                    <td colspan="3">No products selected for checkout.
-                                                                    </td>
-                                                                </tr>
-                                                                <% } %>
-                                    </tbody>
-
-                                </table>
-                            </div>
-                            <button type="button" class="btn btn-primary mb-3" id="applyCouponBtn"
-                                onclick="openCouponModal()">Apply Coupon</button>
-                            <button type="button" class="btn btn-danger mb-3" id="removeCouponBtn"
-                                style="display: none;" onclick="removeCoupon()">Remove Coupon</button>
-                            <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                            <div class="payment_method">
-                                <div class="mb-25">
-                                    <h5>Payment</h5>
-                                </div>
-                                <div class="payment_option">
-                                    <div class="custome-radio">
-                                        <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios3" value="wallet">
-                                        <label class="form-check-label" for="exampleRadios3" data-bs-toggle="collapse"
-                                            data-target="#wallet" aria-controls="wallet">Wallet</label>
-                                    </div>
-                                    <div class="custome-radio">
-                                        <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios4" value="cod">
-                                        <label class="form-check-label" for="exampleRadios4" data-bs-toggle="collapse"
-                                            data-target="#checkPayment" aria-controls="checkPayment">Cash On
-                                            Delivery</label>
-                                    </div>
-                                    <div class="custome-radio">
-                                        <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios5" value="razorpay">
-                                        <label class="form-check-label" for="exampleRadios5" data-bs-toggle="collapse"
-                                            data-target="#razorpay" aria-controls="razorpay">Razorpay</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <form id="placeOrderForm" method="post" action="/user/placeorder">
-                                <input type="hidden" name="total" id="totalval">
-                                <input type="hidden" name="selected_shipping_address" id="selectedShippingAddress">
-                                <input type="hidden" name="payment_option" id="paymentOption">
-                                <input type="hidden" name="subtotal" id="subtotalValue">
-                                <input type="hidden" id="checkedProductsInput" value="<%= JSON.stringify(checkedProducts.map(product => product.productId._id)) %>">
-                                <button type="button" class="btn btn-fill-out btn-block mt-30" id="placeOrderBtn">Place
-                                    Order</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                <% }) %> <% }) %>
+              </div>
             </div>
-        </section>
-    </main>
-
-    <!-- Edit Address Modal -->
-    <% addresses.forEach(address=> { %>
-        <% address.items.forEach(item=> { %>
-            <div class="modal fade" id="editAddressModal-<%= item._id %>" tabindex="-1"
-                aria-labelledby="editAddressModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="editAddressForm" action="/user/checkout/editaddress/<%= item._id %>"
-                                method="post">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="editInputName" class="form-label">Name</label>
-                                        <input type="text" class="form-control" id="editInputName" name="name"
-                                            value="<%= item.name %>" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="editInputMobile" class="form-label">Mobile Number</label>
-                                        <input type="text" class="form-control" id="editInputMobile" name="phone"
-                                            value="<%= item.phone %>" required>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editInputAddress" class="form-label">Address</label>
-                                    <textarea class="form-control" id="editInputAddress" rows="3" name="address"
-                                        required><%= item.address %></textarea>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="editInputDistrict" class="form-label">District</label>
-                                        <input type="text" class="form-control" id="editInputDistrict" name="district"
-                                            value="<%= item.district %>" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="editInputState" class="form-label">State</label>
-                                        <input type="text" class="form-control" id="editInputState" name="state"
-                                            value="<%= item.state %>" required>
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="editInputCity" class="form-label">City</label>
-                                        <input type="text" class="form-control" id="editInputCity" name="city"
-                                            value="<%= item.city %>" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="editInputPincode" class="form-label">Pincode</label>
-                                        <input type="text" class="form-control" id="editInputPincode" name="pincode"
-                                            value="<%= item.pincode %>" required>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label>Edit Address Type</label>
-                                    <div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="addressType"
-                                                id="editWorkAddress" value="work" <%=item.addressType==='work'
-                                                ? 'checked' : '' %>>
-                                            <label class="form-check-label" for="editWorkAddress">Work</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="addressType"
-                                                id="editHomeAddress" value="home" <%=item.addressType==='home'
-                                                ? 'checked' : '' %>>
-                                            <label class="form-check-label" for="editHomeAddress">Home</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                            </form>
-                        </div>
-                    </div>
+          </form>
+          <div class="ship_detail">
+            <div class="form-group">
+              <div class="chek-form">
+                <div class="custome-checkbox">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="checkbox"
+                    id="differentaddress"
+                  />
+                  <label
+                    class="form-check-label label_info"
+                    data-bs-toggle="collapse"
+                    data-target="#collapseAddress"
+                    href="#collapseAddress"
+                    aria-controls="collapseAddress"
+                    for="differentaddress"
+                    ><span>Ship to a different address?</span></label
+                  >
                 </div>
+              </div>
             </div>
-            <% }) %>
-                <% }) %>
-
-
-                    <div class="modal fade" id="couponModal" tabindex="-1" role="dialog"
-                        aria-labelledby="couponModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="couponModalLabel">Select Coupon</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <form id="couponForm">
-                                        <!-- Coupons will be dynamically populated here -->
-                                        <% coupons.forEach(coupon=> { %>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="coupon"
-                                                    id="<%= coupon._id %>" value="<%= coupon._id %>">
-                                                <label class="form-check-label" for="<%= coupon._id %>">
-                                                    <%= coupon.couponname %> - <%= coupon.discountamount %>% Discount
-                                                </label>
-                                            </div>
-                                            <% }); %>
-                                                <!-- Apply Coupon Button inside the Form -->
-                                                <button type="submit" class="btn btn-primary mt-3"
-                                                    id="applyCoupon">Apply Coupon</button>
-                                    </form>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
+            <form action="/user/checkout/address" method="post">
+              <div id="collapseAddress" class="different_address collapse in">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="name"
+                    id="inputName"
+                    placeholder="Name"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="phone"
+                    id="inputMobile"
+                    placeholder="Phone"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <textarea
+                    class="form-control"
+                    id="inputAddress"
+                    rows="3"
+                    name="address"
+                    placeholder="Address"
+                    required
+                  ></textarea>
+                </div>
+                <div class="form-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="inputDistrict"
+                    name="district"
+                    placeholder="District"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="inputState"
+                    name="state"
+                    placeholder="State"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="inputCity"
+                    name="city"
+                    placeholder="City"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="inputPincode"
+                    name="pincode"
+                    placeholder="Pincode"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label>Address Type</label>
+                  <div>
+                    <div class="form-check form-check-inline">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="addressType"
+                        id="workAddress"
+                        value="work"
+                      />
+                      <label class="form-check-label" for="workAddress"
+                        >Work</label
+                      >
                     </div>
+                    <div class="form-check form-check-inline">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="addressType"
+                        id="homeAddress"
+                        value="home"
+                      />
+                      <label class="form-check-label" for="homeAddress"
+                        >Home</label
+                      >
+                    </div>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </form>
+          </div>
+          <div class="mb-20 mt-50">
+            <h5>Additional information</h5>
+          </div>
+          <div class="form-group mb-30">
+            <textarea rows="5" placeholder="Order notes"></textarea>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="order_review">
+            <div class="mb-20">
+              <h4>Your Orders</h4>
+            </div>
+            <div class="table-responsive order_table text-center">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th colspan="2">Product</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (checkedProducts && checkedProducts.length> 0) { %> <%
+                  let subtotal=0; %> <% checkedProducts.forEach(product=> { %>
+                  <% const productPrice=product.productId.mainprice !==0 &&
+                  product.productId.mainprice < product.productId.price ?
+                  product.productId.mainprice : product.productId.price; const
+                  productSubtotal=product.quantity * productPrice; subtotal
+                  +=productSubtotal; %>
+                  <tr>
+                    <td class="image product-thumbnail">
+                      <% if (product.productId &&
+                      product.productId.productImages.length> 0) { %>
+                      <img
+                        src="/uploads/<%= product.productId.productImages[0] %>"
+                        alt="<%= product.productId.productname %>"
+                      />
+                      <% } %>
+                    </td>
+                    <td>
+                      <h5>
+                        <a
+                          href="<%= product.productId ? '/products/' + product.productId._id : '#' %>"
+                        >
+                          <%= product.productId ? product.productId.productname
+                          : 'Product Not Found' %>
+                        </a>
+                      </h5>
+                      <span class="product-qty"
+                        >x <%= product.quantity %>
+                      </span>
+                    </td>
+                    <td>$<%= productSubtotal.toFixed(2) %></td>
+                  </tr>
+                  <% }); %>
+                  <tr>
+                    <th colspan="2">SubTotal</th>
+                    <td class="product-subtotal">
+                      $<%= subtotal.toFixed(2) %>
+                    </td>
+                  </tr>
 
+                  <tr id="couponRow" style="display: none">
+                    <th colspan="2">Coupon Discount</th>
+                    <td id="couponDiscountAmount">-$0.00</td>
+                  </tr>
+                  <!-- Add shipping charges if applicable -->
+                  <tr>
+                    <th colspan="2">Shipping</th>
+                    <td><em>Free Shipping</em></td>
+                  </tr>
+                  <!-- Calculate total -->
+                  <tr id="totalRow">
+                    <th colspan="2">Total</th>
+                    <td class="product-subtotal">
+                      <span class="font-xl text-brand fw-900"
+                        >$<%= subtotal.toFixed(2) %></span
+                      >
+                    </td>
+                  </tr>
+                  <% } else { %>
+                  <tr>
+                    <td colspan="3">No products selected for checkout.</td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+            <button
+              type="button"
+              class="btn btn-primary mb-3"
+              id="applyCouponBtn"
+              onclick="openCouponModal()"
+            >
+              Apply Coupon
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger mb-3"
+              id="removeCouponBtn"
+              style="display: none"
+              onclick="removeCoupon()"
+            >
+              Remove Coupon
+            </button>
+            <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+            <div class="payment_method">
+              <div class="mb-25">
+                <h5>Payment</h5>
+              </div>
+              <div class="payment_option">
+                <div class="custome-radio">
+                  <input
+                    class="form-check-input"
+                    required=""
+                    type="radio"
+                    name="payment_option"
+                    id="exampleRadios3"
+                    value="wallet"
+                  />
+                  <label
+                    class="form-check-label"
+                    for="exampleRadios3"
+                    data-bs-toggle="collapse"
+                    data-target="#wallet"
+                    aria-controls="wallet"
+                    >Wallet</label
+                  >
+                </div>
+                <div class="custome-radio">
+                  <input
+                    class="form-check-input"
+                    required=""
+                    type="radio"
+                    name="payment_option"
+                    id="exampleRadios4"
+                    value="cod"
+                  />
+                  <label
+                    class="form-check-label"
+                    for="exampleRadios4"
+                    data-bs-toggle="collapse"
+                    data-target="#checkPayment"
+                    aria-controls="checkPayment"
+                    >Cash On Delivery</label
+                  >
+                </div>
+                <div class="custome-radio">
+                  <input
+                    class="form-check-input"
+                    required=""
+                    type="radio"
+                    name="payment_option"
+                    id="exampleRadios5"
+                    value="razorpay"
+                  />
+                  <label
+                    class="form-check-label"
+                    for="exampleRadios5"
+                    data-bs-toggle="collapse"
+                    data-target="#razorpay"
+                    aria-controls="razorpay"
+                    >Razorpay</label
+                  >
+                </div>
+              </div>
+            </div>
+            <form id="placeOrderForm" method="post" action="/user/placeorder">
+              <input type="hidden" name="total" id="totalval" />
+              <input
+                type="hidden"
+                name="selected_shipping_address"
+                id="selectedShippingAddress"
+              />
+              <input type="hidden" name="payment_option" id="paymentOption" />
+              <input type="hidden" name="subtotal" id="subtotalValue" />
+              <input
+                type="hidden"
+                id="checkedProductsInput"
+                value="<%= JSON.stringify(checkedProducts.map(product => product.productId._id)) %>"
+              />
+              <button
+                type="button"
+                class="btn btn-fill-out btn-block mt-30"
+                id="placeOrderBtn"
+              >
+                Place Order
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
 
-                    <%- include("../layouts/userFooter") %>
+<!-- Edit Address Modal -->
+<% addresses.forEach(address=> { %> <% address.items.forEach(item=> { %>
+<div
+  class="modal fade"
+  id="editAddressModal-<%= item._id %>"
+  tabindex="-1"
+  aria-labelledby="editAddressModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="editAddressForm"
+          action="/user/checkout/editaddress/<%= item._id %>"
+          method="post"
+        >
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="editInputName" class="form-label">Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="editInputName"
+                name="name"
+                value="<%= item.name %>"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="editInputMobile" class="form-label"
+                >Mobile Number</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="editInputMobile"
+                name="phone"
+                value="<%= item.phone %>"
+                required
+              />
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="editInputAddress" class="form-label">Address</label>
+            <textarea
+              class="form-control"
+              id="editInputAddress"
+              rows="3"
+              name="address"
+              required
+            >
+<%= item.address %></textarea
+            >
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="editInputDistrict" class="form-label">District</label>
+              <input
+                type="text"
+                class="form-control"
+                id="editInputDistrict"
+                name="district"
+                value="<%= item.district %>"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="editInputState" class="form-label">State</label>
+              <input
+                type="text"
+                class="form-control"
+                id="editInputState"
+                name="state"
+                value="<%= item.state %>"
+                required
+              />
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="editInputCity" class="form-label">City</label>
+              <input
+                type="text"
+                class="form-control"
+                id="editInputCity"
+                name="city"
+                value="<%= item.city %>"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="editInputPincode" class="form-label">Pincode</label>
+              <input
+                type="text"
+                class="form-control"
+                id="editInputPincode"
+                name="pincode"
+                value="<%= item.pincode %>"
+                required
+              />
+            </div>
+          </div>
+          <div class="mb-3">
+            <label>Edit Address Type</label>
+            <div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="addressType"
+                id="editWorkAddress" value="work" <%=item.addressType==='work' ?
+                'checked' : '' %>>
+                <label class="form-check-label" for="editWorkAddress"
+                  >Work</label
+                >
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="addressType"
+                id="editHomeAddress" value="home" <%=item.addressType==='home' ?
+                'checked' : '' %>>
+                <label class="form-check-label" for="editHomeAddress"
+                  >Home</label
+                >
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<% }) %> <% }) %>
 
-                        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-                        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<div
+  class="modal fade"
+  id="couponModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="couponModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="couponModalLabel">Select Coupon</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="couponForm">
+          <!-- Coupons will be dynamically populated here -->
+          <% coupons.forEach(coupon=> { %>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="coupon"
+              id="<%= coupon._id %>"
+              value="<%= coupon._id %>"
+            />
+            <label class="form-check-label" for="<%= coupon._id %>">
+              <%= coupon.couponname %> - <%= coupon.discountamount %>% Discount
+            </label>
+          </div>
+          <% }); %>
+          <!-- Apply Coupon Button inside the Form -->
+          <button type="submit" class="btn btn-primary mt-3" id="applyCoupon">
+            Apply Coupon
+          </button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<%- include("../layouts/userFooter") %>
 
-                        <script>
-                            let couponApplied = false;
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
-                            function openCouponModal() {
-                                const couponModal = new bootstrap.Modal(document.getElementById('couponModal'));
-                                couponModal.show();
-                            }
+<script>
+  let couponApplied = false;
 
-                            const couponForm = document.getElementById('couponForm');
-                            const couponDiscountAmount = document.getElementById('couponDiscountAmount');
-                            const subtotalRow = document.getElementById('subtotalRow');
-                            const couponRow = document.getElementById('couponRow');
-                            const totalRow = document.getElementById('totalRow');
+  function openCouponModal() {
+    const couponModal = new bootstrap.Modal(
+      document.getElementById("couponModal")
+    );
+    couponModal.show();
+  }
 
-                            couponForm.addEventListener('submit', function (event) {
-                                event.preventDefault();
+  const couponForm = document.getElementById("couponForm");
+  const couponDiscountAmount = document.getElementById("couponDiscountAmount");
+  const subtotalRow = document.getElementById("subtotalRow");
+  const couponRow = document.getElementById("couponRow");
+  const totalRow = document.getElementById("totalRow");
 
-                                if (couponApplied) {
-                                    swal('Error', 'Coupon has already been applied.', 'error');
-                                    return;
-                                }
+  couponForm.addEventListener("submit", function (event) {
+    event.preventDefault();
 
-                                const selectedCoupon = document.querySelector('input[name="coupon"]:checked');
-                                if (selectedCoupon) {
-                                    const subtotal = parseFloat(document.querySelector('.product-subtotal').innerText.slice(1));
-                                    fetch('/user/applycoupon', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({ couponId: selectedCoupon.value, subtotal: subtotal })
-                                    })
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            if (data.success) {
-                                                const subtotal = parseFloat(document.querySelector('.product-subtotal').innerText.slice(1));
-                                                const discountAmount = subtotal * (data.coupon.discountamount / 100);
-                                                const total = subtotal - discountAmount;
+    if (couponApplied) {
+      swal("Error", "Coupon has already been applied.", "error");
+      return;
+    }
 
-                                                // Update the table
-                                                couponDiscountAmount.innerText = `-$${discountAmount.toFixed(2)}`;
-                                                couponRow.style.display = 'table-row';
-                                                document.querySelector('#totalRow .product-subtotal span').innerText = `$${total.toFixed(2)}`;
-                                                couponApplied = true;
-                                                removeCouponBtn.style.display = 'inline-block';
-                                                swal('Success', data.message, 'success');
-                                            } else {
-                                                swal('Error', data.message, 'error');
-                                            }
-                                        })
-                                        .catch(error => {
-                                            console.error('Error:', error);
-                                            swal('Error', 'An error occurred while applying the coupon.', 'error');
-                                        });
-                                } else {
-                                    swal('Error', 'Please select a coupon.', 'error');
-                                }
-                                const couponModal = bootstrap.Modal.getInstance(document.getElementById('couponModal'));
-                                couponModal.hide();
-                            });
-                            function removeCoupon() {
-                                couponApplied = false;
-                                removeCouponBtn.style.display = 'none'; // Hide the "Remove Coupon" button
-                                couponRow.style.display = 'none';
-                                couponDiscountAmount.innerText = '-$0.00';
+    const selectedCoupon = document.querySelector(
+      'input[name="coupon"]:checked'
+    );
+    if (selectedCoupon) {
+      const subtotal = parseFloat(
+        document.querySelector(".product-subtotal").innerText.slice(1)
+      );
+      fetch("/user/applycoupon", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          couponId: selectedCoupon.value,
+          subtotal: subtotal,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            const subtotal = parseFloat(
+              document.querySelector(".product-subtotal").innerText.slice(1)
+            );
+            const discountAmount =
+              subtotal * (data.coupon.discountamount / 100);
+            const total = subtotal - discountAmount;
 
-                                // Reset the total amount
-                                const subtotal = parseFloat(document.querySelector('.product-subtotal').innerText.slice(1));
-                                document.querySelector('#totalRow .product-subtotal span').innerText = `$${subtotal.toFixed(2)}`;
+            // Update the table
+            couponDiscountAmount.innerText = `-$${discountAmount.toFixed(2)}`;
+            couponRow.style.display = "table-row";
+            document.querySelector(
+              "#totalRow .product-subtotal span"
+            ).innerText = `$${total.toFixed(2)}`;
+            couponApplied = true;
+            removeCouponBtn.style.display = "inline-block";
+            swal("Success", data.message, "success");
+          } else {
+            swal("Error", data.message, "error");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          swal(
+            "Error",
+            "An error occurred while applying the coupon.",
+            "error"
+          );
+        });
+    } else {
+      swal("Error", "Please select a coupon.", "error");
+    }
+    const couponModal = bootstrap.Modal.getInstance(
+      document.getElementById("couponModal")
+    );
+    couponModal.hide();
+  });
+  function removeCoupon() {
+    couponApplied = false;
+    removeCouponBtn.style.display = "none"; // Hide the "Remove Coupon" button
+    couponRow.style.display = "none";
+    couponDiscountAmount.innerText = "-$0.00";
 
-                            }
-                        </script>
-                        <script>
-                            document.getElementById('placeOrderBtn').addEventListener('click', async function (event) {
-                                event.preventDefault(); // Prevent default form submission
+    // Reset the total amount
+    const subtotal = parseFloat(
+      document.querySelector(".product-subtotal").innerText.slice(1)
+    );
+    document.querySelector(
+      "#totalRow .product-subtotal span"
+    ).innerText = `$${subtotal.toFixed(2)}`;
+  }
+</script>
+<script>
+  document
+    .getElementById("placeOrderBtn")
+    .addEventListener("click", async function (event) {
+      event.preventDefault(); // Prevent default form submission
 
-                                var shippingAddress = document.querySelector('input[name="shipping_address"]:checked');
-                                var paymentMethod = document.querySelector('input[name="payment_option"]:checked');
+      var shippingAddress = document.querySelector(
+        'input[name="shipping_address"]:checked'
+      );
+      var paymentMethod = document.querySelector(
+        'input[name="payment_option"]:checked'
+      );
 
-                                if (!shippingAddress || !paymentMethod) {
-                                    swal("Error!", "Please select a shipping address and payment method.", "error");
-                                } else {
-                                    // Set the value of hidden input field to the selected shipping address value
-                                    document.getElementById('selectedShippingAddress').value = shippingAddress.value;
-                                    document.getElementById('totalval').value = document.querySelector('.product-subtotal span').innerText.slice(1);
-                                    document.getElementById('paymentOption').value = paymentMethod.value;
-                                    document.getElementById('subtotalValue').value = document.querySelector('.product-subtotal').innerText.slice(1);
+      if (!shippingAddress || !paymentMethod) {
+        swal(
+          "Error!",
+          "Please select a shipping address and payment method.",
+          "error"
+        );
+      } else {
+        // Set the value of hidden input field to the selected shipping address value
+        document.getElementById("selectedShippingAddress").value =
+          shippingAddress.value;
+        document.getElementById("totalval").value = document
+          .querySelector(".product-subtotal span")
+          .innerText.slice(1);
+        document.getElementById("paymentOption").value = paymentMethod.value;
+        document.getElementById("subtotalValue").value = document
+          .querySelector(".product-subtotal")
+          .innerText.slice(1);
 
+        // Check product quantity before placing the order
+        var productIds = JSON.parse(
+          document.getElementById("checkedProductsInput").value
+        );
+        var allProductsAvailable = true;
 
-                                    // Check product quantity before placing the order
-                                    var productIds = JSON.parse(document.getElementById('checkedProductsInput').value);
-                                    var allProductsAvailable = true;
+        for (let productId of productIds) {
+          try {
+            const response = await fetch(`/user/stockcheck/${productId}`);
+            console.log("Response", response);
+            if (!response.ok) {
+              throw new Error("Failed to fetch product data");
+            }
+            const productData = await response.json();
+            if (productData.quantity === 0) {
+              allProductsAvailable = false;
+              swal(
+                "Oops!",
+                `${productData.productname} is out of stock`,
+                "warning"
+              );
+              break; // Stop further processing if any product is out of stock
+            }
+          } catch (error) {
+            console.error("Error checking product availability:", error);
+            swal(
+              "Oops!",
+              "An error occurred while checking product availability.",
+              "error"
+            );
+            return; // Exit the function if an error occurs
+          }
+        }
 
-                                    for (let productId of productIds) {
-                                        try {
-                                            const response = await fetch(`/user/stockcheck/${productId}`);
-                                            console.log("Response",response);
-                                            if (!response.ok) {
-                                                throw new Error('Failed to fetch product data');
-                                            }
-                                            const productData = await response.json();
-                                            if (productData.quantity === 0) {
-                                                allProductsAvailable = false;
-                                                swal("Oops!", `${productData.productname} is out of stock`, "warning");
-                                                break; // Stop further processing if any product is out of stock
-                                            }
-                                        } catch (error) {
-                                            console.error('Error checking product availability:', error);
-                                            swal("Oops!", "An error occurred while checking product availability.", "error");
-                                            return; // Exit the function if an error occurs
-                                        }
-                                    }
+        if (allProductsAvailable) {
+          let couponId = null;
+          if (couponApplied) {
+            couponId = document.querySelector(
+              'input[name="coupon"]:checked'
+            ).value;
+          }
 
+          if (paymentMethod.value === "cod") {
+            fetch("/user/placeorder", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                total: document.getElementById("totalval").value,
+                selected_shipping_address: document.getElementById(
+                  "selectedShippingAddress"
+                ).value,
+                payment_option: document.getElementById("paymentOption").value,
+                subtotal: document.getElementById("subtotalValue").value,
+                couponId: couponId,
+              }),
+            })
+              .then((response) => {
+                if (response.ok) {
+                  return response.json();
+                }
+                throw new Error("Network response was not ok.");
+              })
+              .then((data) => {
+                if (data.success) {
+                  window.location.href = "/user/orderSuccessfull";
+                } else {
+                  swal("Error!", data.message, "info");
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                swal(
+                  "Error!",
+                  "An error occurred while placing the order.",
+                  "error"
+                );
+              });
+          } else if (paymentMethod.value === "razorpay") {
+            fetch("/user/placeorder", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                total: document.getElementById("totalval").value,
+                selected_shipping_address: document.getElementById(
+                  "selectedShippingAddress"
+                ).value,
+                payment_option: document.getElementById("paymentOption").value,
+                subtotal: document.getElementById("subtotalValue").value,
+                couponId: couponId,
+              }),
+            })
+              .then((response) => {
+                if (response.ok) {
+                  return response.json();
+                }
+                throw new Error("Network error");
+              })
+              .then((data) => {
+                // Initialize Razorpay payment
+                var options = {
+                  key: "rzp_test_69SqlycyrhIrA0",
+                  amount: data.amount,
+                  currency: "INR",
+                  name: "ClassyComforts",
+                  description: "Purchase Description",
+                  order_id: data.orderId,
+                  handler: function (response) {
+                    // Handle successful payment
+                    fetch("/user/updatepayment", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                        orderID: data.orderID,
+                      }),
+                    })
+                      .then((response) => response.json())
+                      .then((data) => {
+                        console.log(data.message);
+                        window.location.href = "/user/orderSuccessfull";
+                      })
+                      .catch((error) => {
+                        console.error("Error:", error);
+                        swal(
+                          "Error!",
+                          "An error occurred while verifying the payment.",
+                          "error"
+                        );
+                      });
+                  },
+                  theme: {
+                    color: "#3399cc",
+                  },
+                };
+                var razorpayInstance = new Razorpay(options);
+                razorpayInstance.open();
 
-
-                                    if (allProductsAvailable) {
-                                        let couponId = null;
-                                        if (couponApplied) {
-                                            couponId = document.querySelector('input[name="coupon"]:checked').value;
-                                        }
-
-                                        if (paymentMethod.value === 'cod') {
-                                            fetch("/user/placeorder", {
-                                                method: "POST",
-                                                headers: {
-                                                    "Content-Type": "application/json"
-                                                },
-                                                body: JSON.stringify({
-                                                    total: document.getElementById('totalval').value,
-                                                    selected_shipping_address: document.getElementById('selectedShippingAddress').value,
-                                                    payment_option: document.getElementById('paymentOption').value,
-                                                    subtotal: document.getElementById('subtotalValue').value,
-                                                    couponId: couponId
-                                                })
-                                            })
-                                                .then(response => {
-                                                    if (response.ok) {
-                                                        return response.json();
-                                                    }
-                                                    throw new Error('Network response was not ok.');
-                                                })
-                                                .then(data => {
-                                                    if (data.success) {
-                                                        window.location.href = '/user/orderSuccessfull';
-                                                    } else {
-                                                        swal("Error!", data.message, "info");
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error('Error:', error);
-                                                    swal("Error!", "An error occurred while placing the order.", "error");
-                                                });
-                                        } else if (paymentMethod.value === 'razorpay') {
-                                            fetch('/user/placeorder', {
-                                                method: "POST",
-                                                headers: {
-                                                    "Content-Type": "application/json"
-                                                },
-                                                body: JSON.stringify({
-                                                    total: document.getElementById('totalval').value,
-                                                    selected_shipping_address: document.getElementById('selectedShippingAddress').value,
-                                                    payment_option: document.getElementById('paymentOption').value,
-                                                    subtotal: document.getElementById('subtotalValue').value,
-                                                    couponId: couponId
-                                                })
-                                            }).then(response => {
-                                                if (response.ok) {
-                                                    return response.json();
-                                                }
-                                                throw new Error('Network error');
-                                            }).then(data => {
-                                                // Initialize Razorpay payment
-                                                var options = {
-                                                    key: RAZORPAY_KEY_ID,
-                                                    amount: data.amount,
-                                                    currency: "INR",
-                                                    name: "ClassyComforts",
-                                                    description: "Purchase Description",
-                                                    order_id: data.orderId,
-                                                    handler: function (response) {
-                                                        // Handle successful payment
-                                                        fetch('/user/updatepayment', {
-                                                            method: 'POST',
-                                                            headers: {
-                                                                'Content-Type': 'application/json',
-                                                            },
-                                                            body: JSON.stringify({
-                                                                razorpay_order_id: response.razorpay_order_id,
-                                                                razorpay_payment_id: response.razorpay_payment_id,
-                                                                razorpay_signature: response.razorpay_signature,
-                                                                orderID: data.orderID,
-                                                            }),
-                                                        }).then(response => response.json())
-                                                            .then(data => {
-                                                                console.log(data.message);
-                                                                window.location.href = '/user/orderSuccessfull';
-                                                            })
-                                                            .catch(error => {
-                                                                console.error('Error:', error);
-                                                                swal('Error!', 'An error occurred while verifying the payment.', 'error');
-                                                            });
-                                                    },
-                                                    "theme": {
-                                                        "color": "#3399cc"
-                                                    }
-                                                };
-                                                var razorpayInstance = new Razorpay(options);
-                                                razorpayInstance.open();
-
-                                                // Handle payment failure
-                                                razorpayInstance.on('payment.failed', function (response) {
-                                                    console.log(response);
-                                                    swal('Payment Failed', 'Your payment was not successful. Please try again.', 'error');
-                                                    // Send the necessary data to the server for payment verification
-                                                    fetch('/user/updatepayment', {
-                                                        method: 'POST',
-                                                        headers: {
-                                                            'Content-Type': 'application/json',
-                                                        },
-                                                        body: JSON.stringify({
-                                                            razorpay_order_id: response.error.metadata.order_id,
-                                                            razorpay_payment_id: response.error.metadata.payment_id,
-                                                            razorpay_signature: response.error.signature,
-                                                            orderID: data.orderID,
-                                                        }),
-                                                    })
-                                                        .then(response => response.json())
-                                                        .then(data => {
-                                                            console.log(data.message);
-                                                        })
-                                                        .catch(error => {
-                                                            console.error('Error:', error);
-                                                            swal('Error!', 'An error occurred while verifying the payment failure.', 'error');
-                                                        });
-                                                });
-                                            })
-                                                .catch(error => {
-                                                    console.error('Error:', error);
-                                                    swal("Error!", "An error occurred while processing the payment.", "error");
-                                                });
-                                        } else if (paymentMethod.value === 'wallet') {
-                                            fetch('/user/placeorder', {
-                                                method: "POST",
-                                                headers: {
-                                                    "Content-Type": "application/json"
-                                                },
-                                                body: JSON.stringify({
-                                                    total: document.getElementById('totalval').value,
-                                                    selected_shipping_address: document.getElementById('selectedShippingAddress').value,
-                                                    payment_option: document.getElementById('paymentOption').value,
-                                                    subtotal: document.getElementById('subtotalValue').value,
-                                                    couponId: couponId
-                                                })
-                                            }).then(response => {
-                                                if (response.ok) {
-                                                    return response.json();
-                                                }
-                                                throw new Error('Network response was not ok.');
-                                            }).then(data => {
-                                                if (data.success) {
-                                                    window.location.href = '/user/orderSuccessfull';
-                                                } else {
-                                                    swal("Error!", data.message, "warning");
-                                                }
-                                            }).catch(error => {
-                                                console.error('Error:', error);
-                                                swal("Error!", "An error occurred while placing the order.", "error");
-                                            });
-                                        }
-
-                                    }
-
-
-                                }
-                            });
-                        </script>
+                // Handle payment failure
+                razorpayInstance.on("payment.failed", function (response) {
+                  console.log(response);
+                  swal(
+                    "Payment Failed",
+                    "Your payment was not successful. Please try again.",
+                    "error"
+                  );
+                  // Send the necessary data to the server for payment verification
+                  fetch("/user/updatepayment", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      razorpay_order_id: response.error.metadata.order_id,
+                      razorpay_payment_id: response.error.metadata.payment_id,
+                      razorpay_signature: response.error.signature,
+                      orderID: data.orderID,
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      console.log(data.message);
+                    })
+                    .catch((error) => {
+                      console.error("Error:", error);
+                      swal(
+                        "Error!",
+                        "An error occurred while verifying the payment failure.",
+                        "error"
+                      );
+                    });
+                });
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                swal(
+                  "Error!",
+                  "An error occurred while processing the payment.",
+                  "error"
+                );
+              });
+          } else if (paymentMethod.value === "wallet") {
+            fetch("/user/placeorder", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                total: document.getElementById("totalval").value,
+                selected_shipping_address: document.getElementById(
+                  "selectedShippingAddress"
+                ).value,
+                payment_option: document.getElementById("paymentOption").value,
+                subtotal: document.getElementById("subtotalValue").value,
+                couponId: couponId,
+              }),
+            })
+              .then((response) => {
+                if (response.ok) {
+                  return response.json();
+                }
+                throw new Error("Network response was not ok.");
+              })
+              .then((data) => {
+                if (data.success) {
+                  window.location.href = "/user/orderSuccessfull";
+                } else {
+                  swal("Error!", data.message, "warning");
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                swal(
+                  "Error!",
+                  "An error occurred while placing the order.",
+                  "error"
+                );
+              });
+          }
+        }
+      }
+    });
+</script>

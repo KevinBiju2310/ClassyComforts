@@ -1,191 +1,225 @@
 <!DOCTYPE html>
 <html class="no-js" lang="en">
-
-<head>
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
     <title>ClassyComforts</title>
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:title" content="">
-    <meta property="og:type" content="">
-    <meta property="og:url" content="">
-    <meta property="og:image" content="">
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:title" content="" />
+    <meta property="og:type" content="" />
+    <meta property="og:url" content="" />
+    <meta property="og:image" content="" />
     <!-- Favicon -->
-    <link rel="shortcut icon" type="image/x-icon" href="/assets/imgs/theme/favicon.svg">
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="/assets/imgs/theme/favicon.svg"
+    />
     <!-- Template CSS -->
-    <link rel="stylesheet" href="/assets/css/main.css?v=3.4">
+    <link rel="stylesheet" href="/assets/css/main.css?v=3.4" />
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
     <style>
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
 
-        .dropdown .dropdown-toggle {
-            cursor: pointer;
-        }
+      .dropdown .dropdown-toggle {
+        cursor: pointer;
+      }
 
-        .dropdown .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 1;
-        }
+      .dropdown .dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 1;
+      }
 
-        .dropdown .dropdown-menu a {
-            display: block;
-            padding: 10px;
-            text-decoration: none;
-            color: #333;
-        }
+      .dropdown .dropdown-menu a {
+        display: block;
+        padding: 10px;
+        text-decoration: none;
+        color: #333;
+      }
 
-        .dropdown .dropdown-menu a:hover {
-            background-color: #f0f0f0;
-        }
+      .dropdown .dropdown-menu a:hover {
+        background-color: #f0f0f0;
+      }
 
-        .dropdown.open .dropdown-menu {
-            display: block;
-        }
+      .dropdown.open .dropdown-menu {
+        display: block;
+      }
 
-        .main-menu ul {
-            padding: 0;
-        }
+      .main-menu ul {
+        padding: 0;
+      }
 
-        .main-menu ul li {
-            margin-right: 20px;
-            /* Adjust spacing as needed */
-        }
+      .main-menu ul li {
+        margin-right: 20px;
+        /* Adjust spacing as needed */
+      }
 
-        /* Optional: Adjust spacing for the last li element */
-        .main-menu ul li:last-child {
-            margin-right: 0;
-        }
+      /* Optional: Adjust spacing for the last li element */
+      .main-menu ul li:last-child {
+        margin-right: 0;
+      }
 
-        .header {
-            background-color: #fafafab2;
-            /* Set background color as needed */
-            padding: 20px 0;
-            /* Adjust padding as needed */
-        }
+      .header {
+        background-color: #fafafab2;
+        /* Set background color as needed */
+        padding: 20px 0;
+        /* Adjust padding as needed */
+      }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var dropdowns = document.querySelectorAll('.dropdown');
+      document.addEventListener("DOMContentLoaded", function () {
+        var dropdowns = document.querySelectorAll(".dropdown");
 
-            dropdowns.forEach(function (dropdown) {
-                var toggle = dropdown.querySelector('.dropdown-toggle');
-                var menu = dropdown.querySelector('.dropdown-menu');
+        dropdowns.forEach(function (dropdown) {
+          var toggle = dropdown.querySelector(".dropdown-toggle");
+          var menu = dropdown.querySelector(".dropdown-menu");
 
-                toggle.addEventListener('click', function () {
-                    if (menu.style.display === 'block') {
-                        menu.style.display = 'none';
-                        dropdown.classList.remove('open');
-                    } else {
-                        menu.style.display = 'block';
-                        dropdown.classList.add('open');
-                    }
-                });
+          toggle.addEventListener("click", function () {
+            if (menu.style.display === "block") {
+              menu.style.display = "none";
+              dropdown.classList.remove("open");
+            } else {
+              menu.style.display = "block";
+              dropdown.classList.add("open");
+            }
+          });
 
-                document.addEventListener('click', function (e) {
-                    if (!dropdown.contains(e.target)) {
-                        menu.style.display = 'none';
-                        dropdown.classList.remove('open');
-                    }
-                });
-            });
+          document.addEventListener("click", function (e) {
+            if (!dropdown.contains(e.target)) {
+              menu.style.display = "none";
+              dropdown.classList.remove("open");
+            }
+          });
         });
-
+      });
     </script>
-</head>
+  </head>
 
-<body>
+  <body>
     <!--Nav Bar start-->
     <header class="header-area header-style-1 header-height-2">
-        <div class="header-top header-top-ptb-1 d-none d-lg-block">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-xl-3 col-lg-4">
-                        <div class="header-info">
-                            <ul>
-                                <li><i class="fi-rs-smartphone"></i> <a href="#">(+01) - 2345 - 6789</a></li>
-                                <li><i class="fi-rs-marker"></i><a href="page-contact.html">Our location</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-xl-6 col-lg-4">
-                        <div class="text-center">
-                            <div id="news-flash" class="d-inline-block">
-                                <ul>
-                                    <li>Get great devices up to 50% off <a href="shop-grid-right.html">View details</a>
-                                    </li>
-                                    <li>Supper Value Deals - Save more with coupons</li>
-                                    <li>Trendy 25silver jewelry, save up 35% off today <a
-                                            href="shop-grid-right.html">Shop now</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-lg-4">
-                        <div class="header-info header-info-right">
-                            <ul>
-                                <% if (user && !user.isBlocked) { %>
-                                    <li class="dropdown">
-                                        <span class="dropdown-toggle" id="dropdownMenuLink">
-                                            <%= user.name %>
-                                        </span>
-                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                            <a class="dropdown-item" href="/user/accountdetails">Profile</a>
-                                            <a class="dropdown-item" href="/user/logout">Logout</a>
-                                        </div>
-                                    </li>
-                                    <% } else { %>
-                                        <li><i class="fi-rs-user"></i><a href="/user/signin">Log In / Sign Up</a></li>
-                                        <% } %>
-                            </ul>
-                        </div>
-                    </div>
-
-                </div>
+      <div class="header-top header-top-ptb-1 d-none d-lg-block">
+        <div class="container">
+          <div class="row align-items-center">
+            <div class="col-xl-3 col-lg-4">
+              <div class="header-info">
+                <ul>
+                  <li>
+                    <i class="fi-rs-smartphone"></i>
+                    <a href="#">(+01) - 2345 - 6789</a>
+                  </li>
+                  <li>
+                    <i class="fi-rs-marker"></i
+                    ><a href="page-contact.html">Our location</a>
+                  </li>
+                </ul>
+              </div>
             </div>
-        </div>
-        <div class="header">
-            <div class="container">
-                <div class="header-wrap d-flex justify-content-between align-items-center">
-                    <div class="logo">
-                        <a href="/user/home"><img src="/assets/imgs/theme/project-logo.png" alt="logo"
-                                style="width: 200px; height: auto;"></a>
-                    </div>
-                    <div class="header-nav d-none d-lg-flex justify-content-center align-items-center ml-auto">
-                        <div class="main-menu ml-0">
-                            <nav>
-                                <ul>
-                                    <li><a class="active" href="/user/home">Home</a></li>
-                                    <li><a href="/user/shop">Shop</a></li>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                    <div class="header-action-right d-flex align-items-center">
-                        <div class="search-style-2"></div>
-                        <div class="header-action-2 d-flex">
-                            <div class="header-action-icon-2">
-                                <a href="/user/wishlist"><img class="svgInject" alt="Evara"
-                                        src="/assets/imgs/theme/icons/icon-heart.svg"></a>
-                            </div>
-                            <div class="header-action-icon-2">
-                                <a class="mini-cart-icon" href='/user/cart'><img alt="Evara"
-                                        src="/assets/imgs/theme/icons/icon-cart.svg"></a>
-                            </div>
-                        </div>
-                    </div>
+            <div class="col-xl-6 col-lg-4">
+              <div class="text-center">
+                <div id="news-flash" class="d-inline-block">
+                  <ul>
+                    <li>
+                      Get great devices up to 50% off
+                      <a href="shop-grid-right.html">View details</a>
+                    </li>
+                    <li>Supper Value Deals - Save more with coupons</li>
+                    <li>
+                      Trendy 25silver jewelry, save up 35% off today
+                      <a href="shop-grid-right.html">Shop now</a>
+                    </li>
+                  </ul>
                 </div>
+              </div>
             </div>
+            <div class="col-xl-3 col-lg-4">
+              <div class="header-info header-info-right">
+                <ul>
+                  <% if (user && !user.isBlocked) { %>
+                  <li class="dropdown">
+                    <span class="dropdown-toggle" id="dropdownMenuLink">
+                      <%= user.name %>
+                    </span>
+                    <div
+                      class="dropdown-menu"
+                      aria-labelledby="dropdownMenuLink"
+                    >
+                      <a class="dropdown-item" href="/user/accountdetails"
+                        >Profile</a
+                      >
+                      <a class="dropdown-item" href="/user/logout">Logout</a>
+                    </div>
+                  </li>
+                  <% } else { %>
+                  <li>
+                    <i class="fi-rs-user"></i
+                    ><a href="/user/signin">Log In / Sign Up</a>
+                  </li>
+                  <% } %>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-
-
+      </div>
+      <div class="header">
+        <div class="container">
+          <div
+            class="header-wrap d-flex justify-content-between align-items-center"
+          >
+            <div class="logo">
+              <a href="/user/home"
+                ><img
+                  src="/assets/imgs/theme/project-logo.png"
+                  alt="logo"
+                  style="width: 200px; height: auto"
+              /></a>
+            </div>
+            <div
+              class="header-nav d-none d-lg-flex justify-content-center align-items-center ml-auto"
+            >
+              <div class="main-menu ml-0">
+                <nav>
+                  <ul>
+                    <li><a class="active" href="/user/home">Home</a></li>
+                    <li><a href="/user/shop">Shop</a></li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+            <div class="header-action-right d-flex align-items-center">
+              <div class="search-style-2"></div>
+              <div class="header-action-2 d-flex">
+                <div class="header-action-icon-2">
+                  <a href="/user/wishlist"
+                    ><img
+                      class="svgInject"
+                      alt="Evara"
+                      src="/assets/imgs/theme/icons/icon-heart.svg"
+                  /></a>
+                </div>
+                <div class="header-action-icon-2">
+                  <a class="mini-cart-icon" href="/user/cart"
+                    ><img
+                      alt="Evara"
+                      src="/assets/imgs/theme/icons/icon-cart.svg"
+                  /></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
+  </body>
+</html>

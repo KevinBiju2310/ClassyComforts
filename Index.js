@@ -1,9 +1,7 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
 mongoose
-  .connect(
-    "mongodb://classyComforts:classyComforts1234@ac-ln7puga-shard-00-00.7oa4bdn.mongodb.net:27017,ac-ln7puga-shard-00-01.7oa4bdn.mongodb.net:27017,ac-ln7puga-shard-00-02.7oa4bdn.mongodb.net:27017/?replicaSet=atlas-iaqop0-shard-0&ssl=true&authSource=admin"
-  )
+  .connect(process.env.MONGODB_URL)
   .then(() => console.log("MongoDB connected successfully"))
   .catch((err) => console.error("MongoDB connection error:", err));
 const express = require("express");

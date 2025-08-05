@@ -1,198 +1,255 @@
 <%- include("../layouts/adminHeader") %>
 
+<div id="content">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Category Offer</h1>
+    <button
+      class="btn btn-success"
+      id="addOfferBtn"
+      data-toggle="modal"
+      data-target="#addOfferModal"
+    >
+      <i class="fas fa-plus"></i> Add Category Offer
+    </button>
+  </div>
 
-    <div id="content">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1>Category Offer</h1>
-            <button class="btn btn-success" id="addOfferBtn" data-toggle="modal" data-target="#addOfferModal">
-                <i class="fas fa-plus"></i> Add Category Offer
-            </button>
-        </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Category Name</th>
+        <th>Discount Percentage</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="categoryOffersTableBody">
+      <% category.forEach((category)=> { %> <% if(category.discount !==0) { %>
+      <tr data-category-name="<%= category.name %>">
+        <td><%= category.name %></td>
+        <td><%= category.discount %>%</td>
+        <td>
+          <button
+            class="btn toggle-status-btn btn-warning"
+            data-toggle="modal"
+            data-target="#updateOfferModal"
+          >
+            Update
+          </button>
+          <button class="btn delete-btn btn-danger">Delete</button>
+        </td>
+      </tr>
+      <% } %> <% }); %>
+    </tbody>
+  </table>
+</div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Category Name</th>
-                    <th>Discount Percentage</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="categoryOffersTableBody">
-                <% category.forEach((category)=> { %>
-                    <% if(category.discount !==0) { %>
-                        <tr data-category-name="<%= category.name %>">
-                            <td>
-                                <%= category.name %>
-                            </td>
-                            <td>
-                                <%= category.discount %>%
-                            </td>
-                            <td>
-                                <button class="btn toggle-status-btn btn-warning" data-toggle="modal"
-                                    data-target="#updateOfferModal">Update</button>
-                                <button class="btn delete-btn btn-danger">Delete</button>
-                            </td>
-                        </tr>
-                        <% } %>
-                            <% }); %>
-            </tbody>
-        </table>
+<!-- Add Offer Modal -->
+<div
+  class="modal fade"
+  id="addOfferModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="addOfferModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addOfferModalLabel">Add Category Offer</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="addOfferForm" method="post" action="/admin/addcategoryoffer">
+          <div class="form-group">
+            <label for="categoryName">Category Name</label>
+            <select class="form-control" id="category" name="category" required>
+              <% category.forEach(category=> { %> <% if(category.discount===0) {
+              %>
+              <option value="<%= category.name %>"><%= category.name %></option>
+              <% } %> <% }) %>
+            </select>
+            <div class="invalid-feedback" id="categoryNameError"></div>
+          </div>
+          <div class="form-group">
+            <label for="discountPercentage">Discount Percentage</label>
+            <input
+              type="number"
+              class="form-control"
+              name="discountPercentage"
+              id="discountPercentage"
+              placeholder="Enter discount percentage"
+              min="0"
+              max="100"
+              required
+            />
+            <div class="invalid-feedback" id="discountPercentageError"></div>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Offer</button>
+        </form>
+      </div>
     </div>
+  </div>
+</div>
 
-
-    <!-- Add Offer Modal -->
-    <div class="modal fade" id="addOfferModal" tabindex="-1" role="dialog" aria-labelledby="addOfferModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addOfferModalLabel">Add Category Offer</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="addOfferForm" method="post" action="/admin/addcategoryoffer">
-                        <div class="form-group">
-                            <label for="categoryName">Category Name</label>
-                            <select class="form-control" id="category" name="category" required>
-                                <% category.forEach(category=> { %>
-                                    <% if(category.discount===0) { %>
-                                        <option value="<%= category.name %>">
-                                            <%= category.name %>
-                                        </option>
-                                        <% } %>
-                                            <% }) %>
-                            </select>
-                            <div class="invalid-feedback" id="categoryNameError"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="discountPercentage">Discount Percentage</label>
-                            <input type="number" class="form-control" name="discountPercentage" id="discountPercentage"
-                                placeholder="Enter discount percentage" min="0" max="100" required>
-                            <div class="invalid-feedback" id="discountPercentageError"></div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add Offer</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+<!-- Update Offer Modal -->
+<div
+  class="modal fade"
+  id="updateOfferModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="updateOfferModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="updateOfferModalLabel">
+          Update Category Offer
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="updateOfferForm"
+          method="post"
+          action="/admin/updatecategoryoffer"
+        >
+          <div class="form-group">
+            <label for="updateCategoryName">Category Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="updateCategoryName"
+              name="categoryName"
+              readonly
+            />
+          </div>
+          <div class="form-group">
+            <label for="updateDiscountPercentage">Discount Percentage</label>
+            <input
+              type="number"
+              class="form-control"
+              name="discountPercentage"
+              id="updateDiscountPercentage"
+              placeholder="Enter discount percentage"
+              min="0"
+              max="100"
+              required
+            />
+            <div
+              class="invalid-feedback"
+              id="updateDiscountPercentageError"
+            ></div>
+          </div>
+          <button type="submit" class="btn btn-primary">Update Offer</button>
+        </form>
+      </div>
     </div>
+  </div>
+</div>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const updateOfferModal = document.getElementById("updateOfferModal");
+    const updateCategoryNameInput =
+      document.getElementById("updateCategoryName");
+    const updateDiscountPercentageInput = document.getElementById(
+      "updateDiscountPercentage"
+    );
 
-    <!-- Update Offer Modal -->
-    <div class="modal fade" id="updateOfferModal" tabindex="-1" role="dialog" aria-labelledby="updateOfferModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="updateOfferModalLabel">Update Category Offer</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="updateOfferForm" method="post" action="/admin/updatecategoryoffer">
-                        <div class="form-group">
-                            <label for="updateCategoryName">Category Name</label>
-                            <input type="text" class="form-control" id="updateCategoryName" name="categoryName"
-                                readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="updateDiscountPercentage">Discount Percentage</label>
-                            <input type="number" class="form-control" name="discountPercentage"
-                                id="updateDiscountPercentage" placeholder="Enter discount percentage" min="0" max="100"
-                                required>
-                            <div class="invalid-feedback" id="updateDiscountPercentageError"></div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update Offer</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    // Function to set values in the update modal
+    function setUpdateModalValues(categoryName, discountPercentage) {
+      updateCategoryNameInput.value = categoryName;
+      updateDiscountPercentageInput.value = discountPercentage;
+    }
 
+    // Event listener for "Update" button click
+    const updateButtons = document.querySelectorAll(".toggle-status-btn");
+    updateButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const row = this.closest("tr");
+        const categoryName = row
+          .querySelector("td:first-child")
+          .textContent.trim();
+        const discountPercentage = row
+          .querySelector("td:nth-child(2)")
+          .textContent.trim();
+        setUpdateModalValues(categoryName, discountPercentage);
+        $("#updateOfferModal").modal("show"); // Show the update modal
+      });
+    });
+  });
+</script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const updateOfferModal = document.getElementById('updateOfferModal');
-            const updateCategoryNameInput = document.getElementById('updateCategoryName');
-            const updateDiscountPercentageInput = document.getElementById('updateDiscountPercentage');
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const deleteButtons = document.querySelectorAll(".delete-btn");
+    const productOffersTableBody = document.getElementById(
+      "categoryOffersTableBody"
+    );
 
-            // Function to set values in the update modal
-            function setUpdateModalValues(categoryName, discountPercentage) {
-                updateCategoryNameInput.value = categoryName;
-                updateDiscountPercentageInput.value = discountPercentage;
-            }
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const row = this.closest("tr");
+        const productName = row.getAttribute("data-category-name");
 
-            // Event listener for "Update" button click
-            const updateButtons = document.querySelectorAll('.toggle-status-btn');
-            updateButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const row = this.closest('tr');
-                    const categoryName = row.querySelector('td:first-child').textContent.trim();
-                    const discountPercentage = row.querySelector('td:nth-child(2)').textContent.trim();
-                    setUpdateModalValues(categoryName, discountPercentage);
-                    $('#updateOfferModal').modal('show'); // Show the update modal
-                });
-            });
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, remove it!",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`/admin/deletecategoryoffer/${productName}`, {
+              method: "DELETE",
+            })
+              .then((response) => {
+                if (response.ok) {
+                  Swal.fire(
+                    "Removed!",
+                    "The category offer has been removed.",
+                    "success"
+                  ).then(() => {
+                    // Remove the corresponding row from the table
+                    row.remove();
+                  });
+                } else {
+                  Swal.fire(
+                    "Error",
+                    "Something went wrong while removing the category offer.",
+                    "error"
+                  );
+                }
+              })
+              .catch((error) => {
+                Swal.fire(
+                  "Error!",
+                  "Something went wrong while removing the category offer.",
+                  "error"
+                );
+                console.error("Error:", error);
+              });
+          }
         });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const deleteButtons = document.querySelectorAll('.delete-btn');
-            const productOffersTableBody = document.getElementById('categoryOffersTableBody');
-
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const row = this.closest('tr');
-                    const productName = row.getAttribute('data-category-name');
-
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "You won't be able to revert this!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, remove it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            fetch(`/admin/deletecategoryoffer/${productName}`, {
-                                method: 'DELETE'
-                            })
-                                .then(response => {
-                                    if (response.ok) {
-                                        Swal.fire(
-                                            'Removed!',
-                                            'The category offer has been removed.',
-                                            'success'
-                                        ).then(() => {
-                                            // Remove the corresponding row from the table
-                                            row.remove();
-                                        });
-                                    } else {
-                                        Swal.fire(
-                                            'Error',
-                                            'Something went wrong while removing the category offer.',
-                                            'error'
-                                        );
-                                    }
-                                })
-                                .catch(error => {
-                                    Swal.fire(
-                                        'Error!',
-                                        'Something went wrong while removing the category offer.',
-                                        'error'
-                                    );
-                                    console.error('Error:', error);
-                                });
-                        }
-                    });
-                });
-            });
-        });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <%- include("../layouts/adminFooter") %>
+      });
+    });
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<%- include("../layouts/adminFooter") %>

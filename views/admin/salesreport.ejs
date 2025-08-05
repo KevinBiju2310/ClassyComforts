@@ -1,227 +1,248 @@
 <%- include("../layouts/adminHeader") %>
 
-    <div id="content">
-        <h1>Sales Report</h1>
+<div id="content">
+  <h1>Sales Report</h1>
 
-        <!-- Filter Section -->
-        <div class="filter-section d-flex justify-content-end">
-            <form class="mr-4" id="filterForm">
-                <div class="form-row align-items-center">
-                    <div class="col-auto">
-                        <label for="startDate" class="col-form-label">Start Date:</label>
-                        <input type="date" id="startDate" name="startDate">
-                    </div>
-                    <div class="col-auto">
-                        <label for="endDate" class="col-form-label">End Date:</label>
-                        <input type="date" id="endDate" name="endDate">
-                    </div>
-                    <div class="col-auto">
-                        <button type="submit" class="btn btn-primary">Apply</button>
-                    </div>
-                </div>
-            </form>
-
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <%= filterType || 'Select' %>
-                </button>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="filterDropdown">
-                    <a class="dropdown-item<%= filterType === 'day' ? ' active' : '' %>" href="?filter=day">Day</a>
-                    <a class="dropdown-item<%= filterType === 'week' ? ' active' : '' %>" href="?filter=week">Week</a>
-                    <a class="dropdown-item<%= filterType === 'month' ? ' active' : '' %>"
-                        href="?filter=month">Month</a>
-                    <a class="dropdown-item<%= filterType === 'custom' ? ' active' : '' %>"
-                        href="?filter=custom">Custom</a>
-                </div>
-            </div>
+  <!-- Filter Section -->
+  <div class="filter-section d-flex justify-content-end">
+    <form class="mr-4" id="filterForm">
+      <div class="form-row align-items-center">
+        <div class="col-auto">
+          <label for="startDate" class="col-form-label">Start Date:</label>
+          <input type="date" id="startDate" name="startDate" />
         </div>
+        <div class="col-auto">
+          <label for="endDate" class="col-form-label">End Date:</label>
+          <input type="date" id="endDate" name="endDate" />
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary">Apply</button>
+        </div>
+      </div>
+    </form>
 
-
-        <% if(order && order.length> 0) { %>
-            <table style="font-size: 14px;">
-                <thead>
-                    <tr>
-                        <th>Customer Name</th>
-                        <th>Product Name</th>
-                        <th>Payment Method</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Discount</th>
-                        <th>Total Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% order.forEach(order=> { %>
-                        <tr>
-                            <td>
-                                <%= order.userId.name %>
-                            </td>
-                            <td>
-                                <ul>
-                                    <% order.products.forEach(product=> { %><li>
-                                            <%= product.productId.productname %>
-                                        </li>
-                                        <% }); %>
-                                </ul>
-                            </td>
-                            <td>
-                                <%= order.paymentMethod %>
-                            </td>
-                            <td>
-                                <ul>
-                                    <% order.products.forEach(product=> { %><li>
-                                            <%= product.quantity %>
-                                        </li>
-                                        <% }); %>
-                                </ul>
-                            </td>
-                            <td>
-                                <ul>
-                                    <% order.products.forEach(product=> { %><li>$<%= product.productPrice.toFixed(2) %>
-                                        </li>
-                                        <% }); %>
-                                </ul>
-                            </td>
-                            <td>$<%= order.couponAmount.toFixed(2) %>
-                            </td>
-                            <td>$<%= order.totalAmount.toFixed(2) %>
-                            </td>
-                        </tr>
-                        <% }); %>
-                </tbody>
-                <tfoot>
-                    <% let overallSalesCount=order.length; %>
-                        <% let overallTotalAmount=order.reduce((total, order)=> total + order.totalAmount, 0); %>
-                            <% let overallDiscount=order.reduce((total, order)=> total + order.couponAmount, 0); %>
-                                <tr>
-                                    <td colspan="6" align="right"><strong>Total Sales Count:</strong></td>
-                                    <td><strong>
-                                            <%= overallSalesCount %>
-                                        </strong></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="6" align="right"><strong>Total Sales Amount:</strong></td>
-                                    <td><strong>$<%= overallTotalAmount.toFixed(2) %></strong></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="6" align="right"><strong>Total Discount:</strong></td>
-                                    <td><strong>$<%= overallDiscount.toFixed(2) %></strong></td>
-                                </tr>
-                </tfoot>
-            </table>
-
-            <% } else { %>
-                <p class="text-center">No Orders Found</p>
-                <% } %>
-                    <div>
-                        <div class="pb-3 pt-3 d-flex justify-content-end">
-                            <button id="pdfButton" class="btn btn-secondary print ms-2"><i
-                                    class="icon material-icons md-print"></i> Download PDF</button>
-                            <button id="excelButton" class="btn btn-secondary print ms-2"><i
-                                    class="icon material-icons md-print"></i>Download Excel </button>
-                        </div>
-                    </div>
-                    <!-- Pagination links -->
-                    <nav aria-label="Page navigation" class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            <% if (currentPage> 1) { %>
-                                <li class="page-item">
-                                    <a class="page-link"
-                                        href="?page=<%= currentPage - 1 %>&filter=<%= filterType %><% if (filterType === 'custom') { %>&startDate=<%= startDate %>&endDate=<%= endDate %><% } %>"
-                                        aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
-                                </li>
-                                <% } %>
-                                    <% for (let i=1; i <=totalPages; i++) { %>
-                                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                            <a class="page-link"
-                                                href="?page=<%= i %>&filter=<%= filterType %><% if (filterType === 'custom') { %>&startDate=<%= startDate %>&endDate=<%= endDate %><% } %>">
-                                                <%= i %>
-                                            </a>
-                                        </li>
-                                        <% } %>
-                                            <% if (currentPage < totalPages) { %>
-                                                <li class="page-item">
-                                                    <a class="page-link"
-                                                        href="?page=<%= currentPage + 1 %>&filter=<%= filterType %><% if (filterType === 'custom') { %>&startDate=<%= startDate %>&endDate=<%= endDate %><% } %>"
-                                                        aria-label="Next">
-                                                        <span aria-hidden="true">&raquo;</span>
-                                                    </a>
-                                                </li>
-                                                <% } %>
-                        </ul>
-                    </nav>
-
+    <div class="dropdown">
+      <button
+        class="btn btn-secondary dropdown-toggle"
+        type="button"
+        id="filterDropdown"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <%= filterType || 'Select' %>
+      </button>
+      <div
+        class="dropdown-menu dropdown-menu-right"
+        aria-labelledby="filterDropdown"
+      >
+        <a
+          class="dropdown-item<%= filterType === 'day' ? ' active' : '' %>"
+          href="?filter=day"
+          >Day</a
+        >
+        <a
+          class="dropdown-item<%= filterType === 'week' ? ' active' : '' %>"
+          href="?filter=week"
+          >Week</a
+        >
+        <a
+          class="dropdown-item<%= filterType === 'month' ? ' active' : '' %>"
+          href="?filter=month"
+          >Month</a
+        >
+        <a
+          class="dropdown-item<%= filterType === 'custom' ? ' active' : '' %>"
+          href="?filter=custom"
+          >Custom</a
+        >
+      </div>
     </div>
+  </div>
 
-    <%- include("../layouts/adminFooter") %>
+  <% if(order && order.length> 0) { %>
+  <table style="font-size: 14px">
+    <thead>
+      <tr>
+        <th>Customer Name</th>
+        <th>Product Name</th>
+        <th>Payment Method</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Discount</th>
+        <th>Total Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% order.forEach(order=> { %>
+      <tr>
+        <td><%= order.userId.name %></td>
+        <td>
+          <ul>
+            <% order.products.forEach(product=> { %>
+            <li><%= product.productId.productname %></li>
+            <% }); %>
+          </ul>
+        </td>
+        <td><%= order.paymentMethod %></td>
+        <td>
+          <ul>
+            <% order.products.forEach(product=> { %>
+            <li><%= product.quantity %></li>
+            <% }); %>
+          </ul>
+        </td>
+        <td>
+          <ul>
+            <% order.products.forEach(product=> { %>
+            <li>$<%= product.productPrice.toFixed(2) %></li>
+            <% }); %>
+          </ul>
+        </td>
+        <td>$<%= order.couponAmount.toFixed(2) %></td>
+        <td>$<%= order.totalAmount.toFixed(2) %></td>
+      </tr>
+      <% }); %>
+    </tbody>
+    <tfoot>
+      <% let overallSalesCount=order.length; %> <% let
+      overallTotalAmount=order.reduce((total, order)=> total +
+      order.totalAmount, 0); %> <% let overallDiscount=order.reduce((total,
+      order)=> total + order.couponAmount, 0); %>
+      <tr>
+        <td colspan="6" align="right"><strong>Total Sales Count:</strong></td>
+        <td><strong> <%= overallSalesCount %> </strong></td>
+      </tr>
+      <tr>
+        <td colspan="6" align="right"><strong>Total Sales Amount:</strong></td>
+        <td><strong>$<%= overallTotalAmount.toFixed(2) %></strong></td>
+      </tr>
+      <tr>
+        <td colspan="6" align="right"><strong>Total Discount:</strong></td>
+        <td><strong>$<%= overallDiscount.toFixed(2) %></strong></td>
+      </tr>
+    </tfoot>
+  </table>
 
+  <% } else { %>
+  <p class="text-center">No Orders Found</p>
+  <% } %>
+  <div>
+    <div class="pb-3 pt-3 d-flex justify-content-end">
+      <button id="pdfButton" class="btn btn-secondary print ms-2">
+        <i class="icon material-icons md-print"></i> Download PDF
+      </button>
+      <button id="excelButton" class="btn btn-secondary print ms-2">
+        <i class="icon material-icons md-print"></i>Download Excel
+      </button>
+    </div>
+  </div>
+  <!-- Pagination links -->
+  <nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <% if (currentPage> 1) { %>
+      <li class="page-item">
+        <a
+          class="page-link"
+          href="?page=<%= currentPage - 1 %>&filter=<%= filterType %><% if (filterType === 'custom') { %>&startDate=<%= startDate %>&endDate=<%= endDate %><% } %>"
+          aria-label="Previous"
+        >
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      <% } %> <% for (let i=1; i <=totalPages; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a
+          class="page-link"
+          href="?page=<%= i %>&filter=<%= filterType %><% if (filterType === 'custom') { %>&startDate=<%= startDate %>&endDate=<%= endDate %><% } %>"
+        >
+          <%= i %>
+        </a>
+      </li>
+      <% } %> <% if (currentPage < totalPages) { %>
+      <li class="page-item">
+        <a
+          class="page-link"
+          href="?page=<%= currentPage + 1 %>&filter=<%= filterType %><% if (filterType === 'custom') { %>&startDate=<%= startDate %>&endDate=<%= endDate %><% } %>"
+          aria-label="Next"
+        >
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+</div>
 
+<%- include("../layouts/adminFooter") %>
 
-        <!-- Frontend Script for applying filter -->
-        <script>
-            const dropdownToggle = document.querySelector('.dropdown-toggle');
-            const dropdownMenu = document.querySelector('.dropdown-menu');
+<!-- Frontend Script for applying filter -->
+<script>
+  const dropdownToggle = document.querySelector(".dropdown-toggle");
+  const dropdownMenu = document.querySelector(".dropdown-menu");
 
-            dropdownToggle.addEventListener('click', function () {
-                dropdownMenu.classList.toggle('show');
-            });
+  dropdownToggle.addEventListener("click", function () {
+    dropdownMenu.classList.toggle("show");
+  });
 
-            window.addEventListener('click', function (e) {
-                if (!e.target.matches('.dropdown-toggle') && !e.target.matches('.dropdown-item')) {
-                    dropdownMenu.classList.remove('show');
-                }
-            });
+  window.addEventListener("click", function (e) {
+    if (
+      !e.target.matches(".dropdown-toggle") &&
+      !e.target.matches(".dropdown-item")
+    ) {
+      dropdownMenu.classList.remove("show");
+    }
+  });
 
-            document.addEventListener('DOMContentLoaded', function () {
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('startDate').setAttribute('max', today);
-                document.getElementById('endDate').setAttribute('max', today);
-            });
-        </script>
-        <script>
-            // Frontend Script for applying filter
-            document.getElementById('filterForm').addEventListener('submit', function (event) {
-                event.preventDefault(); // Prevent default form submission
+  document.addEventListener("DOMContentLoaded", function () {
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("startDate").setAttribute("max", today);
+    document.getElementById("endDate").setAttribute("max", today);
+  });
+</script>
+<script>
+  // Frontend Script for applying filter
+  document
+    .getElementById("filterForm")
+    .addEventListener("submit", function (event) {
+      event.preventDefault(); // Prevent default form submission
 
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
 
-                // Redirect to the filtered URL
-                window.location.href = `?filter=custom&startDate=${startDate}&endDate=${endDate}`;
-            });
-        </script>
+      // Redirect to the filtered URL
+      window.location.href = `?filter=custom&startDate=${startDate}&endDate=${endDate}`;
+    });
+</script>
 
-        <script>
-            document.getElementById('pdfButton').addEventListener('click', function () {
-                // Extract filter type, start date, end date, and current page from the URL query parameters
-                const urlParams = new URLSearchParams(window.location.search);
-                const filterType = urlParams.get('filter') || 'day';
-                const startDate = urlParams.get('startDate') || '';
-                const endDate = urlParams.get('endDate') || '';
-                const page = urlParams.get('page') || 1;
+<script>
+  document.getElementById("pdfButton").addEventListener("click", function () {
+    // Extract filter type, start date, end date, and current page from the URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterType = urlParams.get("filter") || "day";
+    const startDate = urlParams.get("startDate") || "";
+    const endDate = urlParams.get("endDate") || "";
+    const page = urlParams.get("page") || 1;
 
-                // Construct the URL with query parameters
-                const url = `/admin/generatepdf?filter=${filterType}&startDate=${startDate}&endDate=${endDate}&page=${page}`;
+    // Construct the URL with query parameters
+    const url = `/admin/generatepdf?filter=${filterType}&startDate=${startDate}&endDate=${endDate}&page=${page}`;
 
-                // Redirect to the URL
-                window.location.href = url;
-            });
+    // Redirect to the URL
+    window.location.href = url;
+  });
 
-            document.getElementById('excelButton').addEventListener('click', function () {
-                // Extract filter type, start date, end date, and current page from the URL query parameters
-                const urlParams = new URLSearchParams(window.location.search);
-                const filterType = urlParams.get('filter') || 'day';
-                const startDate = urlParams.get('startDate') || '';
-                const endDate = urlParams.get('endDate') || '';
-                const page = urlParams.get('page') || 1;
+  document.getElementById("excelButton").addEventListener("click", function () {
+    // Extract filter type, start date, end date, and current page from the URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterType = urlParams.get("filter") || "day";
+    const startDate = urlParams.get("startDate") || "";
+    const endDate = urlParams.get("endDate") || "";
+    const page = urlParams.get("page") || 1;
 
-                // Construct the URL with query parameters
-                const url = `/admin/generateexcel?filter=${filterType}&startDate=${startDate}&endDate=${endDate}&page=${page}`;
+    // Construct the URL with query parameters
+    const url = `/admin/generateexcel?filter=${filterType}&startDate=${startDate}&endDate=${endDate}&page=${page}`;
 
-                // Redirect to the URL
-                window.location.href = url;
-            });
-        </script>
+    // Redirect to the URL
+    window.location.href = url;
+  });
+</script>

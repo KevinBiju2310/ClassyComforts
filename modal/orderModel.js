@@ -1,106 +1,110 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const orderSchema = new mongoose.Schema({
+const orderSchema = new mongoose.Schema(
+  {
     userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'users',
-        required: true,
+      type: Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
     },
-    products: [{
+    products: [
+      {
         productId: {
-            type: Schema.Types.ObjectId,
-            ref: 'Product',
-            required: true
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
         },
         quantity: {
-            type: Number,
-            required: true,
-            default: 1
+          type: Number,
+          required: true,
+          default: 1,
         },
         productPrice: {
-            type: Number,
-            required: true
-        }
-    }],
-    address: [{
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    address: [
+      {
         name: {
-            type: String,
-            required: true
+          type: String,
+          required: true,
         },
         phone: {
-            type: Number,
-            required: true
+          type: Number,
+          required: true,
         },
         address: {
-            type: String,
-            required: true
+          type: String,
+          required: true,
         },
         district: {
-            type: String,
-            required: true
+          type: String,
+          required: true,
         },
         state: {
-            type: String,
-            required: true
+          type: String,
+          required: true,
         },
         city: {
-            type: String,
-            required: true
+          type: String,
+          required: true,
         },
         pincode: {
-            type: Number,
-            required: true
+          type: Number,
+          required: true,
         },
         addressType: {
-            type: String,
-            enum: ['home', 'work'],
-            required: true
+          type: String,
+          enum: ["home", "work"],
+          required: true,
         },
-    }],
+      },
+    ],
     paymentMethod: {
-        type: String,
-        enum: ['cod', 'razorpay', 'wallet'],
-        required: true
+      type: String,
+      enum: ["cod", "razorpay", "wallet"],
+      required: true,
     },
     paymentStatus: {
-        type: String,
-        enum: ['pending', 'success', 'failure', 'refunded'],
-        default: 'pending',
-        required: true
+      type: String,
+      enum: ["pending", "success", "failure", "refunded"],
+      default: "pending",
+      required: true,
     },
     orderStatus: {
-        type: String,
-        enum: ['pending', 'shipped', 'delivered', 'cancelled', 'returned'],
-        default: 'pending',
-        required: true
+      type: String,
+      enum: ["pending", "shipped", "delivered", "cancelled", "returned"],
+      default: "pending",
+      required: true,
     },
     totalAmount: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     cancelReason: {
-        type: String,
-        default: ''
+      type: String,
+      default: "",
     },
     couponPercentage: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
     couponAmount: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
     couponId: {
-        type: Schema.Types.ObjectId,
-        ref: 'coupon',
-    }
-},
-    {
-        timestamps: true
-    })
+      type: Schema.Types.ObjectId,
+      ref: "coupon",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-
-
-const Order = mongoose.model('order', orderSchema)
+const Order = mongoose.model("order", orderSchema);
 module.exports = Order;

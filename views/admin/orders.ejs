@@ -1,206 +1,231 @@
 <%- include("../layouts/adminHeader") %>
 
-    <div id="content">
-        <h1>Orders</h1>
-        <div class="d-flex justify-content-end align-items-center mt-2">
-            <input type="text" id="searchBar" placeholder="Search..." class="form-control w-auto mr-2">
-            <button class="btn btn-primary mb-3" onclick="searchOrders()">Search</button>
-        </div>
+<div id="content">
+  <h1>Orders</h1>
+  <div class="d-flex justify-content-end align-items-center mt-2">
+    <input
+      type="text"
+      id="searchBar"
+      placeholder="Search..."
+      class="form-control w-auto mr-2"
+    />
+    <button class="btn btn-primary mb-3" onclick="searchOrders()">
+      Search
+    </button>
+  </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Order Date</th>
-                    <th>Product Name</th>
-                    <th>Order Status</th>
-                    <th>Payment Method</th>
-                    <th>Total Amount</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% order.forEach(order=> { %>
-                    <tr>
-                        <td>
-                            <%= order.userId.name %>
-                        </td>
-                        <td>
-                            <%= order.createdAt.toLocaleDateString('en-IN') %>
-                        </td>
-                        <td>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Order Date</th>
+        <th>Product Name</th>
+        <th>Order Status</th>
+        <th>Payment Method</th>
+        <th>Total Amount</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% order.forEach(order=> { %>
+      <tr>
+        <td><%= order.userId.name %></td>
+        <td><%= order.createdAt.toLocaleDateString('en-IN') %></td>
+        <td>
+          <% order.products.forEach(product=> { %>
+          <li><%= product.productId.productname %></li>
+          <% }); %>
+        </td>
+        <td><%= order.orderStatus %></td>
+        <td><%= order.paymentMethod %></td>
+        <td>$<%= order.totalAmount.toFixed(2) %></td>
+        <td>
+          <button
+            type="submit"
+            class="btn btn-danger"
+            onclick="openModal('<%= order._id %>')"
+          >
+            Change Status
+          </button>
+        </td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <!-- Pagination links -->
+  <nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <% if (currentPage> 1) { %>
+      <li class="page-item">
+        <a
+          class="page-link"
+          href="?page=<%= currentPage - 1 %>"
+          aria-label="Previous"
+        >
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      <% } %> <% for(let i=1; i <=totalPages; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link" href="?page=<%= i %>"> <%= i %> </a>
+      </li>
+      <% } %> <% if (currentPage < totalPages) { %>
+      <li class="page-item">
+        <a
+          class="page-link"
+          href="?page=<%= currentPage + 1 %>"
+          aria-label="Next"
+        >
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+</div>
 
-                            <% order.products.forEach(product=> { %>
-                                <li>
-                                    <%= product.productId.productname %>
-                                </li>
-                                <% }); %>
-
-                        </td>
-                        <td>
-                            <%= order.orderStatus %>
-                        </td>
-                        <td>
-                            <%= order.paymentMethod %>
-                        </td>
-                        <td>$<%= order.totalAmount.toFixed(2) %>
-                        </td>
-                        <td>
-                            <button type="submit" class="btn btn-danger" onclick="openModal('<%= order._id %>')">Change
-                                Status</button>
-                        </td>
-                    </tr>
-                    <% }); %>
-            </tbody>
-        </table>
-        <!-- Pagination links -->
-        <nav aria-label="Page navigation" class="mt-4">
-            <ul class="pagination justify-content-center">
-                <% if (currentPage> 1) { %>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    <% } %>
-                        <% for(let i=1; i <=totalPages; i++) { %>
-                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                <a class="page-link" href="?page=<%= i %>">
-                                    <%= i %>
-                                </a>
-                            </li>
-                            <% } %>
-                                <% if (currentPage < totalPages) { %>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                    <% } %>
-            </ul>
-        </nav>
+<div
+  class="modal fade"
+  id="changeStatusModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="changeStatusModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changeStatusModalLabel">
+          Change Order Status
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="statusForm">
+          <div class="form-group">
+            <label for="statusSelect">Select Status:</label>
+            <select class="form-control" id="statusSelect">
+              <option value="pending">Pending</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="returned">Returned</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Update Status</button>
+        </form>
+      </div>
     </div>
+  </div>
+</div>
 
-    <div class="modal fade" id="changeStatusModal" tabindex="-1" role="dialog" aria-labelledby="changeStatusModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="changeStatusModalLabel">Change Order Status</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="statusForm">
-                        <div class="form-group">
-                            <label for="statusSelect">Select Status:</label>
-                            <select class="form-control" id="statusSelect">
-                                <option value="pending">Pending</option>
-                                <option value="shipped">Shipped</option>
-                                <option value="delivered">Delivered</option>
-                                <option value="cancelled">Cancelled</option>
-                                <option value="returned">Returned</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update Status</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+<%- include("../layouts/adminFooter") %>
 
-    <%- include("../layouts/adminFooter") %>
+<script>
+  // Function to open the modal and populate dropdown options
+  function openModal(orderId) {
+    console.log("hello");
+    const modal = document.getElementById("changeStatusModal");
+    modal
+      .querySelector("#statusForm")
+      .addEventListener("submit", function (event) {
+        event.preventDefault();
+        const newStatus = document.getElementById("statusSelect").value;
+        console.log(newStatus);
+        updateOrderStatus(orderId, newStatus);
+      });
+    $("#changeStatusModal").modal("show");
+  }
 
+  // Function to update order status using Fetch API
+  function updateOrderStatus(orderId, newStatus) {
+    fetch(`/admin/orders/${orderId}/status`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ newStatus }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          // Reload the page to reflect changes
+          location.reload();
+        } else {
+          throw new Error("Failed to update order status");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+</script>
 
-        <script>
-            // Function to open the modal and populate dropdown options
-            function openModal(orderId) {
-                console.log("hello")
-                const modal = document.getElementById('changeStatusModal');
-                modal.querySelector('#statusForm').addEventListener('submit', function (event) {
-                    event.preventDefault();
-                    const newStatus = document.getElementById('statusSelect').value;
-                    console.log(newStatus)
-                    updateOrderStatus(orderId, newStatus);
-                });
-                $('#changeStatusModal').modal('show');
-            }
+<script>
+  function searchOrders() {
+    const searchTerm = document
+      .getElementById("searchBar")
+      .value.trim()
+      .toLowerCase();
 
-            // Function to update order status using Fetch API
-            function updateOrderStatus(orderId, newStatus) {
-                fetch(`/admin/orders/${orderId}/status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ newStatus })
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            // Reload the page to reflect changes
-                            location.reload();
-                        } else {
-                            throw new Error('Failed to update order status');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }
-        </script>
+    // Update URL with the search term
+    const url = new URL(window.location.href);
+    url.searchParams.set("term", searchTerm);
+    window.history.pushState({ path: url.href }, "", url.href);
 
-        <script>
-            function searchOrders() {
-                const searchTerm = document.getElementById('searchBar').value.trim().toLowerCase();
+    // Make fetch request to search orders
+    fetch(`/admin/orders/search?term=${searchTerm}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Failed to search orders");
+        }
+      })
+      .then((data) => {
+        updateTable(data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
 
-                // Update URL with the search term
-                const url = new URL(window.location.href);
-                url.searchParams.set('term', searchTerm);
-                window.history.pushState({ path: url.href }, '', url.href);
+  function updateTable(data) {
+    const tbody = document.querySelector("tbody");
+    tbody.innerHTML = "";
 
-                // Make fetch request to search orders
-                fetch(`/admin/orders/search?term=${searchTerm}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                }).then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error('Failed to search orders');
-                    }
-                }).then(data => {
-                    updateTable(data);
-                }).catch(error => {
-                    console.error('Error:', error);
-                });
-            }
-
-
-
-            function updateTable(data) {
-                const tbody = document.querySelector('tbody');
-                tbody.innerHTML = '';
-
-                // Iterate through the search results and populate the table
-                data.forEach(order => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
+    // Iterate through the search results and populate the table
+    data.forEach((order) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
                 <td>${order.userId.name}</td>
                 <td>${new Date(order.createdAt).toDateString()}</td>
                 <td>
-                    ${order.products.map(product => product.productId.productname).join(', ')}
+                    ${order.products
+                      .map((product) => product.productId.productname)
+                      .join(", ")}
                 </td>
                 <td>${order.orderStatus}</td>
                 <td>${order.paymentMethod}</td>
                 <td>$${order.totalAmount.toFixed(2)}</td>
                 <td>
-                    <button type="button" class="btn btn-danger" onclick="openModal('${order._id}')">Change Status</button>
+                    <button type="button" class="btn btn-danger" onclick="openModal('${
+                      order._id
+                    }')">Change Status</button>
                 </td>
             `;
-                    tbody.appendChild(tr);
-                });
-            }
-        </script>
+      tbody.appendChild(tr);
+    });
+  }
+</script>
